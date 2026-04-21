@@ -18,6 +18,9 @@ venv/
 .mempalace/
 data/chroma_rag/
 
+# Third-party libraries (too large for git — install separately)
+V2/vectorbtpro/
+
 # Node
 node_modules/
 
