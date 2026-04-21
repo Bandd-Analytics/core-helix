@@ -35,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from v3_intelligence.trade_logger import TradeLogger
 from v3_intelligence.pair_config import get_pair_config, print_pair_summary
 from v3_intelligence.rag_signal_filter import RAGSignalFilter, CHROMA_AVAILABLE
+from signal_filters import rolling_hurst
 
 # Session windows (UTC hours)
 _LONDON_HOURS = frozenset(range(7, 12))
@@ -49,7 +50,7 @@ def _session(hour: int) -> str:
 
 class HybridMultiTimeframeBacktest:
     def __init__(self, data_dir, enable_rag=True, enable_logging=True,
-                 enable_changepoint=True):
+                 enable_changepoint=True, enable_hurst_filter=False):
         self.data_dir          = Path(data_dir)
         self.reports_dir       = Path(data_dir).parent / "reports"
         self.reports_dir.mkdir(exist_ok=True)
@@ -60,6 +61,7 @@ class HybridMultiTimeframeBacktest:
                                   "GBPNZD", "EURUSD", "AUDNZD"]
         self.enable_changepoint = enable_changepoint
 
+        self.enable_hurst_filter = enable_hurst_filter
         self.logger = TradeLogger() if enable_logging else None
         self.rag    = RAGSignalFilter() if (enable_rag and CHROMA_AVAILABLE) else None
         self._rag_enabled = enable_rag and CHROMA_AVAILABLE
@@ -182,6 +184,11 @@ class HybridMultiTimeframeBacktest:
         daily['atr']     = self.adaptive_atr(daily['High'], daily['Low'], daily['Close'])
         daily['z_score'] = self.z_score_signal(daily['Close'])
 
+        if self.enable_hurst_filter:
+            daily['hurst'] = rolling_hurst(daily['Close'], window=80)
+        else:
+            daily['hurst'] = 0.0  # neutral — never blocks
+
         h1['atr']     = self.adaptive_atr(h1['High'], h1['Low'], h1['Close'])
         h1['z_score'] = self.z_score_signal(h1['Close'])
         h1['vol_pct'] = self.vol_percentile(h1['atr'])
@@ -197,6 +204,7 @@ class HybridMultiTimeframeBacktest:
         h1_d    = np.array([str(d)[:10] for d in h1.index])
         idx     = np.clip(np.searchsorted(daily_d, h1_d, side='right') - 1, 0, len(daily) - 1)
         h1['daily_z']     = daily['z_score'].values[idx]
+        h1['hurst']       = daily['hurst'].values[idx]
         h1['changepoint'] = daily['changepoint'].values[idx]
 
         position = None
@@ -212,6 +220,7 @@ class HybridMultiTimeframeBacktest:
             vpct = row['vol_pct']
             px   = row['Close']
             cp   = int(row['changepoint']) if not pd.isna(row['changepoint']) else 0
+            hv   = row['hurst'] if not pd.isna(row['hurst']) else 0.0
             sess = _session(hour)
 
             # ── EXIT ──────────────────────────────────────────────────────────
@@ -259,7 +268,8 @@ class HybridMultiTimeframeBacktest:
                 if (not pd.isna(dz)
                         and abs(dz) > cfg.swing_z_threshold
                         and not pd.isna(atr) and atr > 0
-                        and not (self.enable_changepoint and cp == 1)):
+                        and not (self.enable_changepoint and cp == 1)
+                        and not (self.enable_hurst_filter and hv > 0.55)):
                     pt  = 'DAILY_SWING_LONG' if dz < 0 else 'DAILY_SWING_SHORT'
                     sz  = 1.0 * cfg.swing_size_mult
                     rm  = self._rag_size_modifier(symbol, pt, sess, dz, h1z, vpct, hour)
@@ -317,12 +327,18 @@ class HybridMultiTimeframeBacktest:
         m15['z_score'] = self.z_score_signal(m15['Close'], period=20)
         m15['vol_pct'] = self.vol_percentile(m15['atr'])
 
+        if self.enable_hurst_filter:
+            m15['hurst'] = rolling_hurst(m15['Close'], window=200)
+        else:
+            m15['hurst'] = 0.0
+
         # Merge daily context onto M15 timestamps
         daily_d = np.array([str(d)[:10] for d in daily.index])
         m15_d   = np.array([str(d)[:10] for d in m15.index])
         idx     = np.clip(np.searchsorted(daily_d, m15_d, side='right') - 1, 0, len(daily) - 1)
         m15['daily_z']     = daily['z_score'].values[idx]
         m15['changepoint'] = daily['changepoint'].values[idx]
+        # m15['hurst'] already computed on M15 data above (not from daily)
 
         position = None
         trades   = []
@@ -337,6 +353,7 @@ class HybridMultiTimeframeBacktest:
             vpct = row['vol_pct']
             px   = row['Close']
             cp   = int(row['changepoint']) if not pd.isna(row['changepoint']) else 0
+            hv   = row['hurst'] if not pd.isna(row['hurst']) else 0.0
             sess = _session(hour)
 
             # ── EXIT ──────────────────────────────────────────────────────────
@@ -383,7 +400,8 @@ class HybridMultiTimeframeBacktest:
             elif position is None and sess in ('LONDON', 'NY'):
                 if (not pd.isna(m15z) and not pd.isna(atr) and atr > 0
                         and abs(m15z) > cfg.m15_z_threshold
-                        and not (self.enable_changepoint and cp == 1)):
+                        and not (self.enable_changepoint and cp == 1)
+                        and not (self.enable_hurst_filter and hv > 0.55)):
 
                     # Direction alignment filter
                     # daily oversold (dz<-1.5) → only M15_SCALP_LONG (m15z<0)
@@ -428,6 +446,7 @@ class HybridMultiTimeframeBacktest:
         print("█" + "  MARKETMIND V2 — DAILY SWING STRATEGY  [H1 Execution]".center(88) + "█")
         print("█"*90)
         print(f"  Change-Point Filter: {'ON' if self.enable_changepoint else 'OFF'}")
+        print(f"  Hurst Regime Filter: {'ON (H>0.55 blocks entry)' if self.enable_hurst_filter else 'OFF'}")
         print(f"  RAG: {'ACTIVE (' + str(self.rag.count) + ' trades)' if self.rag else 'WARMING UP'}\n")
 
         all_trades = []
@@ -465,6 +484,7 @@ class HybridMultiTimeframeBacktest:
         print(f"  Capital note: Requires IC Markets RAW account (1:100 leverage).")
         print(f"  Spread cost at raw: ~0.1-0.3 pips vs 0.5-0.8 pips standard.")
         print(f"  Change-Point Filter: {'ON' if self.enable_changepoint else 'OFF'}")
+        print(f"  Hurst Regime Filter: {'ON (H>0.55 blocks entry)' if self.enable_hurst_filter else 'OFF'}")
         print(f"  RAG: {'ACTIVE (' + str(self.rag.count) + ' trades)' if self.rag else 'WARMING UP'}\n")
 
         all_trades = []
@@ -536,12 +556,12 @@ class HybridMultiTimeframeBacktest:
 
         txt_path = self.reports_dir / f"{slug}_{ts}.txt"
         txt_path.write_text('\n'.join(self._report_buffer), encoding='utf-8')
-        print(f"  [saved] {txt_path.relative_to(Path(__file__).parent)}")
+        print(f"  [saved] {txt_path}")
 
         if trades_df is not None and len(trades_df) > 0:
             csv_path = self.reports_dir / f"{slug}_{ts}_trades.csv"
             trades_df.to_csv(csv_path, index=False)
-            print(f"  [saved] {csv_path.relative_to(Path(__file__).parent)}")
+            print(f"  [saved] {csv_path}")
 
         self._report_buffer.clear()
 
@@ -741,6 +761,7 @@ if __name__ == "__main__":
         enable_rag=("--no-rag" not in args),
         enable_logging=("--no-log" not in args),
         enable_changepoint=True,
+        enable_hurst_filter=("--hurst" in args),
     )
 
     if "--index-rag" in args:

@@ -17,6 +17,13 @@ venv/
 # ChromaDB & mempalace
 .mempalace/
 data/chroma_rag/
+**/chroma_rag/
+
+# Generated backtest reports
+V2/reports/
+
+# IDE / tool artifacts
+entities.json
 
 # Third-party libraries (too large for git — install separately)
 V2/vectorbtpro/
