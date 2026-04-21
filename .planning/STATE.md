@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-04-21)
 
 Phase: Not started (defining requirements)
 Plan: —
-Status: Defining requirements for v1.1
-Last activity: 2026-04-21 — GSD initialized (brownfield import), starting v1.1 milestone planning
+Status: Defining requirements for v2.0
+Last activity: 2026-04-21 — Milestone v2.0 started (V3 Adaptive Strategy Dispatch System)
 
 ## Accumulated Context
 
