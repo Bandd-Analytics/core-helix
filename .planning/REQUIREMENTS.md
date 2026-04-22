@@ -75,32 +75,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRDG-01 | — | Pending |
-| BRDG-02 | — | Pending |
-| BRDG-03 | — | Pending |
-| BRDG-04 | — | Pending |
-| BKTS-01 | — | Pending |
-| BKTS-02 | — | Pending |
-| BKTS-03 | — | Pending |
-| BKTS-04 | — | Pending |
-| REGM-01 | — | Pending |
-| REGM-02 | — | Pending |
-| REGM-03 | — | Pending |
-| REGM-04 | — | Pending |
-| ROUT-01 | — | Pending |
-| ROUT-02 | — | Pending |
-| ROUT-03 | — | Pending |
-| ROUT-04 | — | Pending |
-| LIVE-01 | — | Pending |
-| LIVE-02 | — | Pending |
-| LIVE-03 | — | Pending |
-| LIVE-04 | — | Pending |
+| BRDG-01 | Phase 6 | Pending |
+| BRDG-02 | Phase 6 | Pending |
+| BRDG-03 | Phase 6 | Pending |
+| BRDG-04 | Phase 6 | Pending |
+| BKTS-01 | Phase 7 | Pending |
+| BKTS-02 | Phase 7 | Pending |
+| BKTS-03 | Phase 7 | Pending |
+| BKTS-04 | Phase 7 | Pending |
+| REGM-01 | Phase 8 | Pending |
+| REGM-02 | Phase 8 | Pending |
+| REGM-03 | Phase 8 | Pending |
+| REGM-04 | Phase 8 | Pending |
+| ROUT-01 | Phase 9 | Pending |
+| ROUT-02 | Phase 9 | Pending |
+| ROUT-03 | Phase 9 | Pending |
+| ROUT-04 | Phase 9 | Pending |
+| LIVE-01 | Phase 10 | Pending |
+| LIVE-02 | Phase 10 | Pending |
+| LIVE-03 | Phase 10 | Pending |
+| LIVE-04 | Phase 10 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-22 after initial definition*
+*Last updated: 2026-04-22 — Traceability populated after roadmap creation*

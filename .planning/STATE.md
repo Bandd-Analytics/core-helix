@@ -1,26 +1,110 @@
-# State
+# STATE: MarketMind Helix
+
+*This file is the project's memory. Updated at every phase transition and plan completion.*
+
+---
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-21)
+**Milestone:** v2.0 — V3 Adaptive Strategy Dispatch System
+**Core Value:** A statistically validated daily Z-score mean-reversion signal (Sharpe 2.08) extended to an adaptive multi-strategy router dispatching live to MT5 via ZMQ bridge
+**Total Phases (this milestone):** 5 (Phases 6–10)
+**Total Requirements (this milestone):** 20
 
-**Core value:** A validated daily Z-score mean-reversion signal (Sharpe 2.08) ready to move from Python backtest to live MT5 execution.
-**Current focus:** Defining next milestone
+---
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for v2.0
-Last activity: 2026-04-21 — Milestone v2.0 started (V3 Adaptive Strategy Dispatch System)
+**Current Phase:** 6 — ZMQ Bridge Port
+**Current Plan:** None (roadmap just created — awaiting `/gsd:plan-phase 6`)
+**Status:** Not started
+
+### Progress Bar
+
+```
+Phase 6  [..........] 0%   ZMQ Bridge Port
+Phase 7  [..........] 0%   Backtest Entry Fix + 4yr Validation
+Phase 8  [..........] 0%   HMM-GARCH Regime + PiT Port
+Phase 9  [..........] 0%   Strategy Router
+Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
+```
+
+**Overall milestone:** 0/20 requirements complete
+
+---
+
+## Performance Metrics (v1.0 Baseline)
+
+| Metric | Value |
+|--------|-------|
+| Sharpe (base) | 1.67 |
+| Sharpe (with RAG) | 2.08 |
+| P&L (730-day backtest) | +42.84% |
+| Trade count (walk-forward) | 513 |
+| Win rate | 35.4% |
+| Max drawdown target | <15% |
+
+*v2.0 target: aggregate router Sharpe >= best single-strategy Sharpe + 0.2 (ROUT-04)*
+
+---
 
 ## Accumulated Context
 
-- Daily swing strategy is the ONLY validated signal source; H1 scalp/momentum layers destroy alpha
-- RAG filter (ChromaDB) boosts Sharpe from 1.67 → 2.08 — non-negotiable feature
-- Hurst regime filter just added (latest commit) — not yet validated in live conditions
-- BEC partial close shelved until win rate ≥ 40% (currently 35.4%)
-- MT5 EA compiles but has NO live connection to Python signal engine
-- The critical gap: execution plumbing (Python → MT5 bridge)
+### Carried Forward from v1.0
+
+- Daily swing strategy is the ONLY validated signal source; H1 scalp/momentum layers destroy alpha when run concurrently — valid ONLY as separately dispatched strategies via router
+- RAG filter (ChromaDB) boosts Sharpe from 1.67 to 2.08 — non-negotiable feature
+- Hurst regime filter added in final v1.0 commit — not yet validated in live conditions
+- BEC partial close shelved until win rate >= 40% (currently 35.4%)
+- MT5 EA compiles but has no live connection to Python signal engine
 - USDJPY is the crown jewel (Sharpe 3.09, 44.4% win rate)
 - IC Markets Raw Spread account is the target broker
+
+### Key Decisions for v2.0
+
+| Decision | Rationale |
+|----------|-----------|
+| ZMQ bridge (not file-polling, not named pipes) | Sub-10ms latency; file-polling has 1s latency + lock risk; named pipes Windows-only |
+| Adaptive router over single-strategy dispatch | H1 scalp/momentum valid as isolated dispatched strategies — not concurrent layers |
+| 4yr validation window for routing matrix | Replaces 730-day numbers with statistically stronger evidence |
+| OnlineRegimeFilter only (Viterbi banned) | Prevents future-bar leakage in both backtest and live |
+| Swing-first priority in router | Daily swing fires whenever conditions met; intraday only when no swing position open |
+| 7-day IC Markets demo as live gate | Validates live dispatch matches backtest expectation within 20% before real capital |
+
+### Critical Gates
+
+| Gate | Phase | What It Unlocks |
+|------|-------|-----------------|
+| BRDG-03 DLL compatibility spike | Phase 6 | Phase 10 EA work (if DLL fails, ZMQ approach must be reconsidered) |
+| BKTS-01 entry bias fix | Phase 7 | Trusted Sharpe numbers for BKTS-02/03 routing matrix entries |
+| REGM-04 Viterbi ban | Phase 8 | Phase 9 router 4yr simulation (ROUT-04) |
+| ROUT-04 simulation Sharpe gate | Phase 9 | Phase 10 live deployment |
+| LIVE-04 7-day paper trade | Phase 10 | Live capital deployment |
+
+### Todos
+
+- [ ] Start Phase 6 planning: `/gsd:plan-phase 6`
+
+### Blockers
+
+None currently.
+
+---
+
+## Session Continuity
+
+**Last action:** Roadmap created for v2.0 milestone (2026-04-22)
+**Last agent:** gsd-roadmapper
+**Next action:** `/gsd:plan-phase 6`
+
+---
+
+## Phase Transition Log
+
+| From | To | Date | Notes |
+|------|----|------|-------|
+| v1.0 complete (Phase 5) | v2.0 Phase 6 | 2026-04-22 | Milestone boundary |
+
+---
+
+*Last updated: 2026-04-22 — Roadmap created*
