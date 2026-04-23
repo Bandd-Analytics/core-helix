@@ -37,7 +37,7 @@ patterns-established:
   - "Spike isolation: spike artifacts live in V2/bridge/spike/ and V2/ea/spike/ — standalone, no dependency on V2/bridge/schemas.py or other bridge modules"
   - "Gate result template: BRDG03-RESULT.md pattern — Environment table + PENDING Outcome + PASS/FAIL branches + Reproducibility section"
 
-requirements-completed: []
+requirements-completed: ["BRDG-03"]
 
 # Metrics
 duration: 5min
@@ -123,4 +123,29 @@ None — plan executed as specified. Task 2 is a human-action checkpoint, stoppe
 
 ---
 *Phase: 06-zmq-bridge-port*
-*Completed: 2026-04-23 (at checkpoint — Task 2 awaiting human action)*
+---
+
+## Task 2 Gate Result: BRDG-03 PASS (2026-04-23)
+
+**MT5 journal confirmed:**
+```
+2026.04.23 22:49:00.939  MT5 Build: 5800
+2026.04.23 22:49:00.950  SPIKE: Context created OK
+2026.04.23 22:49:00.980  SPIKE: PUB socket created OK
+2026.04.23 22:49:00.980  SPIKE: connected to tcp://127.0.0.1:5599
+2026.04.23 22:49:02.481  SPIKE PASS: libzmq.dll loaded, test message sent, no crash
+2026.04.23 22:49:02.987  ========== BRDG-03 SPIKE COMPLETE ==========
+```
+
+Python listener timed out (listener started too early, 900s window elapsed before spike ran) — does not affect gate verdict. The DLL compatibility signal is the MT5 side: Context + Socket + connect + send all succeed with no errors.
+
+**Setup friction encountered:**
+- dingmaotu fork: 26 compile errors on build 5800 (char[]/uchar[] strictness)
+- coke5151 fork: ctx.destroy(0) invalid (RAII), removed all manual destroy calls
+- pub.bind() port collision: changed to pub.connect(); Python SUB binds (stable endpoint)
+- #property strict removed (MQL4 holdover)
+
+**BRDG-03 requirement: COMPLETE**
+**Phase 10 EA work: UNBLOCKED**
+
+*Completed: 2026-04-23*

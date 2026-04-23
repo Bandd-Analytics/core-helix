@@ -37,7 +37,7 @@
 
 Plans:
 - [x] 06-01-PLAN.md — Wave 1: V2 test scaffolding + msgpack schema contract (BRDG-01) [autonomous]
-- [x] 06-02-PLAN.md — Wave 1: BRDG-03 DLL compatibility spike on IC Markets MT5 (go/no-go gate) [checkpoint]
+- [x] 06-02-PLAN.md — Wave 1: BRDG-03 DLL compatibility spike — PASS (coke5151 fork, build 5800, Wine 11.7) [checkpoint]
 - [ ] 06-03-PLAN.md — Wave 2: BridgeConsumer + BridgePublisher with env ports, heartbeat, auto-reconnect (BRDG-02) [autonomous]
 - [ ] 06-04-PLAN.md — Wave 3: MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04) [checkpoint]
 

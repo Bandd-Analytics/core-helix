@@ -29,7 +29,7 @@ progress:
 ## Current Position
 
 Phase: 06 (zmq-bridge-port) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ### Progress Bar
 
@@ -65,6 +65,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Plan | Duration (s) | Tasks | Files | Notes |
 |------|-------------|-------|-------|-------|
 | Phase 06 P01 | 173 | 3 tasks | 8 files | BRDG-01 schema contract complete, 15 tests GREEN |
+| Phase 06 P02 | — | 2 tasks | 4 files | BRDG-03 gate PASS — coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 |
 
 ## Accumulated Context
 
@@ -96,7 +97,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 
 | Gate | Phase | What It Unlocks |
 |------|-------|-----------------|
-| BRDG-03 DLL compatibility spike | Phase 6 | Phase 10 EA work (if DLL fails, ZMQ approach must be reconsidered) — **PENDING: spike artifacts created (06-02 Task 1), awaiting human execution on IC Markets MT5 terminal** |
+| BRDG-03 DLL compatibility spike | Phase 6 | Phase 10 EA work — **PASS (2026-04-23): coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 Staging. Phase 10 unblocked.** |
 | BKTS-01 entry bias fix | Phase 7 | Trusted Sharpe numbers for BKTS-02/03 routing matrix entries |
 | REGM-04 Viterbi ban | Phase 8 | Phase 9 router 4yr simulation (ROUT-04) |
 | ROUT-04 simulation Sharpe gate | Phase 9 | Phase 10 live deployment |
@@ -114,9 +115,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** 06-02 Task 1 complete — BRDG-03 spike artifacts committed (8cd8efd). Stopped at Task 2 human-action checkpoint. (2026-04-23)
+**Last action:** 06-02 complete — BRDG-03 PASS committed (04c846d). MT5 build 5800, coke5151 fork, Ubuntu+Wine 11.7 Staging. (2026-04-23)
 **Last agent:** execute-phase
-**Next action:** Run BRDG-03 spike on IC Markets MT5 terminal; update BRDG03-RESULT.md; resume 06-02 with PASS/FAIL/BLOCKED signal
+**Next action:** Execute plan 06-03 (Wave 2) — BridgeConsumer + BridgePublisher with env ports, heartbeat, auto-reconnect (BRDG-02)
 
 ---
 
