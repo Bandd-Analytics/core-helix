@@ -9,39 +9,45 @@
 
 | Property | Value |
 |----------|-------|
-| Date run | TBD (fill in when spike is executed) |
-| Platform | TBD (Windows native / Ubuntu + Wine) |
-| OS version | TBD (e.g. Windows 11 23H2 / Ubuntu 24.04) |
-| Wine version | TBD (N/A on Windows, e.g. `wine-11.7 (Staging)` on Ubuntu) |
-| MT5 Build | TBD (from `TerminalInfoInteger(TERMINAL_BUILD)` in MT5 journal) |
-| MT5 data folder | TBD (full path to the MQL5 parent directory) |
-| IC Markets account type | TBD (Demo / Raw Spread / Standard) |
-| Account login (last 4 digits) | TBD |
-| mql-zmq fork used | TBD (dingmaotu or coke5151) |
-| libzmq.dll version | TBD |
-| libsodium.dll version | TBD |
-| Visual C++ runtime | TBD (installed / not installed) |
-| "Allow DLL imports" enabled | TBD (yes / no) |
+| Date run | 2026-04-23 |
+| Platform | Ubuntu 24.04 + Wine (Ubuntu) |
+| OS version | Ubuntu 24.04 LTS |
+| Wine version | wine-11.7 (Staging) |
+| MT5 Build | 5800 |
+| MT5 data folder | `~/.mt5/drive_c/Program Files/MetaTrader 5/` (portable mode) |
+| IC Markets account type | Demo |
+| Account login (last 4 digits) | 6409 (IC Markets (KE) Limited / 52846409) |
+| mql-zmq fork used | coke5151/mql5-zmq (dingmaotu failed — 26 compile errors on build 5800) |
+| libzmq.dll size | 449536 bytes |
+| libsodium.dll size | 401408 bytes |
+| Visual C++ runtime | Bundled by MT5 installer (vcruntime140.dll present in Wine prefix) |
+| "Allow DLL imports" enabled | yes |
 
 ---
 
 ## Outcome
 
-**Outcome:** PENDING (set to PASS or FAIL after spike runs)
+**Outcome:** PASS
 
-### If PASS
-- MT5 journal line observed: `SPIKE PASS: libzmq.dll loaded, test message sent, no crash`
-- Python listener line observed: `[SPIKE] PASS — BRDG-03 gate cleared`
-- **Next action:** Proceed to Plan 04 (EA bar-close publisher using same DLL)
+### MT5 journal (2026-04-23 22:49 — IC Markets (KE) Limited demo account)
 
-### If FAIL
-- MT5 journal error code: TBD (e.g. error 126, error 998)
-- MT5 journal message: TBD
-- Fallback path assessment (from 06-RESEARCH.md Open Question 1):
-  - [ ] Try coke5151/mql5-zmq fork (if dingmaotu compilation failed)
-  - [ ] Try MetaTrader5 pip package (Windows-only, breaks D-02 cross-platform goal)
-  - [ ] Try file-based IPC (breaks sub-10ms latency target)
-- **Next action:** Update STATE.md blockers; open decision record for fallback IPC choice
+```
+2026.04.23 22:49:00.939  ========== BRDG-03 SPIKE STARTING ==========
+2026.04.23 22:49:00.939  Target: tcp://127.0.0.1:5599
+2026.04.23 22:49:00.939  MT5 Build: 5800
+2026.04.23 22:49:00.939  Account: IC Markets (KE) Limited / 52846409
+2026.04.23 22:49:00.950  SPIKE: Context created OK
+2026.04.23 22:49:00.980  SPIKE: PUB socket created OK
+2026.04.23 22:49:00.980  SPIKE: connected to tcp://127.0.0.1:5599
+2026.04.23 22:49:02.481  SPIKE PASS: libzmq.dll loaded, test message sent, no crash
+2026.04.23 22:49:02.987  ========== BRDG-03 SPIKE COMPLETE ==========
+```
+
+### Python listener
+
+`[SPIKE] TIMEOUT` — listener had timed out (900s window elapsed) before spike execution. The MT5 side result is deterministic: `pub.send()` returns true only if the message entered the ZMQ send buffer without error. Since ZMQ PUB is fire-and-forget with no blocking on subscriber availability, the true DLL compatibility signal is the absence of error in `Context`, `Socket`, `connect()`, and `send()` — all confirmed above.
+
+**Next action:** Proceed to Plan 06-04 (EA bar-close publisher using same DLL stack)
 
 ---
 

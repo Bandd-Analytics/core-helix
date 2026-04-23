@@ -6,7 +6,6 @@
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics"
 #property version   "1.00"
-#property strict
 #property script_show_inputs
 
 #include <Zmq/Zmq.mqh>
@@ -32,47 +31,37 @@ void OnStart()
    Socket pub(ctx, ZMQ_PUB);
    Print("SPIKE: PUB socket created OK");
 
-   // Step 3: Bind to test port
-   string endpoint = StringFormat("tcp://*:%d", InpSpikePort);
-   if(!pub.bind(endpoint)) {
-      Print("SPIKE FAIL: bind failed on ", endpoint, " — error ", GetLastError());
-      ctx.destroy(0);
+   // Step 3: Connect to Python SUB listener (listener binds, publisher connects)
+   string endpoint = StringFormat("tcp://%s:%d", InpPythonHost, InpSpikePort);
+   if(!pub.connect(endpoint))
+     {
+      Print("SPIKE FAIL: connect failed on ", endpoint, " - error ", GetLastError());
       return;
-   }
-   Print("SPIKE: bound to ", endpoint);
+     }
+   Print("SPIKE: connected to ", endpoint);
 
-   // Step 4: Build topic + payload byte arrays
-   string topicStr = "SPIKE";
-   string payloadStr = "BRDG03_SPIKE_OK";
-   uchar topicBytes[];
-   uchar payloadBytes[];
-   StringToCharArray(topicStr, topicBytes, 0, StringLen(topicStr));
-   StringToCharArray(payloadStr, payloadBytes, 0, StringLen(payloadStr));
-
-   // Step 5: Give SUB time to connect (ZMQ slow-joiner — PUB drops if no subscriber yet)
+   // Step 4: Give SUB time to connect (ZMQ slow-joiner - PUB drops if no subscriber yet)
    Sleep(1500);
 
-   // Step 6: Send multipart [topic, payload]
-   if(!pub.sendMore(topicBytes)) {
-      Print("SPIKE FAIL: sendMore(topic) failed — error ", GetLastError());
-      pub.unbind(endpoint);
-      ctx.destroy(0);
+   // Step 5: Send multipart [topic, payload] using string overloads
+   if(!pub.sendMore("SPIKE"))
+     {
+      Print("SPIKE FAIL: sendMore(topic) failed - error ", GetLastError());
+      pub.disconnect(endpoint);
       return;
-   }
-   if(!pub.send(payloadBytes)) {
-      Print("SPIKE FAIL: send(payload) failed — error ", GetLastError());
-      pub.unbind(endpoint);
-      ctx.destroy(0);
+     }
+   if(!pub.send("BRDG03_SPIKE_OK"))
+     {
+      Print("SPIKE FAIL: send(payload) failed - error ", GetLastError());
+      pub.disconnect(endpoint);
       return;
-   }
+     }
 
    Print("SPIKE PASS: libzmq.dll loaded, test message sent, no crash");
-   Print("Message sent: topic='", topicStr, "' payload='", payloadStr, "'");
 
-   // Step 7: Let the message drain before unbinding
+   // Step 6: Let the message drain before disconnecting. Context auto-destroys on scope exit.
    Sleep(500);
-   pub.unbind(endpoint);
-   ctx.destroy(0);
+   pub.disconnect(endpoint);
    Print("========== BRDG-03 SPIKE COMPLETE ==========");
 }
 //+------------------------------------------------------------------+
