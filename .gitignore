@@ -28,6 +28,13 @@ entities.json
 # Third-party libraries (too large for git — install separately)
 V2/vectorbtpro/
 
+# Sealed layer — top-secret IP, never tracked by git.
+# See SEALED-LAYER.md for the rule. Only .gitkeep preserves the directory.
+sealed/*
+!sealed/.gitkeep
+**/sealed/*
+!**/sealed/.gitkeep
+
 # Node
 node_modules/
 
