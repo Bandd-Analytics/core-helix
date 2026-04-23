@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-23T13:22:23.910Z"
+last_updated: "2026-04-23T13:26:55.929Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 2
 ---
 
 # STATE: MarketMind Helix
@@ -29,7 +29,7 @@ progress:
 ## Current Position
 
 Phase: 06 (zmq-bridge-port) — EXECUTING
-Plan: 1 of 4
+Plan: 2 of 4
 
 ### Progress Bar
 
@@ -60,6 +60,12 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 
 ---
 
+## Plan Execution Metrics
+
+| Plan | Duration (s) | Tasks | Files | Notes |
+|------|-------------|-------|-------|-------|
+| Phase 06 P01 | 173 | 3 tasks | 8 files | BRDG-01 schema contract complete, 15 tests GREEN |
+
 ## Accumulated Context
 
 ### Carried Forward from v1.0
@@ -82,6 +88,9 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | OnlineRegimeFilter only (Viterbi banned) | Prevents future-bar leakage in both backtest and live |
 | Swing-first priority in router | Daily swing fires whenever conditions met; intraday only when no swing position open |
 | 7-day IC Markets demo as live gate | Validates live dispatch matches backtest expectation within 20% before real capital |
+| Fill replaces OrderResult in V2 (D-08) | class OrderResult does not exist in V2/bridge/ — V2 uses Fill throughout (06-01) |
+| SCHEMA_VERSION=1 module constant (D-06) | Single source of truth for schema version in V2/bridge/schemas.py (06-01) |
+| unpack_heartbeat returns dict not datetime64 (D-07) | Consumer can check schema_version on connect — deliberate V1 breaking change (06-01) |
 
 ### Critical Gates
 
@@ -119,4 +128,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-22 — Roadmap created*
+*Last updated: 2026-04-23 — 06-01 BRDG-01 schema contract complete (15 tests GREEN)*

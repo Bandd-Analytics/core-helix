@@ -33,10 +33,10 @@
 3. The mql-zmq DLL loads and sends a test message on the IC Markets MT5 terminal without crash or rejection — Phase 10 EA work is unblocked (go/no-go gate)
 4. The MT5 EA pushes a completed-bar event per pair with timeframe tag; Python receives and processes it on bar close without polling the terminal
 
-**Plans:** 4 plans across 3 waves
+**Plans:** 2/4 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Wave 1: V2 test scaffolding + msgpack schema contract (BRDG-01) [autonomous]
+- [x] 06-01-PLAN.md — Wave 1: V2 test scaffolding + msgpack schema contract (BRDG-01) [autonomous]
 - [x] 06-02-PLAN.md — Wave 1: BRDG-03 DLL compatibility spike on IC Markets MT5 (go/no-go gate) [checkpoint]
 - [ ] 06-03-PLAN.md — Wave 2: BridgeConsumer + BridgePublisher with env ports, heartbeat, auto-reconnect (BRDG-02) [autonomous]
 - [ ] 06-04-PLAN.md — Wave 3: MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04) [checkpoint]
@@ -119,7 +119,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. ZMQ Bridge Port | 0/4 | Not started | — |
+| 6. ZMQ Bridge Port | 2/4 | In Progress|  |
 | 7. Backtest Entry Fix + 4yr Validation | 0/? | Not started | — |
 | 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
