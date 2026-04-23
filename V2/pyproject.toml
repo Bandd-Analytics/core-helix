@@ -1,0 +1,24 @@
+[project]
+name = "helix-v2"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v -m 'not slow'"
+asyncio_mode = "auto"
+markers = [
+    "pit_check: marks tests as Point-in-Time compliance checks",
+    "slow: marks tests as slow (deselect with '-m not slow')",
+    "spike: marks manual/spike tests that require external hardware (MT5 terminal)",
+]
+
+[tool.mypy]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+packages = ["bridge"]
+
+[[tool.mypy.overrides]]
+module = ["msgpack.*", "zmq.*"]
+ignore_missing_imports = true
