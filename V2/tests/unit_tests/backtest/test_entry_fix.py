@@ -26,12 +26,12 @@ from v3_intelligence.pair_config import PairConfig
 
 # ── synthetic data factory ───────────────────────────────────────────────────
 
-def _make_h1(n: int = 300, drift: float = 0.0001) -> pd.DataFrame:
+def _make_h1(n: int = 300, drift: float = 0.0001, volatility: float = 0.0005) -> pd.DataFrame:
     """Upward-drifting H1 OHLCV with a 20-period Z-score that oscillates strongly."""
     rng = np.random.default_rng(42)
-    idx = pd.date_range("2024-01-01", periods=n, freq="h")
+    idx = pd.date_range("2022-01-01", periods=n, freq="h")
 
-    close = 1.10 + np.cumsum(rng.normal(drift, 0.0005, n))
+    close = 1.10 + np.cumsum(rng.normal(drift, volatility, n))
     open_ = close - rng.uniform(0.0001, 0.0003, n)
     high  = close + rng.uniform(0.0001, 0.0004, n)
     low   = close - rng.uniform(0.0001, 0.0004, n)
@@ -46,11 +46,11 @@ def _make_h1(n: int = 300, drift: float = 0.0001) -> pd.DataFrame:
 
 def _make_daily(n_days: int = 60) -> pd.DataFrame:
     rng = np.random.default_rng(7)
-    idx = pd.date_range("2024-01-01", periods=n_days, freq="D")
-    close = 1.10 + np.cumsum(rng.normal(0.0, 0.001, n_days))
+    idx = pd.date_range("2022-01-01", periods=n_days, freq="D")
+    close = 1.10 + np.cumsum(rng.normal(0.0, 0.003, n_days))
     open_ = close - 0.0001
-    high  = close + 0.001
-    low   = close - 0.001
+    high  = close + 0.003
+    low   = close - 0.003
     return pd.DataFrame(
         {"Open": open_, "High": high, "Low": low, "Close": close, "Volume": 1000.0},
         index=idx,
@@ -70,11 +70,12 @@ def _scalp_cfg(sym: str = "AUDNZD") -> PairConfig:
 
 
 def _momentum_cfg(sym: str = "AUDNZD") -> PairConfig:
+    # Use lower Z thresholds to ensure trades are generated on synthetic data
     return PairConfig(
         symbol=sym, tier=2,
         momentum_size_mult=0.3,
-        momentum_z_threshold=1.5,
-        momentum_daily_z_threshold=1.5,
+        momentum_z_threshold=0.5,
+        momentum_daily_z_threshold=0.5,
         momentum_target_atr=1.0,
         momentum_stop_atr=0.5,
         momentum_max_bars=2,
@@ -128,8 +129,8 @@ def test_scalp_entry_price_is_next_bar_open():
 def test_momentum_entry_price_is_next_bar_open():
     """Every momentum trade's entry_price must equal h1.iloc[entry_bar + 1]['Open']."""
     ev     = _evaluator()
-    h1     = _make_h1(n=500)
-    daily  = _make_daily()
+    h1     = _make_h1(n=2000, volatility=0.001)
+    daily  = _make_daily(n_days=300)
     cfg    = _momentum_cfg()
 
     trades_df = ev.run_momentum_with_cfg("AUDNZD", daily, h1, cfg)

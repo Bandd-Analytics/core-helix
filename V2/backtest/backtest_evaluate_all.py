@@ -114,8 +114,8 @@ class Evaluator(HybridMultiTimeframeBacktest):
         h1['changepoint'] = daily['changepoint'].values[idx]
 
         position = None; trades = []
-        for i in range(100, len(h1)):
-            row  = h1.iloc[i]; ts = h1.index[i]
+        for i in range(100, len(h1) - 1):
+            row      = h1.iloc[i]; next_row = h1.iloc[i + 1]; ts = h1.index[i]
             dz   = row['daily_z']; atr = row['atr']; px = row['Close']
             cp   = int(row['changepoint']) if not pd.isna(row['changepoint']) else 0
             sess = _session(ts.hour)
@@ -137,6 +137,7 @@ class Evaluator(HybridMultiTimeframeBacktest):
                                    'exit_date': ts, 'entry_price': ep, 'exit_price': px,
                                    'pnl_pct': pnl, 'bars_held': bars, 'size': position['size'],
                                    'exit_reason': why, 'daily_z': position['daily_z'],
+                                   'entry_bar_ts': position['entry_bar_ts'],
                                    'session': sess})
                     position = None
             else:
@@ -144,9 +145,12 @@ class Evaluator(HybridMultiTimeframeBacktest):
                         and not pd.isna(atr) and atr > 0
                         and not (self.enable_changepoint and cp == 1)):
                     pt = 'DAILY_SWING_LONG' if dz < 0 else 'DAILY_SWING_SHORT'
-                    position = {'type': pt, 'entry_price': px, 'entry_date': ts,
+                    # BKTS-01 (D-01): next-bar open fill
+                    entry_px = next_row['Open']
+                    position = {'type': pt, 'entry_price': entry_px, 'entry_date': ts,
                                 'entry_bar': i, 'entry_hour': ts.hour, 'atr_entry': atr,
-                                'size': cfg.swing_size_mult, 'daily_z': dz}
+                                'size': cfg.swing_size_mult, 'daily_z': dz,
+                                'entry_bar_ts': h1.index[i]}
         return pd.DataFrame(trades)
 
     def run_scalp_with_cfg(self, symbol, daily, h1, cfg):
@@ -172,8 +176,8 @@ class Evaluator(HybridMultiTimeframeBacktest):
         h1['changepoint'] = daily['changepoint'].values[idx]
 
         position = None; trades = []
-        for i in range(100, len(h1)):
-            row  = h1.iloc[i]; ts = h1.index[i]
+        for i in range(100, len(h1) - 1):
+            row      = h1.iloc[i]; next_row = h1.iloc[i + 1]; ts = h1.index[i]
             h1z  = row['z_score']; dz = row['daily_z']; atr = row['atr']
             px   = row['Close']; cp = int(row['changepoint']) if not pd.isna(row['changepoint']) else 0
             sess = _session(ts.hour)
@@ -195,6 +199,7 @@ class Evaluator(HybridMultiTimeframeBacktest):
                                    'exit_date': ts, 'entry_price': ep, 'exit_price': px,
                                    'pnl_pct': pnl, 'bars_held': bars, 'size': position['size'],
                                    'exit_reason': why, 'daily_z': position.get('daily_z'),
+                                   'entry_bar_ts': position['entry_bar_ts'],
                                    'session': sess})
                     position = None
             else:
@@ -205,9 +210,11 @@ class Evaluator(HybridMultiTimeframeBacktest):
                         and (pd.isna(dz) or abs(dz) < 1.5
                              or (dz < 0 and h1z < 0) or (dz > 0 and h1z > 0))):
                     pt = 'H1_SCALP_LONG' if h1z < 0 else 'H1_SCALP_SHORT'
-                    position = {'type': pt, 'entry_price': px, 'entry_date': ts,
+                    # BKTS-01 (D-01): next-bar open fill
+                    entry_px = next_row['Open']
+                    position = {'type': pt, 'entry_price': entry_px, 'entry_date': ts,
                                 'entry_bar': i, 'atr_entry': atr, 'size': cfg.scalp_size_mult,
-                                'daily_z': dz}
+                                'daily_z': dz, 'entry_bar_ts': h1.index[i]}
         return pd.DataFrame(trades)
 
     def run_momentum_with_cfg(self, symbol, daily, h1, cfg):
@@ -233,8 +240,8 @@ class Evaluator(HybridMultiTimeframeBacktest):
         h1['changepoint'] = daily['changepoint'].values[idx]
 
         position = None; trades = []
-        for i in range(100, len(h1)):
-            row  = h1.iloc[i]; ts = h1.index[i]
+        for i in range(100, len(h1) - 1):
+            row      = h1.iloc[i]; next_row = h1.iloc[i + 1]; ts = h1.index[i]
             h1z  = row['z_score']; dz = row['daily_z']; atr = row['atr']
             px   = row['Close']; cp = int(row['changepoint']) if not pd.isna(row['changepoint']) else 0
             sess = _session(ts.hour)
@@ -256,6 +263,7 @@ class Evaluator(HybridMultiTimeframeBacktest):
                                    'exit_date': ts, 'entry_price': ep, 'exit_price': px,
                                    'pnl_pct': pnl, 'bars_held': bars, 'size': position['size'],
                                    'exit_reason': why, 'daily_z': position.get('daily_z'),
+                                   'entry_bar_ts': position['entry_bar_ts'],
                                    'session': sess})
                     position = None
             else:
@@ -266,9 +274,11 @@ class Evaluator(HybridMultiTimeframeBacktest):
                         and not pd.isna(atr) and atr > 0
                         and ((dz < 0 and h1z < 0) or (dz > 0 and h1z > 0))):
                     pt = 'MOMENTUM_LONG' if h1z < 0 else 'MOMENTUM_SHORT'
-                    position = {'type': pt, 'entry_price': px, 'entry_date': ts,
+                    # BKTS-01 (D-01): next-bar open fill
+                    entry_px = next_row['Open']
+                    position = {'type': pt, 'entry_price': entry_px, 'entry_date': ts,
                                 'entry_bar': i, 'atr_entry': atr, 'size': cfg.momentum_size_mult,
-                                'daily_z': dz}
+                                'daily_z': dz, 'entry_bar_ts': h1.index[i]}
         return pd.DataFrame(trades)
 
     def run_m15_with_cfg(self, symbol, daily, m15, cfg):

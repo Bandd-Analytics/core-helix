@@ -210,8 +210,9 @@ class HybridMultiTimeframeBacktest:
         position = None
         trades   = []
 
-        for i in range(100, len(h1)):
-            row  = h1.iloc[i]
+        for i in range(100, len(h1) - 1):
+            row      = h1.iloc[i]
+            next_row = h1.iloc[i + 1]
             ts   = h1.index[i]
             hour = ts.hour
             dz   = row['daily_z']
@@ -274,9 +275,11 @@ class HybridMultiTimeframeBacktest:
                     sz  = 1.0 * cfg.swing_size_mult
                     rm  = self._rag_size_modifier(symbol, pt, sess, dz, h1z, vpct, hour)
                     if rm > 0:
+                        # BKTS-01 (D-01): next-bar open fill — see .planning/phases/07-.../07-CONTEXT.md
+                        entry_px = next_row['Open']
                         position = {
                             'type':        pt,
-                            'entry_price': px,
+                            'entry_price': entry_px,
                             'entry_date':  ts,
                             'entry_bar':   i,
                             'entry_hour':  hour,
@@ -343,8 +346,9 @@ class HybridMultiTimeframeBacktest:
         position = None
         trades   = []
 
-        for i in range(50, len(m15)):
-            row  = m15.iloc[i]
+        for i in range(50, len(m15) - 1):
+            row      = m15.iloc[i]
+            next_row = m15.iloc[i + 1]
             ts   = m15.index[i]
             hour = ts.hour
             m15z = row['z_score']
@@ -420,9 +424,11 @@ class HybridMultiTimeframeBacktest:
                     sz  = cfg.m15_size_mult
                     rm  = self._rag_size_modifier(symbol, pt, sess, dz_safe, m15z, vpct, hour)
                     if rm > 0:
+                        # BKTS-01 (D-01): next-bar open fill — see .planning/phases/07-.../07-CONTEXT.md
+                        entry_px = next_row['Open']
                         position = {
                             'type':        pt,
-                            'entry_price': px,
+                            'entry_price': entry_px,
                             'entry_date':  ts,
                             'entry_bar':   i,
                             'entry_hour':  hour,
