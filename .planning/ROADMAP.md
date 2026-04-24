@@ -2,7 +2,7 @@
 
 **Milestone:** v2.0 — V3 Adaptive Strategy Dispatch System
 **Created:** 2026-04-22
-**Phases:** 6–10 (v1.0 ended at Phase 5)
+**Phases:** 6–10 + 8.5 (v1.0 ended at Phase 5)
 **Coverage:** 20/20 v2.0 requirements mapped
 
 ---
@@ -12,7 +12,8 @@
 - [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
 - [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2026-04-24)
 - [ ] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series
-- [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, and RAG score, and validate aggregate portfolio Sharpe uplift
+- [ ] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9
+- [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
 
 ---
@@ -85,16 +86,45 @@ Plans:
 
 ---
 
+### Phase 8.5: Temporal & Session Analysis
+
+**Goal:** Every pair-strategy combination has a statistically validated performance profile across trading sessions, time-of-day, day-of-week, day-of-month, and day-of-year — riskiest windows are identified and blacklisted, best windows are encoded as filters — so Phase 9's StrategyRouter can gate entries on time as a first-class input alongside regime and Sharpe.
+
+**Depends on:** Phase 7 (4yr data and corrected Sharpe numbers must exist before time-sliced analysis is meaningful), Phase 8 (regime labels per bar enable regime×session interaction analysis — knowing whether London open is mean-reverting or trending changes how you weight it)
+
+**Requirements:** SESS-01, SESS-02, SESS-03, SESS-04
+
+**Success Criteria** (what must be TRUE):
+1. For every active pair × strategy combination, a session performance table exists showing Sharpe, win rate, and trade count for each of: Tokyo (00:00–09:00 UTC), London (07:00–16:00 UTC), New York (13:00–22:00 UTC), London-NY overlap (13:00–16:00 UTC), London open (07:00–09:00 UTC) — top and bottom sessions identified per pair
+2. Hour-of-day, day-of-week, day-of-month, and day-of-year heatmaps are produced per pair × strategy, showing average P&L per bar across each temporal bucket — best and worst buckets documented
+3. A risk calendar is produced listing high-volatility recurring windows (FOMC, NFP, BoE, BoJ, ECB, RBA, RBNZ release windows) with empirical evidence of abnormal spread/slippage behaviour drawn from the 4yr dataset — these windows are flagged as blackout periods
+4. `V2/v3_intelligence/session_config.py` and `V2/v3_intelligence/temporal_filters.py` exist with typed, testable interfaces that Phase 9 can import — `is_tradeable_session(pair, strategy, timestamp) -> bool` is the minimum contract
+
+**Scope detail:**
+- **Multi-timeframe comparison** — M15 vs H1 vs D1 Sharpe per pair per strategy; best timeframe per pair documented
+- **Session windows** — Tokyo, London, New York, London-NY overlap, London open, NY open; winner per pair
+- **Hour-of-day heatmap** — 24-bucket bar chart, wins vs losses by entry hour, per pair × strategy
+- **Day-of-week analysis** — Monday–Friday P&L distribution; does Monday open / Friday close matter?
+- **Day-of-month analysis** — first week vs mid-month vs month-end; rollover effects
+- **Day-of-year analysis** — seasonal patterns, Q1/Q2/Q3/Q4 Sharpe split; holiday thin-market windows
+- **Entry/exit timing distributions** — histogram of winning vs losing trade entry times; is there a golden hour?
+- **Risk calendar** — recurring event windows with empirical spread/volatility spikes flagged as blackouts
+- **Outputs** — session_config.py (allowed sessions per pair×strategy), temporal_filters.py (is_tradeable_session, is_blackout_window), analysis notebooks/CSVs as committed evidence
+
+**Plans:** TBD
+
+---
+
 ### Phase 9: Strategy Router
 
 **Goal:** StrategyRouter dispatches the correct strategy per pair per bar using a three-layer decision chain (regime gate, 4yr matrix check, RAG score), enforces swing-first priority and direction conflict rejection, and a 4yr simulation demonstrates that aggregate portfolio Sharpe exceeds the best individual strategy Sharpe by at least 0.2.
 
-**Depends on:** Phase 7 (routing matrix entries must be in pair_config.py), Phase 8 (OnlineRegimeFilter and PiT manager must be the sole regime source — REGM-04 Viterbi ban must be enforced before the simulation runs)
+**Depends on:** Phase 7 (routing matrix entries must be in pair_config.py), Phase 8 (OnlineRegimeFilter and PiT manager must be the sole regime source — REGM-04 Viterbi ban must be enforced before the simulation runs), Phase 8.5 (session_config.py and temporal_filters.py must exist — router uses is_tradeable_session() as a first-class gate alongside regime and 4yr matrix)
 
 **Requirements:** ROUT-01, ROUT-02, ROUT-03, ROUT-04
 
 **Success Criteria** (what must be TRUE):
-1. StrategyRouter.route(pair, timestamp, market_data) returns a typed dict {strategy, direction, confidence, size_mult} or None, passing a unit test suite that covers regime-block, matrix-fail, RAG-below-threshold, and valid-dispatch scenarios
+1. StrategyRouter.route(pair, timestamp, market_data) returns a typed dict {strategy, direction, confidence, size_mult} or None, passing a unit test suite that covers regime-block, matrix-fail, session-block, RAG-below-threshold, and valid-dispatch scenarios
 2. When a daily swing signal fires on a pair, the router selects it over any intraday strategy — and intraday strategies are only dispatched when no swing position is open on that pair
 3. The router returns None when an existing position on the pair is open in the opposite direction — no counter-position orders are published
 4. A 4yr portfolio simulation using the router dispatch log shows aggregate Sharpe >= (best single-strategy Sharpe across the matrix + 0.2), confirming that adaptive dispatch adds measurable value over picking one strategy
@@ -125,9 +155,10 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. ZMQ Bridge Port | 4/4 | Complete   | 2026-04-24 |
-| 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete   | 2026-04-24 |
+| 6. ZMQ Bridge Port | 4/4 | Complete | 2026-04-24 |
+| 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2026-04-25 |
 | 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
+| 8.5. Temporal & Session Analysis | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
 
@@ -137,17 +168,18 @@ Plans:
 
 ```
 Phase 6 (Bridge)
-    ├── Phase 7 (Backtest) ──────────────────────┐
-    └── Phase 8 (Regime) ──────────────────────── Phase 9 (Router) ── Phase 10 (Live)
-         [REGM-04 Viterbi ban]                    [4yr simulation]     [BRDG-03 gate]
+    ├── Phase 7 (Backtest) ──────────────────────────────────┐
+    └── Phase 8 (Regime) ──── Phase 8.5 (Session Analysis) ── Phase 9 (Router) ── Phase 10 (Live)
+         [REGM-04 Viterbi ban]  [session_config.py]           [4yr + session gates] [BRDG-03 gate]
 ```
 
-**Critical path:** Phase 6 → Phase 8 → Phase 9 → Phase 10
+**Critical path:** Phase 6 → Phase 8 → Phase 8.5 → Phase 9 → Phase 10
 
-Phase 7 can run in parallel with Phase 8 after Phase 6 completes, but Phase 9 cannot begin until both Phase 7 and Phase 8 are done.
+Phase 7 can run in parallel with Phase 8 after Phase 6 completes. Phase 8.5 requires both Phase 7 (4yr data) and Phase 8 (regime labels for regime×session interaction). Phase 9 cannot begin until Phase 7, Phase 8, and Phase 8.5 are all done.
 
 ---
 
 *Roadmap created: 2026-04-22*
-*Phase 7 planned: 2026-04-24 (4 plans across 3 waves)*
-*Next: `/gsd:plan-phase 6`*
+*Phase 7 completed: 2026-04-25 (4 plans, 70/70 tests, BKTS-01/02/03/04 verified)*
+*Phase 8.5 added: 2026-04-25 — Temporal & Session Analysis, prerequisite for Phase 9 StrategyRouter*
+*Next: `/gsd:plan-phase 8`*
