@@ -1,7 +1,8 @@
 ---
 phase: 7
 slug: backtest-entry-fix-h1-momentum-4yr-validation
-status: draft
+status: approved
+reviewed_at: 2026-04-24T00:00:00Z
 shadcn_initialized: false
 preset: none
 created: 2026-04-24
