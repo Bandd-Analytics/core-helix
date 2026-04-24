@@ -10,11 +10,14 @@ Ported from V1/helix/src/execution/bridge/linux_consumer.py with deltas:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import time
 from collections.abc import Awaitable, Callable
 from typing import Any
+
+import numpy as np
 
 import zmq  # type: ignore[import-untyped,unused-ignore]
 import zmq.asyncio  # type: ignore[import-untyped,unused-ignore]
@@ -23,6 +26,7 @@ from .schemas import (
     SCHEMA_VERSION,
     pack_order_request,
     unpack_bar,
+    unpack_bar_with_timeframe,
     unpack_heartbeat,
     unpack_fill,
     unpack_tick,
@@ -164,16 +168,49 @@ class BridgeConsumer:
         self._last_heartbeat = time.monotonic()
 
     # ------------------------------------------------------------------
+    # Bar-close frame handling (BRDG-04)
+    # ------------------------------------------------------------------
+
+    def _handle_bar_frame(self, data: bytes) -> tuple[Bar, str]:
+        """Parse a bar-close frame. Accepts msgpack (V2 native) or JSON (MQL5 Option A).
+
+        Returns:
+            tuple[Bar, str]: the Bar object and the timeframe tag ("" if absent).
+
+        Raises:
+            Exception: if the bytes are neither valid msgpack-with-expected-keys
+                       nor valid JSON-with-expected-keys. Caller (receive loop)
+                       must catch and log without killing the loop.
+        """
+        # Try msgpack first (V2 native path)
+        try:
+            return unpack_bar_with_timeframe(data)
+        except Exception:
+            pass
+        # Fallback to JSON (MQL5 EA payload path per RESEARCH Option A)
+        obj = json.loads(data.decode("utf-8"))
+        bar = Bar(
+            timestamp=np.datetime64(int(obj["ts"]), "ns"),
+            symbol=obj["sym"],
+            open=float(obj["o"]), high=float(obj["h"]),
+            low=float(obj["l"]), close=float(obj["c"]),
+            volume=float(obj.get("v", 0.0)),
+            spread=float(obj.get("sp", 0.0)),
+        )
+        return bar, str(obj.get("tf", ""))
+
+    # ------------------------------------------------------------------
     # Receive loop
     # ------------------------------------------------------------------
 
     async def _receive_loop(
         self,
         on_tick: Callable[[Tick], Awaitable[None]],
-        on_bar: Callable[[Bar], Awaitable[None]],
+        on_bar_close: Callable[[Bar, str], Awaitable[None]],
     ) -> None:
         """Receive ticks, bars, and heartbeats; dispatch to callbacks.
 
+        on_bar_close is invoked with (Bar, timeframe_tag).
         Heartbeats arrive on the tick socket as single-frame messages.
         Ticks arrive as two-frame [symbol, payload] messages.
         """
@@ -191,14 +228,20 @@ class BridgeConsumer:
                 if len(frames) == 1:
                     self._handle_heartbeat_frame(frames[0])
                 elif len(frames) == 2:
-                    tick = unpack_tick(frames[1])
-                    await on_tick(tick)
+                    try:
+                        tick = unpack_tick(frames[1])
+                        await on_tick(tick)
+                    except Exception as e:
+                        logger.warning("[BRIDGE] WARNING: failed to decode tick frame: %s", e)
 
             if self._bar_sub in events:
                 frames = await self._bar_sub.recv_multipart()
                 if len(frames) == 2:
-                    bar = unpack_bar(frames[1])
-                    await on_bar(bar)
+                    try:
+                        bar, tf = self._handle_bar_frame(frames[1])
+                        await on_bar_close(bar, tf)
+                    except Exception as e:
+                        logger.warning("[BRIDGE] WARNING: failed to decode bar frame: %s", e)
 
     # ------------------------------------------------------------------
     # Order sending (to MT5 publisher via PUSH)

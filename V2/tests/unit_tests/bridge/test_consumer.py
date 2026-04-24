@@ -151,5 +151,38 @@ class TestAutoReconnect:
 
 
 class TestBarCloseReceive:
-    def test_placeholder_for_plan_04(self):
-        pytest.skip("Plan 04 adds bar-close routing with timeframe tag — see 06-04-PLAN.md")
+    """Consumer dispatches bar-close events with timeframe tag (BRDG-04)."""
+
+    @pytest.mark.asyncio
+    async def test_receive_loop_passes_timeframe_to_callback(self, monkeypatch):
+        from bridge.schemas import pack_bar
+        from bridge.types import Bar
+        import numpy as np
+        from unittest.mock import AsyncMock, MagicMock
+
+        c = BridgeConsumer()
+        c._running = True
+        c._tick_sub = MagicMock()
+        c._bar_sub = MagicMock()
+        bar = Bar(
+            timestamp=np.datetime64("2026-04-23T10:00:00", "ns"),
+            symbol="EURUSD", open=1.1, high=1.12, low=1.09, close=1.11,
+            volume=1000, spread=2,
+        )
+        c._bar_sub.recv_multipart = AsyncMock(return_value=[b"EURUSD", pack_bar(bar, "D1")])
+        fake_poller = MagicMock()
+        fake_poller.poll = AsyncMock(return_value=[(c._bar_sub, 1)])
+        fake_poller.register = MagicMock()
+        monkeypatch.setattr("zmq.asyncio.Poller", lambda: fake_poller)
+
+        received = []
+
+        async def on_tick(t):
+            pass
+
+        async def on_bar_close(b, tf):
+            received.append((b.symbol, tf))
+            c._running = False
+
+        await c._receive_loop(on_tick, on_bar_close)
+        assert received == [("EURUSD", "D1")]
