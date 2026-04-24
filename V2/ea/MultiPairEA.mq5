@@ -15,6 +15,7 @@
 #include "include/CHybridSignal.mqh"
 #include "include/CScalingManager.mqh"
 #include "include/CLogger.mqh"
+#include <Zmq/Zmq.mqh>
 
 //--- Input parameters
 input double InpInitialEquity = 1000.0;           // Initial account equity
@@ -25,6 +26,10 @@ input double InpMaxDrawdown = 0.15;               // Maximum drawdown (15%)
 input double InpKelleFraction = 0.25;             // Kelly fraction multiplier (0.25x)
 input double InpSignalThreshold = 70;             // Minimum signal score (0-100)
 input int    InpTimerIntervalSeconds = 1;        // Timer interval (1 second)
+//--- ZMQ bridge inputs (BRDG-04)
+input int    InpBarPort       = 5557;            // Bar-close PUB port (matches ZMQ_BAR_PORT env)
+input string InpBarBindAddr   = "tcp://*";       // Bar PUB bind address
+input bool   InpEnableZmqBars = true;            // Enable ZMQ bar-close publishing
 
 //--- Global EA state
 CCircuitBreaker riskManager;
@@ -39,6 +44,14 @@ string          symbols[5] = {"EURUSD", "USDJPY", "AUDNZD", "EURGBP", "GBPJPY"};
 bool            eaInitialized = false;
 datetime        lastBarTime[5];
 int             magicBaseNumber = 100000;
+
+//--- ZMQ bridge state (BRDG-04)
+Context        zmqContext;
+Socket         barPub(zmqContext, ZMQ_PUB);
+bool           zmqBarsActive = false;
+ENUM_TIMEFRAMES activeTimeframes[3] = {PERIOD_D1, PERIOD_H1, PERIOD_M15};
+string         timeframeTags[3]    = {"D1", "H1", "M15"};
+int            lastBarsCount[5][3];   // per pair (5) per timeframe (3)
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                  |
@@ -119,6 +132,26 @@ int OnInit()
    // Step 6: Set timer interval
    EventSetTimer(InpTimerIntervalSeconds);
 
+   // Step 7: Initialize ZMQ bar-close publisher (BRDG-04)
+   if(InpEnableZmqBars) {
+      string bindEp = StringFormat("%s:%d", InpBarBindAddr, InpBarPort);
+      if(barPub.bind(bindEp)) {
+         zmqBarsActive = true;
+         Print("[BRIDGE] Bar-close PUB bound to ", bindEp);
+         // Initialize lastBarsCount to current counts so first OnTimer tick
+         // doesn't spuriously fire 15 bar-close events.
+         for(int p = 0; p < 5; p++) {
+            for(int t = 0; t < 3; t++) {
+               lastBarsCount[p][t] = Bars(symbols[p], activeTimeframes[t]);
+            }
+         }
+      } else {
+         Print("[BRIDGE] WARNING: Bar-close PUB bind failed on ", bindEp,
+               " — EA will run without ZMQ publishing. Error: ", GetLastError());
+         zmqBarsActive = false;
+      }
+   }
+
    eaInitialized = true;
    Print("========== MultiPairEA Initialized Successfully ==========");
 
@@ -130,6 +163,14 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
+   // Tear down ZMQ bar-close publisher (BRDG-04)
+   if(zmqBarsActive) {
+      string bindEp = StringFormat("%s:%d", InpBarBindAddr, InpBarPort);
+      barPub.unbind(bindEp);
+      zmqBarsActive = false;
+      Print("[BRIDGE] Bar-close PUB unbound");
+   }
+
    EventKillTimer();
 
    // Release signal generators
@@ -179,6 +220,50 @@ void OnTimer()
       SOpenPosition pos;
       if(scalingManager.GetPosition(i, pos))
          scalingManager.CheckScalingConditions(pos.ticket);
+   }
+
+   // BRDG-04: Emit bar-close events for D1/H1/M15 per pair via ZMQ PUB
+   if(zmqBarsActive) {
+      for(int p = 0; p < 5; p++) {
+         string sym = symbols[p];
+         for(int t = 0; t < 3; t++) {
+            ENUM_TIMEFRAMES tf = activeTimeframes[t];
+            string tfStr = timeframeTags[t];
+            int barsNow = Bars(sym, tf);
+            if(barsNow <= lastBarsCount[p][t]) continue;  // no new bar
+            lastBarsCount[p][t] = barsNow;
+            // A new bar opened — the PREVIOUS bar (index 1) just closed.
+            MqlRates rates[];
+            if(CopyRates(sym, tf, 1, 1, rates) != 1) {
+               Print("[BRIDGE] WARNING: CopyRates failed for ", sym, " ", tfStr);
+               continue;
+            }
+            // Build JSON payload (Option A per RESEARCH — avoids native msgpack in MQL5).
+            // Consumer's _handle_bar_frame decodes JSON or msgpack transparently.
+            string payload = StringFormat(
+               "{\"ts\":%I64d,\"sym\":\"%s\",\"tf\":\"%s\","
+               "\"o\":%.5f,\"h\":%.5f,\"l\":%.5f,\"c\":%.5f,"
+               "\"v\":%d,\"sp\":%d}",
+               (long)rates[0].time * 1000000000,
+               sym, tfStr,
+               rates[0].open, rates[0].high, rates[0].low, rates[0].close,
+               (int)rates[0].tick_volume, (int)rates[0].spread
+            );
+            uchar topicBytes[];
+            uchar payloadBytes[];
+            StringToCharArray(sym, topicBytes, 0, StringLen(sym));
+            StringToCharArray(payload, payloadBytes, 0, StringLen(payload));
+            if(!barPub.sendMore(topicBytes)) {
+               Print("[BRIDGE] WARNING: sendMore(topic) failed for ", sym);
+               continue;
+            }
+            if(!barPub.send(payloadBytes)) {
+               Print("[BRIDGE] WARNING: send(payload) failed for ", sym, " ", tfStr);
+               continue;
+            }
+            Print("[BRIDGE] Bar close: ", sym, " ", tfStr, " @ ", TimeToString(rates[0].time));
+         }
+      }
    }
 }
 
