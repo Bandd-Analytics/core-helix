@@ -57,7 +57,13 @@ Plans:
 3. Momentum strategy produces a routing matrix entry (Sharpe, win rate, pair-level performance) for every active pair from 4yr data, committed to pair_config.py
 4. pit_validator.py rejects any Sharpe number that exhibits future-bar leakage — no routing matrix entry enters pair_config.py without a passing PiT validation run
 
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Wave 0: Test scaffolding for BKTS-01/02/03/04 (RED tests covering entry fix, PiT validator, 4yr evaluator) [autonomous]
+- [ ] 07-02-PLAN.md — Wave 1: Entry bias fix across 4 strategy loops + before/after comparison CSV (BKTS-01) [autonomous]
+- [ ] 07-03-PLAN.md — Wave 1: Port V1 PiT validator to V2 with Title-case PRICE_COLUMNS + next-bar whitelist + CLI gate (BKTS-04) [autonomous]
+- [ ] 07-04-PLAN.md — Wave 2: 4yr H1 fetch + scalp/momentum evaluation + PiT-gated pair_config.py update (BKTS-02, BKTS-03) [checkpoint]
 
 ---
 
@@ -120,7 +126,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 6. ZMQ Bridge Port | 4/4 | Complete   | 2026-04-24 |
-| 7. Backtest Entry Fix + 4yr Validation | 0/? | Not started | — |
+| 7. Backtest Entry Fix + 4yr Validation | 0/4 | Planned | — |
 | 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
@@ -143,4 +149,5 @@ Phase 7 can run in parallel with Phase 8 after Phase 6 completes, but Phase 9 ca
 ---
 
 *Roadmap created: 2026-04-22*
+*Phase 7 planned: 2026-04-24 (4 plans across 3 waves)*
 *Next: `/gsd:plan-phase 6`*
