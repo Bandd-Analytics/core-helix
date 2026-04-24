@@ -147,7 +147,7 @@ int OnInit()
          }
       } else {
          Print("[BRIDGE] WARNING: Bar-close PUB bind failed on ", bindEp,
-               " — EA will run without ZMQ publishing. Error: ", GetLastError());
+               " - EA will run without ZMQ publishing. Error: ", GetLastError());
          zmqBarsActive = false;
       }
    }
