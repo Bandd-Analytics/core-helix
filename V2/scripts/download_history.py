@@ -6,6 +6,39 @@ Usage:
 
 The 4yr mode writes {PAIR}_H1_4yr.csv into V2/data/, skipping pairs whose
 file already exists. Output format per 07-UI-SPEC.md §download_history.py.
+
+# DATA ACQUISITION FAILOVER (MetaTrader5 Python package is Windows COM only)
+#
+# The MetaTrader5 pip package cannot install on Linux. If `_fetch_4yr()` fails
+# with "no matching distribution" or an import error, follow this chain:
+#
+# A — MT5 GUI History Export (fastest, ~5 min per pair)
+#     MT5 terminal is already running (coke5151 fork, IC Markets Raw, under Wine).
+#     1. Press F2 in MT5 (Tools → History Center)
+#     2. Select pair → H1 → click Download (ensures full broker history is loaded)
+#     3. Click Export → save as V2/data/{PAIR}_H1_4yr.csv
+#     4. Repeat for: AUDNZD, EURGBP, GBPJPY, EURUSD, USDJPY
+#     Column map: MT5 exports <Date>,<Time>,<Open>,<High>,<Low>,<Close>,<Volume>
+#     Rename to: Datetime,Open,High,Low,Close,Volume  (Title-case OHLC required)
+#     This script's idempotency (SKIP if file exists) still applies on re-runs.
+#
+# B — Wine Python execution (~15 min if Wine Python is present)
+#     MetaTrader5 package works inside Wine's Windows Python environment.
+#     find ~/.wine -name "python*.exe" 2>/dev/null   # locate Wine Python
+#     wine <path>/python.exe -m pip install MetaTrader5 pandas
+#     wine <path>/python.exe scripts/download_history.py --4yr
+#     The script runs inside Wine where MT5 COM interface is reachable.
+#
+# D — Dukascopy tick data (broker-neutral, no account needed, works on Linux)
+#     pip install duka
+#     duka -s AUDNZD EURGBP GBPJPY EURUSD USDJPY -d 2022-04-01 -e 2026-04-25 \\
+#          -t TICK -c 1  # then aggregate ticks → H1 OHLCV
+#     Dukascopy publishes free FX tick data back to 2003.
+#     Aggregate with pandas: df.resample('1H').agg({'Ask':'ohlc',...})
+#     Rename columns to Title-case (Open, High, Low, Close) before saving.
+#
+# After any manual export: re-run backtest_4yr_evaluate.py to regenerate
+# the routing matrix, then re-run the PiT gate before updating pair_config.py.
 """
 from __future__ import annotations
 
