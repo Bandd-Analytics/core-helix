@@ -1,0 +1,11 @@
+pair,strategy,sharpe,win_rate,trade_count,min_trades_met,sharpe_threshold_met,routing_matrix_entry,allow_flag
+AUDNZD,scalp,1.59,53.5,437,True,True,True,True
+EURGBP,scalp,1.09,48.3,974,True,True,True,True
+GBPJPY,scalp,0.64,48.3,753,True,True,True,True
+EURUSD,scalp,-0.24,41.9,880,True,False,False,False
+USDJPY,scalp,-1.64,41.1,654,True,False,False,False
+AUDNZD,momentum,0.97,50.2,1032,True,True,True,True
+EURGBP,momentum,0.84,49.7,1651,True,True,True,True
+GBPJPY,momentum,0.44,46.7,1395,True,False,False,False
+EURUSD,momentum,-0.04,46.2,1538,True,False,False,False
+USDJPY,momentum,-0.29,47.9,1316,True,False,False,False
