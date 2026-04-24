@@ -10,7 +10,7 @@
 ## Phases
 
 - [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
-- [ ] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data
+- [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2026-04-24)
 - [ ] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
@@ -57,13 +57,13 @@ Plans:
 3. Momentum strategy produces a routing matrix entry (Sharpe, win rate, pair-level performance) for every active pair from 4yr data, committed to pair_config.py
 4. pit_validator.py rejects any Sharpe number that exhibits future-bar leakage — no routing matrix entry enters pair_config.py without a passing PiT validation run
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 07-01-PLAN.md — Wave 0: Test scaffolding for BKTS-01/02/03/04 (RED tests covering entry fix, PiT validator, 4yr evaluator) [autonomous]
 - [x] 07-02-PLAN.md — Wave 1: Entry bias fix across 4 strategy loops + before/after comparison CSV (BKTS-01) [autonomous]
 - [x] 07-03-PLAN.md — Wave 1: Port V1 PiT validator to V2 with Title-case PRICE_COLUMNS + next-bar whitelist + CLI gate (BKTS-04) [autonomous]
-- [ ] 07-04-PLAN.md — Wave 2: 4yr H1 fetch + scalp/momentum evaluation + PiT-gated pair_config.py update (BKTS-02, BKTS-03) [checkpoint]
+- [x] 07-04-PLAN.md — Wave 2: 4yr H1 fetch + scalp/momentum evaluation + PiT-gated pair_config.py update (BKTS-02, BKTS-03) [checkpoint]
 
 ---
 
@@ -126,7 +126,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 6. ZMQ Bridge Port | 4/4 | Complete   | 2026-04-24 |
-| 7. Backtest Entry Fix + 4yr Validation | 3/4 | In Progress|  |
+| 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete   | 2026-04-24 |
 | 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
