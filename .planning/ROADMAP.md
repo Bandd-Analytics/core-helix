@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push
+- [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
 - [ ] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data
 - [ ] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, and RAG score, and validate aggregate portfolio Sharpe uplift
@@ -33,13 +33,13 @@
 3. The mql-zmq DLL loads and sends a test message on the IC Markets MT5 terminal without crash or rejection — Phase 10 EA work is unblocked (go/no-go gate)
 4. The MT5 EA pushes a completed-bar event per pair with timeframe tag; Python receives and processes it on bar close without polling the terminal
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — Wave 1: V2 test scaffolding + msgpack schema contract (BRDG-01) [autonomous]
 - [x] 06-02-PLAN.md — Wave 1: BRDG-03 DLL compatibility spike — PASS (coke5151 fork, build 5800, Wine 11.7) [checkpoint]
 - [x] 06-03-PLAN.md — Wave 2: BridgeConsumer + BridgePublisher with env ports, heartbeat, auto-reconnect (BRDG-02) [autonomous]
-- [ ] 06-04-PLAN.md — Wave 3: MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04) [checkpoint]
+- [x] 06-04-PLAN.md — Wave 3: MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04) [checkpoint]
 
 ---
 
@@ -119,7 +119,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. ZMQ Bridge Port | 3/4 | In Progress|  |
+| 6. ZMQ Bridge Port | 4/4 | Complete   | 2026-04-24 |
 | 7. Backtest Entry Fix + 4yr Validation | 0/? | Not started | — |
 | 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-24T02:23:20.776Z"
+last_updated: "2026-04-24T02:30:32.288Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # STATE: MarketMind Helix
@@ -59,6 +59,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 *v2.0 target: aggregate router Sharpe >= best single-strategy Sharpe + 0.2 (ROUT-04)*
 
 ---
+| Phase 06 P04 | 230 | 3 tasks | 4 files | - |
 
 ## Plan Execution Metrics
 
@@ -67,6 +68,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 06 P01 | 173 | 3 tasks | 8 files | BRDG-01 schema contract complete, 15 tests GREEN |
 | Phase 06 P02 | — | 2 tasks | 4 files | BRDG-03 gate PASS — coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 |
 | Phase 06 P03 | 182 | 3 tasks | 4 files | BRDG-02 complete — BridgeConsumer + BridgePublisher, 43 tests GREEN |
+| Phase 06 P04 | 230 | 3 tasks | 4 files | BRDG-04 Python side complete — _handle_bar_frame, on_bar_close dispatch, EA ZMQ PUB; 53 tests GREEN; Task 4 EA compile pending |
 
 ## Accumulated Context
 
@@ -93,6 +95,8 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Fill replaces OrderResult in V2 (D-08) | class OrderResult does not exist in V2/bridge/ — V2 uses Fill throughout (06-01) |
 | SCHEMA_VERSION=1 module constant (D-06) | Single source of truth for schema version in V2/bridge/schemas.py (06-01) |
 | unpack_heartbeat returns dict not datetime64 (D-07) | Consumer can check schema_version on connect — deliberate V1 breaking change (06-01) |
+| zmqContext.destroy(0) omitted from OnDeinit (06-04) | coke5151 RAII destructor handles context cleanup on scope exit — explicit destroy causes double-free crash |
+| _handle_bar_frame dual-decoder: msgpack first, JSON fallback (06-04) | Consumer resilient to both V2 msgpack (Python-to-Python) and MQL5 JSON Option A payload formats |
 
 ### Critical Gates
 
@@ -116,9 +120,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** 06-03 complete — BRDG-02 satisfied. BridgeConsumer + BridgePublisher with env-configurable ports, heartbeat guard, auto-reconnect, schema_version check. 43 tests GREEN. (2026-04-23)
+**Last action:** 06-04 checkpoint Task 4 — BRDG-04 Python side complete. _handle_bar_frame + on_bar_close dispatch, 53 tests GREEN, MultiPairEA.mq5 extended with ZMQ PUB bar-close for D1/H1/M15. EA compile + live verify pending user action. (2026-04-24)
 **Last agent:** execute-phase
-**Next action:** Execute plan 06-04 (Wave 3) — MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04)
+**Next action:** User compiles V2/ea/MultiPairEA.mq5 in MetaEditor (F7), attaches to MT5, verifies bar-close events arrive. On PASS: /gsd:verify-work 6
 
 ---
 
@@ -130,4 +134,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-23 — 06-03 BRDG-02 complete: BridgeConsumer + BridgePublisher, 43 tests GREEN*
+*Last updated: 2026-04-24 — 06-04 checkpoint Task 4: BRDG-04 Python side complete, 53 tests GREEN, EA ZMQ extension ready for MetaEditor compile*
