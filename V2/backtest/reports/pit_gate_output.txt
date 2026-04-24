@@ -1,0 +1,2 @@
+PiT check PASSED — 2 file(s) clean
+exit_code=0

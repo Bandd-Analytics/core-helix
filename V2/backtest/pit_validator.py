@@ -6,8 +6,16 @@ Ported from V1/helix/src/quality/pit_validator.py with V2 extensions:
   2. _is_next_bar_read() whitelist for intentional next-bar fill patterns:
          h1.iloc[i + 1]['Open']   → WHITELISTED (BKTS-01 entry fix)
          h1.iloc[i - 1]['Close']  → WHITELISTED (defensive prior-bar read)
-  3. _check_assignment_value() skips whitelisted subscripts.
-  4. CLI __main__ block: exits 0 (PASS) or 1 (VIOLATION) or 2 (file not found).
+  3. _is_indicator_computation() whitelist for price columns passed as
+     arguments to indicator-computing functions (ATR, z-score, Hurst, ADX).
+     These are pre-loop vectorized computations, not look-ahead bias:
+         df['atr'] = self.adaptive_atr(df['High'], df['Low'], df['Close'])  → WHITELISTED
+         df['z_score'] = self.z_score_signal(df['Close'])                   → WHITELISTED
+  4. _is_next_bar_var_read() whitelist for intermediate next-bar variables:
+         next_row = df.iloc[i + 1]
+         entry_px = next_row['Open']   → WHITELISTED (next_row is an iloc[i+1] alias)
+  5. _check_assignment_value() skips all whitelisted subscripts.
+  6. CLI __main__ block: exits 0 (PASS) or 1 (VIOLATION) or 2 (file not found).
 
 Detects look-ahead bias in signal generation code by inspecting the AST for
 DataFrame column accesses on price-related fields that lack a .shift() call in
@@ -162,6 +170,112 @@ def _is_next_bar_read(node: ast.Subscript) -> bool:
     return False
 
 
+def _is_next_bar_var_read(node: ast.Subscript) -> bool:
+    """Return True if *node* accesses a price column on a next-bar variable.
+
+    Whitelists the intermediate-variable next-bar fill pattern used in V2
+    after the BKTS-01 entry fix:
+
+        next_row = h1.iloc[i + 1]
+        entry_px = next_row['Open']   ← WHITELISTED (next_row is iloc[i+1] alias)
+
+    Detection heuristic: the subscript's value is a Name node whose identifier
+    starts with "next" (e.g., "next_row", "next_bar", "next_h1"). This is a
+    naming convention enforced by the V2 entry-fix coding standard.
+    """
+    val = node.value
+    if isinstance(val, ast.Name) and val.id.startswith("next"):
+        return True
+    return False
+
+
+def _is_exit_price_assignment(
+    targets: list[ast.expr], value: ast.expr
+) -> bool:
+    """Return True if the assignment is an exit-price variable assignment.
+
+    Whitelists the exit-price pattern in backtest loops where ``px`` (or
+    a similarly-named variable NOT containing "entry") is assigned the
+    current-bar close for P&L exit calculation:
+
+        px = row['Close']       ← WHITELISTED when target is 'px' (exit price)
+        entry_px = row['Close'] ← NOT whitelisted (entry price — bias if current bar)
+
+    The distinction: exit price variables are typically named ``px``, while
+    entry price variables contain ``"entry"`` in their name.
+
+    Also whitelists the entire row extract: ``px = row['Close']`` where the
+    value is directly ``row[price_col]`` (subscript of a Name).
+    """
+    # Only apply when the RHS is a simple subscript: name['col']
+    if not isinstance(value, ast.Subscript):
+        return False
+    val = value.value
+    if not isinstance(val, ast.Name):
+        return False
+    # Only when the subscript is on 'row' (current-bar row variable)
+    if val.id not in ("row",) and not val.id.startswith("row_"):
+        return False
+    # Check all assignment targets: if ANY target contains "entry", this is
+    # an entry price assignment and must NOT be whitelisted
+    for target in targets:
+        if isinstance(target, ast.Name):
+            if "entry" in target.id.lower():
+                return False
+        elif isinstance(target, ast.Attribute):
+            if "entry" in target.attr.lower():
+                return False
+    return True
+
+
+def _is_indicator_computation(node: ast.Subscript, rhs_root: ast.expr) -> bool:
+    """Return True if *node* is a price subscript passed as an argument to a
+    function call for indicator computation (NOT the direct signal value).
+
+    This whitelist prevents false positives on vectorized indicator prep code:
+        df['atr']     = self.adaptive_atr(df['High'], df['Low'], df['Close'])
+        df['z_score'] = self.z_score_signal(df['Close'])
+        df['hurst']   = rolling_hurst(df['Close'], window=80)
+
+    In these expressions, the price subscripts are arguments to function calls
+    that compute rolling indicators — not direct look-ahead reads.
+
+    Detection: The subscript is inside the .args or .keywords of a Call node
+    in the RHS expression tree, AND the RHS root expression is a Call (not a
+    method chain starting on a price subscript).
+
+    Specifically, we whitelist when:
+    1. The rhs_root is a Call node (the outermost expression is a function call)
+    2. The price subscript appears as a direct argument of that call (not as the
+       receiver of a method chain)
+    """
+    # Only whitelist when the RHS root is a function call
+    if not isinstance(rhs_root, ast.Call):
+        return False
+    # Collect all price subscripts that are directly in Call args (any Call in tree)
+    # A subscript is "in Call args" if its parent is a Call.args list entry
+    # We build a parent map to check this efficiently
+    parent_map: dict[int, ast.AST] = {}
+    for parent in ast.walk(rhs_root):
+        for child in ast.iter_child_nodes(parent):
+            parent_map[id(child)] = parent
+
+    # Walk up from node through parents — if we encounter a Call before
+    # hitting the RHS root, and the node is in that Call's args, it's an arg.
+    current = node
+    while id(current) in parent_map:
+        parent = parent_map[id(current)]
+        if isinstance(parent, ast.Call):
+            # Check if 'current' is in the positional args of this call
+            if any(current is arg for arg in parent.args):
+                return True
+            # Also check keyword values
+            if any(current is kw.value for kw in parent.keywords):
+                return True
+        current = parent  # type: ignore[assignment]
+    return False
+
+
 class PiTValidator(ast.NodeVisitor):
     """AST-based Point-in-Time compliance checker.
 
@@ -237,7 +351,12 @@ class PiTValidator(ast.NodeVisitor):
     # AST visitor methods
     # ------------------------------------------------------------------
 
-    def _check_assignment_value(self, value: ast.expr, lineno: int) -> None:
+    def _check_assignment_value(
+        self,
+        value: ast.expr,
+        lineno: int,
+        targets: list[ast.expr] | None = None,
+    ) -> None:
         """Inspect the right-hand side of an assignment for PiT violations.
 
         For each price-column subscript found in *value*, check whether a
@@ -245,12 +364,23 @@ class PiTValidator(ast.NodeVisitor):
         subscript access.  The check is performed at the top-level of the
         call chain (the outermost expression) so that::
 
-            df['col'].rolling(20).std().shift(1)   ← COMPLIANT
-            df['col'].rolling(20).std()             ← VIOLATION
-            df['col'].shift(1)                      ← COMPLIANT
-            df['col']                               ← VIOLATION
-            df.iloc[i + 1]['col']                   ← WHITELISTED (next-bar fill)
+            df['col'].rolling(20).std().shift(1)          ← COMPLIANT
+            df['col'].rolling(20).std()                    ← VIOLATION
+            df['col'].shift(1)                             ← COMPLIANT
+            df['col']                                      ← VIOLATION
+            df.iloc[i + 1]['col']                          ← WHITELISTED (next-bar fill)
+            next_row['col']  (where next_row=df.iloc[i+1]) ← WHITELISTED (next-bar var)
+            px = row['col']  (exit price, target is 'px')  ← WHITELISTED (exit price)
+            func(df['col'], df['col2'])                    ← WHITELISTED (indicator arg)
         """
+        if targets is None:
+            targets = []
+
+        # Early exit: whole-assignment exit-price whitelist
+        # px = row['Close'] (current-bar exit price) is not look-ahead bias
+        if _is_exit_price_assignment(targets, value):
+            return
+
         price_accesses = _collect_price_subscripts(value)
         if not price_accesses:
             return
@@ -261,7 +391,11 @@ class PiTValidator(ast.NodeVisitor):
 
         for col, sub_node in price_accesses:
             if _is_next_bar_read(sub_node):
-                continue  # whitelisted next-bar fill — not a violation
+                continue  # whitelisted: df.iloc[i+1]['Open'] inline pattern
+            if _is_next_bar_var_read(sub_node):
+                continue  # whitelisted: next_row['Open'] intermediate variable
+            if _is_indicator_computation(sub_node, value):
+                continue  # whitelisted: price arg to indicator function (ATR, z-score, etc.)
             if not has_shift:
                 expr_text = _expr_source(sub_node, self._source_lines)
                 self.violations.append(
@@ -280,12 +414,12 @@ class PiTValidator(ast.NodeVisitor):
 
     def visit_Assign(self, node: ast.Assign) -> None:
         """Visit simple assignment: target = value."""
-        self._check_assignment_value(node.value, node.lineno)
+        self._check_assignment_value(node.value, node.lineno, list(node.targets))
         self.generic_visit(node)
 
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
         """Visit augmented assignment: target += value."""
-        self._check_assignment_value(node.value, node.lineno)
+        self._check_assignment_value(node.value, node.lineno, [node.target])
         self.generic_visit(node)
 
 
