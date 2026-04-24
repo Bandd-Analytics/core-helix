@@ -40,9 +40,9 @@ A statistically validated daily Z-score mean-reversion signal that generates con
 
 <!-- v2.0 scope: V3 Adaptive Strategy Dispatch System -->
 
-- [ ] ZMQ bridge ported from V1 — Python↔MT5 tick/order round-trip, heartbeat, <10ms local latency
-- [ ] H1 scalp strategy backtested over 4yr data across all active pairs — produces routing matrix entry
-- [ ] Momentum strategy backtested over 4yr data across all active pairs — produces routing matrix entry
+- [x] ZMQ bridge ported from V1 — Python↔MT5 tick/order round-trip, heartbeat, <10ms local latency (Phase 6, 2026-04-24)
+- [x] H1 scalp strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
+- [x] Momentum strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
 - [ ] HMM-GARCH regime classifier ported from V1 with PiT discipline — zero future-bar leakage
 - [ ] StrategyRouter dispatches per-pair per-bar to best strategy based on regime + 4yr matrix + RAG
 - [ ] Live signal engine service (Python) consumes MT5 ticks, calls router, publishes OrderRequest
@@ -61,7 +61,7 @@ A statistically validated daily Z-score mean-reversion signal that generates con
 
 - **Tech stack**: Python 3.x, vectorbt.pro 2026.3.1, ChromaDB (local), NumPy/Pandas, MQL5 (MetaTrader 5)
 - **Target broker**: IC Markets Raw Spread Account (0.02–0.82 pip spreads, $3.50/lot/side commission, ~35ms execution)
-- **Backtest window**: 730-day H1 data per pair (2 years), 2024–2026
+- **Backtest window**: ~33-month H1 data per pair (2023–2026); 4yr window pending Windows/MT5 re-export (see docs/GLOSSARY.md §Data Acquisition Failover)
 - **Data pipeline**: Custom scripts for fetching OHLCV (fetch_data.py, download_history.py, download_intraday_data.py)
 - **The execution gap**: Python signal engine produces validated entries, MT5 EA exists but no bridge between them — this is the next critical milestone
 
