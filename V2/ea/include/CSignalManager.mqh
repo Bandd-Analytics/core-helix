@@ -200,7 +200,8 @@ int CSignalManager::LoadDonchianADX()
 //+------------------------------------------------------------------+
 int CSignalManager::LoadMeanRevOscillator()
 {
-   return iCustom(NULL, 0, "MeanRevOscillator", config.zScorePeriod);
+   int period = config.zScorePeriod > 0 ? config.zScorePeriod : 48;
+   return iCustom(NULL, 0, "MeanRevOscillator", period);
 }
 
 //+------------------------------------------------------------------+

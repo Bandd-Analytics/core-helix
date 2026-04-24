@@ -155,7 +155,7 @@ int OnCalculate(const int rates_total,
 //+------------------------------------------------------------------+
 double CalcSMA(const double &close[], int bar, int period)
 {
-   if(bar < period - 1) return 0.0;
+   if(period <= 0 || bar < period - 1) return 0.0;
    double sum = 0.0;
    for(int k = bar - period + 1; k <= bar; k++)
       sum += close[k];
@@ -167,7 +167,7 @@ double CalcSMA(const double &close[], int bar, int period)
 //+------------------------------------------------------------------+
 double CalculateStdDev(const double &close[], int barIndex, int period, double sma)
 {
-   if(barIndex < period - 1) return 0.0;
+   if(period <= 0 || barIndex < period - 1) return 0.0;
 
    double sumSquaredDiff = 0.0;
 
