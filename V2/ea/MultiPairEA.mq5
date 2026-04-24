@@ -247,15 +247,11 @@ void OnTimer()
                rates[0].open, rates[0].high, rates[0].low, rates[0].close,
                (int)rates[0].tick_volume, (int)rates[0].spread
             );
-            uchar topicBytes[];
-            uchar payloadBytes[];
-            StringToCharArray(sym, topicBytes, 0, StringLen(sym));
-            StringToCharArray(payload, payloadBytes, 0, StringLen(payload));
-            if(!barPub.sendMore(topicBytes)) {
+            if(!barPub.sendMore(sym)) {
                Print("[BRIDGE] WARNING: sendMore(topic) failed for ", sym);
                continue;
             }
-            if(!barPub.send(payloadBytes)) {
+            if(!barPub.send(payload)) {
                Print("[BRIDGE] WARNING: send(payload) failed for ", sym, " ", tfStr);
                continue;
             }
