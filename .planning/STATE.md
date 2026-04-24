@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-23T13:26:55.929Z"
+last_updated: "2026-04-24T02:23:20.776Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # STATE: MarketMind Helix
@@ -29,7 +29,7 @@ progress:
 ## Current Position
 
 Phase: 06 (zmq-bridge-port) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 ### Progress Bar
 
@@ -66,6 +66,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 |------|-------------|-------|-------|-------|
 | Phase 06 P01 | 173 | 3 tasks | 8 files | BRDG-01 schema contract complete, 15 tests GREEN |
 | Phase 06 P02 | — | 2 tasks | 4 files | BRDG-03 gate PASS — coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 |
+| Phase 06 P03 | 182 | 3 tasks | 4 files | BRDG-02 complete — BridgeConsumer + BridgePublisher, 43 tests GREEN |
 
 ## Accumulated Context
 
@@ -115,9 +116,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** 06-02 complete — BRDG-03 PASS committed (04c846d). MT5 build 5800, coke5151 fork, Ubuntu+Wine 11.7 Staging. (2026-04-23)
+**Last action:** 06-03 complete — BRDG-02 satisfied. BridgeConsumer + BridgePublisher with env-configurable ports, heartbeat guard, auto-reconnect, schema_version check. 43 tests GREEN. (2026-04-23)
 **Last agent:** execute-phase
-**Next action:** Execute plan 06-03 (Wave 2) — BridgeConsumer + BridgePublisher with env ports, heartbeat, auto-reconnect (BRDG-02)
+**Next action:** Execute plan 06-04 (Wave 3) — MT5 EA bar-close publisher + consumer bar routing across D1/H1/M15 (BRDG-04)
 
 ---
 
@@ -129,4 +130,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-23 — 06-01 BRDG-01 schema contract complete (15 tests GREEN)*
+*Last updated: 2026-04-23 — 06-03 BRDG-02 complete: BridgeConsumer + BridgePublisher, 43 tests GREEN*

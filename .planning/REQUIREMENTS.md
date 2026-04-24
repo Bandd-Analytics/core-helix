@@ -10,7 +10,7 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 ### Bridge
 
 - [x] **BRDG-01**: Versioned msgpack schema contract file defines Tick, Bar, OrderRequest, Fill, Heartbeat types before any bridge code is written
-- [ ] **BRDG-02**: ZMQ bridge has heartbeat + auto-reconnect (built from scratch — V1 IPC module is a stub with no heartbeat)
+- [x] **BRDG-02**: ZMQ bridge has heartbeat + auto-reconnect (built from scratch — V1 IPC module is a stub with no heartbeat)
 - [ ] **BRDG-03**: mql-zmq DLL compatibility confirmed on IC Markets MT5 terminal (go/no-go spike before EA work begins)
 - [ ] **BRDG-04**: MT5 EA publishes completed bars per pair with timeframe tag; Python reacts on bar close (no polling)
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | BRDG-01 | Phase 6 | Complete |
-| BRDG-02 | Phase 6 | Pending |
+| BRDG-02 | Phase 6 | Complete |
 | BRDG-03 | Phase 6 | Pending |
 | BRDG-04 | Phase 6 | Pending |
 | BKTS-01 | Phase 7 | Pending |
