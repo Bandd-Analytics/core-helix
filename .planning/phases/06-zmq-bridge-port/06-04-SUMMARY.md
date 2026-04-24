@@ -103,8 +103,25 @@ int            lastBarsCount[5][3];
 - Log: `[BRIDGE] Bar close: EURUSD D1 @ <timestamp>` on every emission
 - All existing risk/signal/scaling logic untouched
 
-### Task 4: Human verification — CHECKPOINT (not yet executed)
-Awaiting user to compile `V2/ea/MultiPairEA.mq5` in MetaEditor (F7), attach to MT5 chart, and confirm bar-close events appear in both MT5 Experts tab and Python listener. See checkpoint details below.
+### Task 4: Human verification — PASS (2026-04-24)
+
+**Compile:** 0 errors after two fixes applied post-checkpoint:
+1. Em dash (`—`) in warning string → ASCII hyphen (`-`) (encoding issue, same as brdg03_spike fix)
+2. `#property strict` removed — incompatible with coke5151 ZMQ headers
+3. `sendMore(uchar &data[])` overload has no body in installed Socket.mqh — switched to string overloads `barPub.sendMore(sym)` / `barPub.send(payload)`
+
+**MT5 Experts tab:** `[BRIDGE] Bar-close PUB bound to tcp://*:5557`
+
+**Python listener received (M15 bar close, all 5 pairs):**
+```
+[BRIDGE] Bar close: EURUSD M15 close=1.16771
+[BRIDGE] Bar close: USDJPY M15 close=159.825
+[BRIDGE] Bar close: AUDNZD M15 close=1.21823
+[BRIDGE] Bar close: EURGBP M15 close=0.86767
+[BRIDGE] Bar close: GBPJPY M15 close=215.084
+```
+
+**BRDG-04 requirement: COMPLETE**
 
 ---
 

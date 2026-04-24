@@ -28,20 +28,19 @@ progress:
 
 ## Current Position
 
-Phase: 06 (zmq-bridge-port) — EXECUTING
-Plan: 4 of 4
+Phase: 07 (backtest-entry-fix) — NEXT
 
 ### Progress Bar
 
 ```
-Phase 6  [..........] 0%   ZMQ Bridge Port
+Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [..........] 0%   Backtest Entry Fix + 4yr Validation
 Phase 8  [..........] 0%   HMM-GARCH Regime + PiT Port
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 0/20 requirements complete
+**Overall milestone:** 4/20 requirements complete (BRDG-01, BRDG-02, BRDG-03, BRDG-04)
 
 ---
 
@@ -68,7 +67,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 06 P01 | 173 | 3 tasks | 8 files | BRDG-01 schema contract complete, 15 tests GREEN |
 | Phase 06 P02 | — | 2 tasks | 4 files | BRDG-03 gate PASS — coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 |
 | Phase 06 P03 | 182 | 3 tasks | 4 files | BRDG-02 complete — BridgeConsumer + BridgePublisher, 43 tests GREEN |
-| Phase 06 P04 | 230 | 3 tasks | 4 files | BRDG-04 Python side complete — _handle_bar_frame, on_bar_close dispatch, EA ZMQ PUB; 53 tests GREEN; Task 4 EA compile pending |
+| Phase 06 P04 | 230 | 4 tasks | 4 files | BRDG-04 PASS — EA compiles 0 errors, all 5 pairs M15 bar-close received in Python; 53 tests GREEN |
 
 ## Accumulated Context
 
@@ -120,9 +119,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** 06-04 checkpoint Task 4 — BRDG-04 Python side complete. _handle_bar_frame + on_bar_close dispatch, 53 tests GREEN, MultiPairEA.mq5 extended with ZMQ PUB bar-close for D1/H1/M15. EA compile + live verify pending user action. (2026-04-24)
+**Last action:** Phase 6 complete — BRDG-04 PASS. All 5 pairs bar-close received (EURUSD/USDJPY/AUDNZD/EURGBP/GBPJPY M15). 53 tests GREEN. (2026-04-24)
 **Last agent:** execute-phase
-**Next action:** User compiles V2/ea/MultiPairEA.mq5 in MetaEditor (F7), attaches to MT5, verifies bar-close events arrive. On PASS: /gsd:verify-work 6
+**Next action:** /gsd:plan-phase 7 (Backtest Entry Fix + 4yr Validation)
 
 ---
 
@@ -134,4 +133,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-24 — 06-04 checkpoint Task 4: BRDG-04 Python side complete, 53 tests GREEN, EA ZMQ extension ready for MetaEditor compile*
+*Last updated: 2026-04-24 — Phase 6 COMPLETE: BRDG-01/02/03/04 all satisfied. 53 tests GREEN. ZMQ bridge operational end-to-end.*
