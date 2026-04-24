@@ -87,23 +87,23 @@ PAIR_CONFIGS: dict[str, PairConfig] = {
         symbol="USDJPY", tier=1,
         swing_size_mult=1.0,
         allow_swing=True,
-        allow_scalp=False,           # H1 scalp Sh -2.34 — strongly negative
-        allow_momentum=False,        # Momentum Sh -1.61 — negative
+        allow_scalp=False,           # H1 scalp Sh -1.64 — strongly negative (4yr)
+        allow_momentum=False,        # Momentum Sh -0.29 — negative (4yr)
         allow_m15_scalp=True,        # M15 Sh 0.93 — marginal positive
         m15_z_threshold=2.0,
         m15_size_mult=0.5,           # Reduced — marginal edge
-        notes="Swing Sh 3.09 (best pair). M15 Sh 0.93 (marginal, 0.5x size). H1 scalp/momentum both negative.",
+        notes="Swing Sh 3.09 (best pair). M15 Sh 0.93 (marginal, 0.5x size). H1 scalp/momentum both negative. | 4yr corrected — 2026-04-25: scalp Sh=-1.64 win=41.1% n=654; momentum Sh=-0.29 win=47.9% n=1316",
     ),
 
-    # ── GBPJPY: Elite swing. All intraday strategies negative. ───────────────
+    # ── GBPJPY: Elite swing. H1 scalp enabled per 4yr routing matrix. ───────────────
     "GBPJPY": PairConfig(
         symbol="GBPJPY", tier=1,
         swing_size_mult=1.0,
         allow_swing=True,
-        allow_scalp=False,           # H1 scalp Sh 0.85 — borderline, high trade count noise risk
-        allow_momentum=False,        # Momentum Sh 0.21 — insufficient
+        allow_scalp=True,            # H1 scalp Sh 0.64 — enabled per 4yr routing matrix (user approved 2026-04-25)
+        allow_momentum=False,        # Momentum Sh 0.44 — below threshold (4yr)
         allow_m15_scalp=False,       # M15 Sh -0.02 — all Z thresholds tested, structurally negative
-        notes="Swing Sh 1.93. H1 scalp Sh 0.85 (borderline, disabled). M15 negative all thresholds. Swing-only.",
+        notes="Swing Sh 1.93. H1 scalp Sh 0.85 (borderline, disabled). M15 negative all thresholds. Swing-only. | 4yr corrected — 2026-04-25: scalp Sh=0.64 win=48.3% n=753; momentum Sh=0.44 win=46.7% n=1395",
     ),
 
     # ── GBPAUD: Strong swing. M15 positive. ──────────────────────────────────
@@ -138,14 +138,14 @@ PAIR_CONFIGS: dict[str, PairConfig] = {
         symbol="EURGBP", tier=2,
         swing_size_mult=0.8,
         allow_swing=True,            # Swing Sh 0.45 — marginal but positive
-        allow_scalp=True,            # H1 scalp Sh 1.32 — validated
+        allow_scalp=True,            # H1 scalp Sh 1.09 — validated (4yr)
         scalp_size_mult=0.5,
-        allow_momentum=True,         # Momentum Sh 1.57 — best momentum pair
+        allow_momentum=True,         # Momentum Sh 0.84 — validated (4yr)
         momentum_size_mult=0.4,
         allow_m15_scalp=True,        # M15 Sh 1.86 — best M15 strategy here
         m15_z_threshold=2.0,
         m15_size_mult=0.5,
-        notes="Multi-strategy: Swing Sh 0.45, H1 Scalp Sh 1.32, Momentum Sh 1.57, M15 Sh 1.86. All positive.",
+        notes="Multi-strategy: Swing Sh 0.45, H1 Scalp Sh 1.32, Momentum Sh 1.57, M15 Sh 1.86. All positive. | 4yr corrected — 2026-04-25: scalp Sh=1.09 win=48.3% n=974; momentum Sh=0.84 win=49.7% n=1651",
     ),
 
     # ── GBPNZD: Swing negative. M15 is the best M15 pair (Sh 3.65). ──────────
@@ -168,28 +168,28 @@ PAIR_CONFIGS: dict[str, PairConfig] = {
         swing_size_mult=0.0,
         swing_z_threshold=99.0,
         allow_swing=False,           # Swing Sh -0.20 — disabled
-        allow_scalp=False,           # H1 scalp Sh -0.17 — disabled
-        allow_momentum=False,        # Momentum Sh -1.03 — disabled
+        allow_scalp=False,           # H1 scalp Sh -0.24 — disabled (4yr)
+        allow_momentum=False,        # Momentum Sh -0.04 — disabled (4yr)
         allow_m15_scalp=True,        # M15 Sh 2.62 — most liquid pair, tight raw spreads
         m15_z_threshold=2.0,
         m15_size_mult=0.7,
-        notes="Swing/H1/Momentum disabled. M15 Sh 2.62 — liquid pair benefits most from raw account spreads.",
+        notes="Swing/H1/Momentum disabled. M15 Sh 2.62 — liquid pair benefits most from raw account spreads. | 4yr corrected — 2026-04-25: scalp Sh=-0.24 win=41.9% n=880; momentum Sh=-0.04 win=46.2% n=1538",
     ),
 
-    # ── AUDNZD: Swing negative. M15 Sh 2.19 + H1 scalp Sh 1.63. ─────────────
+    # ── AUDNZD: Swing negative. M15 Sh 2.19 + H1 scalp Sh 1.59 (4yr). ───────
     "AUDNZD": PairConfig(
         symbol="AUDNZD", tier=2,
         swing_size_mult=0.0,
         swing_z_threshold=99.0,
         allow_swing=False,           # Swing Sh -2.16 — structural drift
-        allow_scalp=True,            # H1 scalp Sh 1.63 — validated positive
+        allow_scalp=True,            # H1 scalp Sh 1.59 — validated positive (4yr)
         scalp_size_mult=0.5,
-        allow_momentum=True,         # Momentum Sh 0.55 — marginal but positive
+        allow_momentum=True,         # Momentum Sh 0.97 — validated positive (4yr)
         momentum_size_mult=0.3,      # Small size — low conviction
         allow_m15_scalp=True,        # M15 Sh 2.19 — positive
         m15_z_threshold=2.0,
         m15_size_mult=0.6,
-        notes="Swing Sh -2.16 (structural drift). H1 Scalp Sh 1.63 + Momentum Sh 0.55 + M15 Sh 2.19.",
+        notes="Swing Sh -2.16 (structural drift). H1 Scalp Sh 1.63 + Momentum Sh 0.55 + M15 Sh 2.19. | 4yr corrected — 2026-04-25: scalp Sh=1.59 win=53.5% n=437; momentum Sh=0.97 win=50.2% n=1032",
     ),
 }
 
