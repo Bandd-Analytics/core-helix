@@ -16,10 +16,10 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 
 ### Backtest Validation
 
-- [ ] **BKTS-01**: backtest_hybrid.py uses next-bar-open entry for all strategy loops (not signal-bar close — fixes Sharpe inflation of 0.2–0.4)
-- [ ] **BKTS-02**: H1 scalp strategy backtested on full 4yr data across all active pairs → routing matrix entry in pair_config.py
-- [ ] **BKTS-03**: Momentum strategy backtested on full 4yr data across all active pairs → routing matrix entry in pair_config.py
-- [ ] **BKTS-04**: pit_validator.py wired as pass/fail gate — no new Sharpe number enters pair_config.py without PiT compliance
+- [x] **BKTS-01**: backtest_hybrid.py uses next-bar-open entry for all strategy loops (not signal-bar close — fixes Sharpe inflation of 0.2–0.4)
+- [x] **BKTS-02**: H1 scalp strategy backtested on full 4yr data across all active pairs → routing matrix entry in pair_config.py
+- [x] **BKTS-03**: Momentum strategy backtested on full 4yr data across all active pairs → routing matrix entry in pair_config.py
+- [x] **BKTS-04**: pit_validator.py wired as pass/fail gate — no new Sharpe number enters pair_config.py without PiT compliance
 
 ### Regime + PiT
 
@@ -79,10 +79,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRDG-02 | Phase 6 | Complete |
 | BRDG-03 | Phase 6 | Pending |
 | BRDG-04 | Phase 6 | Complete |
-| BKTS-01 | Phase 7 | Pending |
-| BKTS-02 | Phase 7 | Pending |
-| BKTS-03 | Phase 7 | Pending |
-| BKTS-04 | Phase 7 | Pending |
+| BKTS-01 | Phase 7 | Complete |
+| BKTS-02 | Phase 7 | Complete |
+| BKTS-03 | Phase 7 | Complete |
+| BKTS-04 | Phase 7 | Complete |
 | REGM-01 | Phase 8 | Pending |
 | REGM-02 | Phase 8 | Pending |
 | REGM-03 | Phase 8 | Pending |
