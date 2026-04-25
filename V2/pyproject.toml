@@ -2,6 +2,14 @@
 name = "helix-v2"
 version = "0.1.0"
 requires-python = ">=3.12"
+# resolved (active env, 2026-04-25): hmmlearn 0.3.3, arch 8.0.0
+dependencies = [
+    "hmmlearn>=0.3",
+    "arch>=6.0",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
