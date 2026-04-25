@@ -62,6 +62,6 @@
     "data_path": "/home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2/data/GBPJPY_H1_4yr.csv",
     "n_bars": 17273,
     "hmmlearn_converged": true,
-    "v1_parity_tested": false
+    "v1_parity_tested": true
   }
 }
