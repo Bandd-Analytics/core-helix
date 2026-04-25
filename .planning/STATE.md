@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-24T23:24:42.625Z"
+last_updated: "2026-04-25T07:34:57.547Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 12
+  completed_plans: 9
 ---
 
 # STATE: MarketMind Helix
@@ -28,20 +28,20 @@ progress:
 
 ## Current Position
 
-Phase: 8
-Plan: Not started
+Phase: 8 (HMM-GARCH Regime + PiT Port) — EXECUTING
+Plan: 2 of 4
 
 ### Progress Bar
 
 ```
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
-Phase 7  [..........] 0%   Backtest Entry Fix + 4yr Validation
-Phase 8  [..........] 0%   HMM-GARCH Regime + PiT Port
+Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
+Phase 8  [##........] 25%  HMM-GARCH Regime + PiT Port — Plan 01 RED-test scaffold complete
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 4/20 requirements complete (BRDG-01, BRDG-02, BRDG-03, BRDG-04)
+**Overall milestone:** 8/20 requirements complete (BRDG-01..04, BKTS-01..04)
 
 ---
 
@@ -64,6 +64,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 07 P02 | 498 | 3 tasks | 6 files | - |
 | Phase 07 P03 | 755 | 2 tasks | 3 files | - |
 | Phase 07 P04 | 300 | 3 tasks | 9 files | - |
+| Phase 08 P01 | 319 | 3 tasks | 12 files | - |
 
 ## Plan Execution Metrics
 
@@ -73,6 +74,11 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 06 P02 | — | 2 tasks | 4 files | BRDG-03 gate PASS — coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 |
 | Phase 06 P03 | 182 | 3 tasks | 4 files | BRDG-02 complete — BridgeConsumer + BridgePublisher, 43 tests GREEN |
 | Phase 06 P04 | 230 | 4 tasks | 4 files | BRDG-04 PASS — EA compiles 0 errors, all 5 pairs M15 bar-close received in Python; 53 tests GREEN |
+| Phase 07 P01 | 208 | 3 tasks | 4 files | Wave 0 test scaffold — 17 RED tests for BKTS-01/02/03/04 |
+| Phase 07 P02 | 498 | 3 tasks | 6 files | BKTS-01 entry-fix GREEN (4/4 tests pass) |
+| Phase 07 P03 | 755 | 2 tasks | 3 files | BKTS-04 H1 momentum GREEN (7/7 tests pass) |
+| Phase 07 P04 | 300 | 3 tasks | 9 files | BKTS-02/03 4yr routing matrix GREEN (6/6 tests pass) |
+| Phase 08 P01 | 319 | 3 tasks | 12 files | Wave 0 test scaffold — 41 RED tests across 8 files; parity_baseline.npz captured from V1 |
 
 ## Accumulated Context
 
@@ -101,6 +107,9 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | unpack_heartbeat returns dict not datetime64 (D-07) | Consumer can check schema_version on connect — deliberate V1 breaking change (06-01) |
 | zmqContext.destroy(0) omitted from OnDeinit (06-04) | coke5151 RAII destructor handles context cleanup on scope exit — explicit destroy causes double-free crash |
 | _handle_bar_frame dual-decoder: msgpack first, JSON fallback (06-04) | Consumer resilient to both V2 msgpack (Python-to-Python) and MQL5 JSON Option A payload formats |
+| PYTHONPATH=V1/helix for V1 baseline capture (08-01) | V1's alpha/__init__.py uses absolute `from src.alpha.*` imports — package root must be V1/helix, not V1/helix/src |
+| parity_baseline.npz committed to repo (08-01) | Frees CI from any V1 environment dependency; .npz captured once via _capture_v1_baseline.py |
+| Wave 0 = 41 RED tests for REGM-01/02/03/04 (08-01) | Mirrors Phase 7 P01 pattern; Plans 02/03/04 turn them GREEN |
 
 ### Critical Gates
 
@@ -124,9 +133,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** Phase 7 Plan 01 complete — Wave 0 test scaffold: 17 RED tests collected (4 BKTS-01 + 7 BKTS-04 + 6 BKTS-02/03). All tests RED against current code. (2026-04-24)
+**Last action:** Phase 8 Plan 01 complete — Wave 0 test scaffold: 41 RED tests across 8 files (9 regime detector + 5 online filter + 5 emissions + 4 persistence + 4 bars helper + 8 PitClock + 2 viterbi-ban + 4 parity); parity_baseline.npz captured from V1 (3,4 garch / 3,3 transmat / 3 startprob / 1000 online states). (2026-04-25)
 **Last agent:** execute-phase
-**Next action:** Execute Phase 7 Plan 02 (entry-fix implementation — makes BKTS-01 tests GREEN)
+**Next action:** Execute Phase 8 Plan 02 (Wave 1: detector + emissions + bars_to_log_returns helper — turns test_regime_detector / test_emissions / test_bars_to_log_returns GREEN)
 
 ---
 
@@ -138,4 +147,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-24 — Phase 7 Plan 01 COMPLETE: Wave 0 test scaffold (17 RED tests). BKTS-01/02/03/04 test coverage in place. Plans 02/03/04 will make them GREEN.*
+*Last updated: 2026-04-25 — Phase 8 Plan 01 COMPLETE: Wave 0 test scaffold (41 RED tests across 8 files; parity_baseline.npz captured). REGM-01/02/03/04 test coverage in place. Plans 02/03/04 will make them GREEN.*

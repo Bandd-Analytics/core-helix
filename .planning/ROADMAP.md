@@ -85,7 +85,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Wave 0: Test scaffolding (RED) for REGM-01/02/03/04 + V1 parity baseline capture (12 files: conftest + capture script + parity_baseline.npz + 8 test_*.py with 41 RED tests) [autonomous]
+- [x] 08-01-PLAN.md — Wave 0: Test scaffolding (RED) for REGM-01/02/03/04 + V1 parity baseline capture (12 files: conftest + capture script + parity_baseline.npz + 8 test_*.py with 41 RED tests) [autonomous]
 - [ ] 08-02-PLAN.md — Wave 1: Core port — pyproject.toml deps (hmmlearn>=0.3, arch>=6.0) + types.py (RegimeState) + emissions.py (GARCHParams) + hmm_garch.py (HMMGARCHRegimeDetector minus Viterbi) + bars_to_log_returns helper (REGM-01, REGM-02) [autonomous]
 - [ ] 08-03-PLAN.md — Wave 2: OnlineRegimeFilter (Viterbi-free) + PitClock context manager + FutureBarReadError + UNBOUNDED sentinel + JSON persistence (save_detector / load_detector) (REGM-01, REGM-03, REGM-04) [autonomous]
 - [ ] 08-04-PLAN.md — Wave 3: fit_regime_detectors.py CLI + 5/5 detector JSONs (USDJPY, GBPJPY, GBPAUD, GBPUSD, EURGBP) + REGM-04 grep gate ratification + D-16 parity test green (REGM-04) [checkpoint]
