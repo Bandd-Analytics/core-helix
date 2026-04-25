@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "pair": "EURGBP",
+  "n_states": 3,
+  "garch_params": [
+    {
+      "mu": 4.802819407866569e-07,
+      "omega": 1.0190446638166516e-07,
+      "alpha": 0.2,
+      "beta": 0.49999999999999994
+    },
+    {
+      "mu": 0.0,
+      "omega": 1e-06,
+      "alpha": 0.05,
+      "beta": 0.9
+    },
+    {
+      "mu": 0.000370168533407173,
+      "omega": 1.1790073580660854e-06,
+      "alpha": 0.05,
+      "beta": 0.9
+    }
+  ],
+  "transmat": [
+    [
+      0.9990293061155844,
+      5.621184245146213e-74,
+      0.000970693884415763
+    ],
+    [
+      0.007463446488024687,
+      3.7813169798268875e-71,
+      0.9925365535119753
+    ],
+    [
+      0.9999926106806837,
+      5.2680736695954364e-73,
+      7.389319316306291e-06
+    ]
+  ],
+  "startprob": [
+    0.99999402159984,
+    7.816921769389881e-86,
+    5.978400160003679e-06
+  ],
+  "variance_ordering": {
+    "state_labels": [
+      "TRENDING",
+      "MEAN_REVERTING",
+      "CRISIS"
+    ],
+    "unconditional_variances": [
+      3.396815546055504e-07,
+      2.0000000000000025e-05,
+      2.3580147161321738e-05
+    ]
+  },
+  "fit_metadata": {
+    "fitted_at_utc": "2026-04-25T09:33:28+00:00",
+    "data_window": "4yr",
+    "data_path": "/home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2/data/EURGBP_H1_4yr.csv",
+    "n_bars": 17287,
+    "hmmlearn_converged": true,
+    "v1_parity_tested": false
+  }
+}

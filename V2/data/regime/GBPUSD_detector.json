@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "pair": "GBPUSD",
+  "n_states": 3,
+  "garch_params": [
+    {
+      "mu": 8.492122793765296e-06,
+      "omega": 2.894041233311923e-07,
+      "alpha": 0.1,
+      "beta": 0.4
+    },
+    {
+      "mu": 2.1217309899824083e-06,
+      "omega": 4.841817092166508e-07,
+      "alpha": 0.2,
+      "beta": 0.3
+    },
+    {
+      "mu": -0.0011765219096657156,
+      "omega": 2.932147472789851e-06,
+      "alpha": 0.05,
+      "beta": 0.9
+    }
+  ],
+  "transmat": [
+    [
+      0.3111467520016787,
+      0.6855396851953123,
+      0.0033135628030090247
+    ],
+    [
+      0.9995367648979101,
+      0.00041885134215000145,
+      4.4383759939946025e-05
+    ],
+    [
+      0.0004809294481628718,
+      0.9989484176496966,
+      0.0005706529021404531
+    ]
+  ],
+  "startprob": [
+    0.6560862452954161,
+    0.34391001982665587,
+    3.734877928122231e-06
+  ],
+  "variance_ordering": {
+    "state_labels": [
+      "TRENDING",
+      "MEAN_REVERTING",
+      "CRISIS"
+    ],
+    "unconditional_variances": [
+      5.788082466623846e-07,
+      9.683634184333016e-07,
+      5.8642949455797104e-05
+    ]
+  },
+  "fit_metadata": {
+    "fitted_at_utc": "2026-04-25T09:33:24+00:00",
+    "data_window": "4yr",
+    "data_path": "/home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2/data/GBPUSD_H1_4yr.csv",
+    "n_bars": 17264,
+    "hmmlearn_converged": true,
+    "v1_parity_tested": false
+  }
+}
