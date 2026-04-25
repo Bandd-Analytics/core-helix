@@ -20,6 +20,7 @@ import pandas as pd
 
 from .emissions import GARCHParams, garch_emission_prob
 from .hmm_garch import HMMGARCHRegimeDetector
+from .online_filter import OnlineRegimeFilter
 from .types import RegimeState
 
 
@@ -66,5 +67,6 @@ __all__ = [
     "GARCHParams",
     "garch_emission_prob",
     "HMMGARCHRegimeDetector",
+    "OnlineRegimeFilter",
     "bars_to_log_returns",
 ]
