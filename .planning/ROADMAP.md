@@ -11,7 +11,7 @@
 
 - [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
 - [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2026-04-24)
-- [ ] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series
+- [x] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series (completed 2026-04-25)
 - [ ] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
@@ -82,13 +82,13 @@ Plans:
 3. PiT manager at V2/v3_intelligence/pit.py enforces that no future bar is readable during backtest replay — a deliberate out-of-order read raises an error rather than silently succeeding
 4. A grep or import trace of the V2 codebase finds zero direct Viterbi calls in any backtest loop or live signal path — OnlineRegimeFilter is the only entry point
 
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 08-01-PLAN.md — Wave 0: Test scaffolding (RED) for REGM-01/02/03/04 + V1 parity baseline capture (12 files: conftest + capture script + parity_baseline.npz + 8 test_*.py with 41 RED tests) [autonomous]
 - [x] 08-02-PLAN.md — Wave 1: Core port — pyproject.toml deps (hmmlearn>=0.3, arch>=6.0) + types.py (RegimeState) + emissions.py (GARCHParams) + hmm_garch.py (HMMGARCHRegimeDetector minus Viterbi) + bars_to_log_returns helper (REGM-01, REGM-02) [autonomous]
 - [x] 08-03-PLAN.md — Wave 2: OnlineRegimeFilter (Viterbi-free) + PitClock context manager + FutureBarReadError + UNBOUNDED sentinel + JSON persistence (save_detector / load_detector) (REGM-01, REGM-03, REGM-04) [autonomous]
-- [ ] 08-04-PLAN.md — Wave 3: fit_regime_detectors.py CLI + 5/5 detector JSONs (USDJPY, GBPJPY, GBPAUD, GBPUSD, EURGBP) + REGM-04 grep gate ratification + D-16 parity test green (REGM-04) [checkpoint]
+- [x] 08-04-PLAN.md — Wave 3: fit_regime_detectors.py CLI + 5/5 detector JSONs (USDJPY, GBPJPY, GBPAUD, GBPUSD, EURGBP) + REGM-04 grep gate ratification + D-16 parity test green (REGM-04) [checkpoint]
 
 ---
 
@@ -163,7 +163,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 6. ZMQ Bridge Port | 4/4 | Complete | 2026-04-24 |
 | 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2026-04-25 |
-| 8. HMM-GARCH Regime + PiT Port | 0/4 | Planned | — |
+| 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2026-04-25 |
 | 8.5. Temporal & Session Analysis | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
@@ -189,4 +189,5 @@ Phase 7 can run in parallel with Phase 8 after Phase 6 completes. Phase 8.5 requ
 *Phase 7 completed: 2026-04-25 (4 plans, 70/70 tests, BKTS-01/02/03/04 verified)*
 *Phase 8.5 added: 2026-04-25 — Temporal & Session Analysis, prerequisite for Phase 9 StrategyRouter*
 *Phase 8 planned: 2026-04-25 — 4 plans (Wave 0 RED scaffold → Wave 1 core port → Wave 2 OnlineRegimeFilter+PitClock+JSON → Wave 3 CLI+5 detector JSONs+grep gate+parity)*
-*Next: `/gsd:execute-phase 8`*
+*Phase 8 completed: 2026-04-25 — 4/4 plans, 112/112 tests GREEN (v3_intelligence 42 + Phase 6 53 + Phase 7 17), REGM-01/02/03/04 verified, 5/5 detector JSONs landed (variance ratios 69x-101x), D-16 parity at rtol=1e-6, operator approved*
+*Next: `/gsd:verify-work 08`*

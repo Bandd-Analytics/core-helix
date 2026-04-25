@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-25T09:25:37.294Z"
+last_updated: "2026-04-25T11:38:04.888Z"
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # STATE: MarketMind Helix
@@ -28,20 +28,20 @@ progress:
 
 ## Current Position
 
-Phase: 8 (HMM-GARCH Regime + PiT Port) — EXECUTING
-Plan: 4 of 4
+Phase: 8 (HMM-GARCH Regime + PiT Port) — READY FOR VERIFICATION
+Plan: 4 of 4 (all complete)
 
 ### Progress Bar
 
 ```
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
-Phase 8  [########..] 75%  HMM-GARCH Regime + PiT Port — Plans 01/02/03 complete (REGM-01 full / REGM-02 / REGM-03 satisfied; REGM-04 ratification pending Plan 04)
+Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 11/20 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01, REGM-02, REGM-03)
+**Overall milestone:** 12/20 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04)
 
 ---
 
@@ -67,6 +67,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P01 | 319 | 3 tasks | 12 files | - |
 | Phase 08 P02 | 32 min | 3 tasks | 7 files | - |
 | Phase 08 P03 | 9 min | 3 tasks | 5 files | - |
+| Phase 08 P04 | 12 min | 4 tasks | 9 files | - |
 
 ## Plan Execution Metrics
 
@@ -83,6 +84,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P01 | 319 | 3 tasks | 12 files | Wave 0 test scaffold — 41 RED tests across 8 files; parity_baseline.npz captured from V1 |
 | Phase 08 P02 | 32 min | 3 tasks | 7 files | REGM-01 offline-fit + REGM-02 variance-rank pinning GREEN — HMMGARCHRegimeDetector ported from V1 minus Viterbi (D-04); 18 tests GREEN (5 emissions + 4 bars + 9 detector); hmmlearn 0.3.3 + arch 8.0.0 |
 | Phase 08 P03 | 9 min | 3 tasks | 5 files | REGM-01 online-update + REGM-03 PitClock GREEN — OnlineRegimeFilter ported from V1 minus dead emission-prob import; PitClock + FutureBarReadError + UNBOUNDED + pit_gated; save_detector/load_detector JSON D-11; 17 tests GREEN (5 online_filter + 8 pit + 4 persistence) |
+| Phase 08 P04 | 12 min | 4 tasks | 9 files | REGM-04 GREEN (phase gate) — fit_regime_detectors.py CLI + 5 detector JSONs (USDJPY/GBPJPY/GBPAUD/GBPUSD/EURGBP) with variance ratios 69x-101x; functional-pattern grep gate refinement (3/3 GREEN); D-16 parity GREEN at rtol=1e-6; v1_parity_tested=True stamped on all 5 JSONs; v3_intelligence 42 GREEN; full V2 112 GREEN; operator approved 2026-04-25 |
 
 ## Accumulated Context
 
@@ -119,6 +121,9 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | OnlineRegimeFilter ported from V1 minus dead emission-prob import (08-03 / RESEARCH A.3) | V1 imported the helper on line 9 but never called it (emission inlined in update()). V2 omits the import entirely; grep gates verify symbol absence |
 | PitClock.UNBOUNDED constructed at module load via class-level assignment (08-03 / D-25) | Sentinel always available before any with-block; None as_of_ts disables enforcement (read returns df verbatim, assert_no_future never raises) |
 | save_detector + load_detector live in dedicated persistence.py module (08-03 / D-11) | Keeps regime/__init__.py focused on re-exports + bars_to_log_returns helper; isolates JSON schema for future evolution; mirrors V1 one-concept-per-file convention |
+| Linux/MT5 failover applied per Phase 7 D-15 (08-04) | MetaTrader5 Python package not available on Linux dev host; download_history.py `_fetch_4yr_pairs_linux_failover()` copies existing 730d-shape H1 CSVs into *_H1_4yr.csv paths to preserve naming continuity. All 5 detectors fit on ~17k bars Jul-2023→Apr-2026 with strong regime separation (CRISIS/TRENDING ratios 69x-101x). Windows MT5 refresh recommended before LIVE-04 paper trade gate (non-blocking for Phase 9) |
+| REGM-04 grep gate refined to functional patterns (08-04) | test_viterbi_ban.py switched from literal-substring scan to functional regex (imports + calls + attribute access) + viterbi.py file scan as defense-in-depth. Permits docstring/comment documentation of D-04 deliberate omission without false positives; catches actual re-introduction. 3/3 GREEN |
+| v1_parity_tested metadata uses two-stage flip (08-04 / D-11) | fit_regime_detectors.py emits False at fit time; Task 3 flips to True only after the 4 @pytest.mark.slow parity tests clear at rtol=1e-6 vs V1 baseline. Keeps on-disk artefact an honest provenance record; pattern reusable for v3.0 EXPN-03 walk-forward refits |
 
 ### Critical Gates
 
@@ -126,7 +131,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 |------|-------|-----------------|
 | BRDG-03 DLL compatibility spike | Phase 6 | Phase 10 EA work — **PASS (2026-04-23): coke5151 fork, MT5 build 5800, Ubuntu+Wine 11.7 Staging. Phase 10 unblocked.** |
 | BKTS-01 entry bias fix | Phase 7 | Trusted Sharpe numbers for BKTS-02/03 routing matrix entries |
-| REGM-04 Viterbi ban | Phase 8 | Phase 9 router 4yr simulation (ROUT-04) |
+| REGM-04 Viterbi ban | Phase 8 | Phase 9 router 4yr simulation (ROUT-04) — **PASS (2026-04-25): functional grep gate 3/3 GREEN; 5/5 detector JSONs landed; D-16 parity GREEN at rtol=1e-6; operator approved. Phase 9 ROUT-04 unblocked.** |
 | ROUT-04 simulation Sharpe gate | Phase 9 | Phase 10 live deployment |
 | LIVE-04 7-day paper trade | Phase 10 | Live capital deployment |
 
@@ -142,9 +147,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** Phase 8 Plan 03 complete — OnlineRegimeFilter ported from V1 minus dead emission-prob import (REGM-01 online half); PitClock + FutureBarReadError + UNBOUNDED + pit_gated landed (REGM-03); save_detector/load_detector JSON D-11 schema. 17 tests GREEN (5 online_filter + 8 pit + 4 persistence); v3_intelligence fast suite 35/35 GREEN; full V2 fast suite 105/105 GREEN — no Phase 6/7 regression. (2026-04-25)
+**Last action:** Phase 8 Plan 04 COMPLETE — fit_regime_detectors.py CLI + 5 detector JSONs (USDJPY/GBPJPY/GBPAUD/GBPUSD/EURGBP) landed in V2/data/regime/ with monotonically ascending variance ordering (CRISIS/TRENDING ratios 69x-101x); REGM-04 grep gate refined to functional-pattern regex and ratified 3/3 GREEN; D-16 parity GREEN at rtol=1e-6 (4/4 slow tests); v1_parity_tested=True stamped on all 5 JSONs; full v3_intelligence suite 42/42 GREEN; full V2 project suite 112/112 GREEN. Operator approved 2026-04-25 (no caveats). Linux/MT5 failover applied per D-15 — Windows refresh recommended before LIVE-04. **Phase 8 complete — ready for Phase 9 planning.** (2026-04-25)
 **Last agent:** execute-phase
-**Next action:** Execute Phase 8 Plan 04 (Wave 3: fit_regime_detectors.py CLI + Viterbi grep gate ratification + parity tests — checkpoint plan; produces 5 detector JSONs in V2/data/regime/)
+**Next action:** Run `/gsd:verify-work 08` to verify Phase 8 phase gate (REGM-01..04), then `/gsd:plan-phase 8.5` (Temporal & Session Analysis is the next phase per ROADMAP.md dependency graph; Phase 9 router requires Phase 8.5 first).
 
 ---
 
@@ -156,4 +161,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-25 — Phase 8 Plan 03 COMPLETE: OnlineRegimeFilter + PitClock + JSON persistence landed. REGM-01 (full) + REGM-03 GREEN. 17 newly-green tests; full v3_intelligence fast suite 35/35 GREEN; full V2 fast suite 105/105 GREEN. Plan 04 next: fit_regime_detectors.py CLI + Viterbi grep gate ratification + 5 detector JSONs (checkpoint plan).*
+*Last updated: 2026-04-25 — Phase 8 Plan 04 COMPLETE: fit_regime_detectors.py CLI + 5 detector JSONs + REGM-04 ratified (functional grep gate 3/3 GREEN) + D-16 parity GREEN at rtol=1e-6. All four REGM requirements (REGM-01/02/03/04) satisfied. Operator approved 2026-04-25. v3_intelligence 42/42 GREEN; full V2 project suite 112/112 GREEN. Phase 8 ready for verification (`/gsd:verify-work 08`). Phase 9 ROUT-04 unblocked (after Phase 8.5).*

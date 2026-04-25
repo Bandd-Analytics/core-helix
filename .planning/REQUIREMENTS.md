@@ -26,7 +26,7 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 - [x] **REGM-01**: HMM-GARCH classifier ported from V1 to V2/v3_intelligence/regime.py with offline fit + online update split
 - [x] **REGM-02**: HMM state labels pinned by variance rank at fit time (prevents permutation when re-fitting on new dataset)
 - [x] **REGM-03**: PiT manager ported from V1 to V2/v3_intelligence/pit.py with no future-bar read enforced
-- [ ] **REGM-04**: OnlineRegimeFilter is the only regime series source in backtest and live paths — Viterbi banned from both
+- [x] **REGM-04**: OnlineRegimeFilter is the only regime series source in backtest and live paths — Viterbi banned from both
 
 ### Router
 
@@ -86,7 +86,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REGM-01 | Phase 8 | Complete |
 | REGM-02 | Phase 8 | Complete |
 | REGM-03 | Phase 8 | Complete |
-| REGM-04 | Phase 8 | Pending |
+| REGM-04 | Phase 8 | Complete |
 | ROUT-01 | Phase 9 | Pending |
 | ROUT-02 | Phase 9 | Pending |
 | ROUT-03 | Phase 9 | Pending |
