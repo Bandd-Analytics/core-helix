@@ -43,7 +43,7 @@ A statistically validated daily Z-score mean-reversion signal that generates con
 - [x] ZMQ bridge ported from V1 — Python↔MT5 tick/order round-trip, heartbeat, <10ms local latency (Phase 6, 2026-04-24)
 - [x] H1 scalp strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
 - [x] Momentum strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
-- [ ] HMM-GARCH regime classifier ported from V1 with PiT discipline — zero future-bar leakage
+- [x] HMM-GARCH regime classifier ported from V1 with PiT discipline — zero future-bar leakage (Phase 8, 2026-04-25)
 - [ ] StrategyRouter dispatches per-pair per-bar to best strategy based on regime + 4yr matrix + RAG
 - [ ] Live signal engine service (Python) consumes MT5 ticks, calls router, publishes OrderRequest
 - [ ] MT5 EA reads OrderRequest from ZMQ, validates via CCircuitBreaker, executes
@@ -104,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after milestone v2.0 start — V3 Adaptive Strategy Dispatch System*
+*Last updated: 2026-04-25 after Phase 8 completion — HMM-GARCH regime classifier and PitClock manager ported with REGM-01/02/03/04 verified; Viterbi banished; 5 detector JSONs landed; D-16 parity GREEN at rtol=1e-6.*
