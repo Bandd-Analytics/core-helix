@@ -21,6 +21,7 @@ import pandas as pd
 from .emissions import GARCHParams, garch_emission_prob
 from .hmm_garch import HMMGARCHRegimeDetector
 from .online_filter import OnlineRegimeFilter
+from .persistence import save_detector, load_detector
 from .types import RegimeState
 
 
@@ -69,4 +70,6 @@ __all__ = [
     "HMMGARCHRegimeDetector",
     "OnlineRegimeFilter",
     "bars_to_log_returns",
+    "save_detector",
+    "load_detector",
 ]
