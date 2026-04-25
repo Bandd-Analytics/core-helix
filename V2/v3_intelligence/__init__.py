@@ -6,11 +6,13 @@ Modules:
   pair_config         — per-pair strategy overrides with tiered sizing
   rag_signal_filter   — ChromaDB semantic retrieval for signal confidence scoring
   regime              — HMM-GARCH regime classifier subpackage (Phase 8)
+  pit                 — point-in-time replay clock (Phase 8)
 """
 from .trade_logger import TradeLogger
 from .pair_config import PairConfig, PAIR_CONFIGS, get_pair_config
 from .rag_signal_filter import RAGSignalFilter, CHROMA_AVAILABLE
-from .regime import RegimeState  # re-export for ergonomics (D-22)
+from .regime import RegimeState, OnlineRegimeFilter
+from .pit import PitClock, FutureBarReadError
 
 __all__ = [
     "TradeLogger",
@@ -20,4 +22,7 @@ __all__ = [
     "RAGSignalFilter",
     "CHROMA_AVAILABLE",
     "RegimeState",
+    "OnlineRegimeFilter",
+    "PitClock",
+    "FutureBarReadError",
 ]
