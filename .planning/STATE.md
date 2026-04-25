@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-25T07:34:57.547Z"
+last_updated: "2026-04-25T09:08:31.866Z"
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # STATE: MarketMind Helix
@@ -29,14 +29,14 @@ progress:
 ## Current Position
 
 Phase: 8 (HMM-GARCH Regime + PiT Port) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ### Progress Bar
 
 ```
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
-Phase 8  [##........] 25%  HMM-GARCH Regime + PiT Port — Plan 01 RED-test scaffold complete
+Phase 8  [#####.....] 50%  HMM-GARCH Regime + PiT Port — Plans 01 + 02 complete (REGM-01 offline-fit / REGM-02 variance-rank pinning satisfied)
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
@@ -65,6 +65,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 07 P03 | 755 | 2 tasks | 3 files | - |
 | Phase 07 P04 | 300 | 3 tasks | 9 files | - |
 | Phase 08 P01 | 319 | 3 tasks | 12 files | - |
+| Phase 08 P02 | 32 min | 3 tasks | 7 files | - |
 
 ## Plan Execution Metrics
 
@@ -79,6 +80,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 07 P03 | 755 | 2 tasks | 3 files | BKTS-04 H1 momentum GREEN (7/7 tests pass) |
 | Phase 07 P04 | 300 | 3 tasks | 9 files | BKTS-02/03 4yr routing matrix GREEN (6/6 tests pass) |
 | Phase 08 P01 | 319 | 3 tasks | 12 files | Wave 0 test scaffold — 41 RED tests across 8 files; parity_baseline.npz captured from V1 |
+| Phase 08 P02 | 32 min | 3 tasks | 7 files | REGM-01 offline-fit + REGM-02 variance-rank pinning GREEN — HMMGARCHRegimeDetector ported from V1 minus Viterbi (D-04); 18 tests GREEN (5 emissions + 4 bars + 9 detector); hmmlearn 0.3.3 + arch 8.0.0 |
 
 ## Accumulated Context
 
@@ -110,6 +112,8 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | PYTHONPATH=V1/helix for V1 baseline capture (08-01) | V1's alpha/__init__.py uses absolute `from src.alpha.*` imports — package root must be V1/helix, not V1/helix/src |
 | parity_baseline.npz committed to repo (08-01) | Frees CI from any V1 environment dependency; .npz captured once via _capture_v1_baseline.py |
 | Wave 0 = 41 RED tests for REGM-01/02/03/04 (08-01) | Mirrors Phase 7 P01 pattern; Plans 02/03/04 turn them GREEN |
+| HMMGARCHRegimeDetector ported verbatim from V1 minus predict_viterbi method and _compute_log_emission_probs helper (08-02 / D-04) | REGM-04 Viterbi ban enforced by-construction at the source; the only consumer of _compute_log_emission_probs was predict_viterbi |
+| bars_to_log_returns helper accepts both 'close' and 'Close' columns (08-02 / D-20) | V1 / synthetic tests use lowercase; Phase 7 _H1_4yr.csv files use Title-case — single helper covers both |
 
 ### Critical Gates
 
@@ -133,9 +137,9 @@ None currently.
 
 ## Session Continuity
 
-**Last action:** Phase 8 Plan 01 complete — Wave 0 test scaffold: 41 RED tests across 8 files (9 regime detector + 5 online filter + 5 emissions + 4 persistence + 4 bars helper + 8 PitClock + 2 viterbi-ban + 4 parity); parity_baseline.npz captured from V1 (3,4 garch / 3,3 transmat / 3 startprob / 1000 online states). (2026-04-25)
+**Last action:** Phase 8 Plan 02 complete — HMMGARCHRegimeDetector ported from V1 minus Viterbi (D-04); 18 tests GREEN (5 emissions + 4 bars_to_log_returns + 9 regime_detector); REGM-01 offline-fit half + REGM-02 variance-rank pinning satisfied by-construction; hmmlearn 0.3.3 + arch 8.0.0 resolved. Continuation agent finished after previous agent hit usage limit mid-plan. (2026-04-25)
 **Last agent:** execute-phase
-**Next action:** Execute Phase 8 Plan 02 (Wave 1: detector + emissions + bars_to_log_returns helper — turns test_regime_detector / test_emissions / test_bars_to_log_returns GREEN)
+**Next action:** Execute Phase 8 Plan 03 (Wave 2: OnlineRegimeFilter + PitClock + detector persistence — turns test_online_filter / test_pit / test_persistence GREEN)
 
 ---
 
@@ -147,4 +151,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-04-25 — Phase 8 Plan 01 COMPLETE: Wave 0 test scaffold (41 RED tests across 8 files; parity_baseline.npz captured). REGM-01/02/03/04 test coverage in place. Plans 02/03/04 will make them GREEN.*
+*Last updated: 2026-04-25 — Phase 8 Plan 02 COMPLETE: HMMGARCHRegimeDetector + GARCHParams + bars_to_log_returns ported from V1 minus Viterbi (D-04). REGM-01 offline-fit + REGM-02 variance-rank pinning GREEN. 18 tests passing in Plan 02 scope; 88 tests in fast suite (no Phase 6/7 regression). Plan 03 next: OnlineRegimeFilter + PitClock + persistence.*
