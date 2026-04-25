@@ -82,7 +82,13 @@ Plans:
 3. PiT manager at V2/v3_intelligence/pit.py enforces that no future bar is readable during backtest replay — a deliberate out-of-order read raises an error rather than silently succeeding
 4. A grep or import trace of the V2 codebase finds zero direct Viterbi calls in any backtest loop or live signal path — OnlineRegimeFilter is the only entry point
 
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Wave 0: Test scaffolding (RED) for REGM-01/02/03/04 + V1 parity baseline capture (12 files: conftest + capture script + parity_baseline.npz + 8 test_*.py with 41 RED tests) [autonomous]
+- [ ] 08-02-PLAN.md — Wave 1: Core port — pyproject.toml deps (hmmlearn>=0.3, arch>=6.0) + types.py (RegimeState) + emissions.py (GARCHParams) + hmm_garch.py (HMMGARCHRegimeDetector minus Viterbi) + bars_to_log_returns helper (REGM-01, REGM-02) [autonomous]
+- [ ] 08-03-PLAN.md — Wave 2: OnlineRegimeFilter (Viterbi-free) + PitClock context manager + FutureBarReadError + UNBOUNDED sentinel + JSON persistence (save_detector / load_detector) (REGM-01, REGM-03, REGM-04) [autonomous]
+- [ ] 08-04-PLAN.md — Wave 3: fit_regime_detectors.py CLI + 5/5 detector JSONs (USDJPY, GBPJPY, GBPAUD, GBPUSD, EURGBP) + REGM-04 grep gate ratification + D-16 parity test green (REGM-04) [checkpoint]
 
 ---
 
@@ -157,7 +163,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 6. ZMQ Bridge Port | 4/4 | Complete | 2026-04-24 |
 | 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2026-04-25 |
-| 8. HMM-GARCH Regime + PiT Port | 0/? | Not started | — |
+| 8. HMM-GARCH Regime + PiT Port | 0/4 | Planned | — |
 | 8.5. Temporal & Session Analysis | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
@@ -182,4 +188,5 @@ Phase 7 can run in parallel with Phase 8 after Phase 6 completes. Phase 8.5 requ
 *Roadmap created: 2026-04-22*
 *Phase 7 completed: 2026-04-25 (4 plans, 70/70 tests, BKTS-01/02/03/04 verified)*
 *Phase 8.5 added: 2026-04-25 — Temporal & Session Analysis, prerequisite for Phase 9 StrategyRouter*
-*Next: `/gsd:plan-phase 8`*
+*Phase 8 planned: 2026-04-25 — 4 plans (Wave 0 RED scaffold → Wave 1 core port → Wave 2 OnlineRegimeFilter+PitClock+JSON → Wave 3 CLI+5 detector JSONs+grep gate+parity)*
+*Next: `/gsd:execute-phase 8`*

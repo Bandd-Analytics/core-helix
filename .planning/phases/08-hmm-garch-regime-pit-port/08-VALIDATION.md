@@ -46,13 +46,13 @@ The default `addopts = "-v -m 'not slow'"` excludes parity tests from fast runs;
 | REGM-01 (behavioral) | `OnlineRegimeFilter.update()` returns `(RegimeState, float)` after detector fit | unit | `pytest tests/v3_intelligence/test_online_filter.py::test_update_returns_state_conf -x` | ❌ Wave 0 | ⬜ pending |
 | REGM-02 | After `fit()`, `garch_params[i].unconditional_variance` is monotonically increasing | unit | `pytest tests/v3_intelligence/test_regime_detector.py::test_variance_rank_pinning -x` | ❌ Wave 0 | ⬜ pending |
 | REGM-02 | Re-fit on perturbed (+1e-7 shift) returns preserves state ordering | unit | `pytest tests/v3_intelligence/test_regime_detector.py::test_refit_preserves_ordering -x` | ❌ Wave 0 | ⬜ pending |
-| REGM-03 | `PitClock(t)` raises `FutureBarReadError` on access past `as_of_ts` | unit | `pytest tests/v3_intelligence/test_pit.py::test_future_read_raises -x` | ❌ Wave 0 | ⬜ pending |
-| REGM-03 | `PitClock.UNBOUNDED` allows reads of any timestamp | unit | `pytest tests/v3_intelligence/test_pit.py::test_unbounded_allows -x` | ❌ Wave 0 | ⬜ pending |
-| REGM-03 | `clock.read(df)` returns rows with index ≤ as_of when df extends beyond cutoff | unit | `pytest tests/v3_intelligence/test_pit.py::test_read_truncates -x` | ❌ Wave 0 | ⬜ pending |
+| REGM-03 | `PitClock(t)` raises `FutureBarReadError` on access past `as_of_ts` | unit | `pytest tests/v3_intelligence/test_pit.py::test_assert_no_future_raises_on_future_ts -x` | ❌ Wave 0 | ⬜ pending |
+| REGM-03 | `PitClock.UNBOUNDED` allows reads of any timestamp | unit | `pytest tests/v3_intelligence/test_pit.py::test_unbounded_sentinel_allows_any_read -x` | ❌ Wave 0 | ⬜ pending |
+| REGM-03 | `clock.read(df)` returns rows with index ≤ as_of when df extends beyond cutoff | unit | `pytest tests/v3_intelligence/test_pit.py::test_read_returns_truncated_view -x` | ❌ Wave 0 | ⬜ pending |
 | REGM-04 | Grep finds zero `viterbi`/`Viterbi`/`predict_viterbi` in V2/backtest, V2/v3_intelligence, V2/live | grep gate | `pytest tests/v3_intelligence/test_viterbi_ban.py -x` | ❌ Wave 0 | ⬜ pending |
 | Port faithfulness (D-16) | V2 GARCHParams within rtol=1e-6 of V1 baseline | parity / slow | `pytest tests/v3_intelligence/test_regime_parity.py -m slow -x` | ❌ Wave 0 | ⬜ pending |
 | Port faithfulness (D-16) | V2 OnlineRegimeFilter state agreement ≥ 95% with V1 baseline on synthetic returns | parity / slow | `pytest tests/v3_intelligence/test_regime_parity.py::test_online_state_agreement -m slow -x` | ❌ Wave 0 | ⬜ pending |
-| Persistence integrity (D-11) | save→load roundtrip preserves all fitted parameters within 1e-12 | unit | `pytest tests/v3_intelligence/test_persistence.py::test_roundtrip -x` | ❌ Wave 0 | ⬜ pending |
+| Persistence integrity (D-11) | save→load roundtrip preserves all fitted parameters within 1e-12 | unit | `pytest tests/v3_intelligence/test_persistence.py::test_save_then_load_roundtrip -x` | ❌ Wave 0 | ⬜ pending |
 
 *Status legend: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
