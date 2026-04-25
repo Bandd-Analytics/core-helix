@@ -1,4 +1,4 @@
-"""Regime state enum (D-22, D-23 — only RegimeState ported from V1 signal_types.py)."""
+"""Regime state enum (D-22, D-23 — only RegimeState ported from the V1 signal_types module)."""
 from __future__ import annotations
 
 import enum

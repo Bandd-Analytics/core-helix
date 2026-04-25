@@ -2,8 +2,8 @@
 
 Port of V1/helix/src/alpha/regime/ with two surgical changes per CONTEXT.md:
   - D-04: Viterbi banished — no viterbi.py, no predict_viterbi method.
-  - D-22/D-23: RegimeState enum lives at types.py (only enum ported from V1
-    signal_types.py).
+  - D-22/D-23: RegimeState enum lives at types.py (only enum ported from the
+    V1 signal_types module).
 
 Public surface (consumed by Phase 9 router and Phase 10 live):
   - RegimeState
