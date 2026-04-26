@@ -122,7 +122,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 08.4-01-PLAN.md — Wave 0: REQUIREMENTS.md update (D-21) + dependency additions (psycopg + python-dotenv) + Supabase bars-table migration (D-02) + 8 RED test files for INFRA-01..04 + D-08 [checkpoint — operator SUPABASE_DB_URL]
+- [x] 08.4-01-PLAN.md — Wave 0: REQUIREMENTS.md update (D-21) + dependency additions (psycopg + python-dotenv) + Supabase bars-table migration (D-02) + 8 RED test files for INFRA-01..04 + D-08 [checkpoint — operator SUPABASE_DB_URL]
 - [ ] 08.4-02-PLAN.md — Wave 1: OHLCVCache class + PiT-active gate (RESEARCH Pattern 1+2) + scripts/update_cache.py CLI (D-04 dual-mode) [autonomous]
 - [ ] 08.4-03-PLAN.md — Wave 2: GBPNZD H1 4yr (INFRA-02 / D-05/D-06) + 8 pairs × H4 4yr (D-08) + PiT-gated 4yr eval (D-07) + conditional pair_config update [checkpoint — operator MT5 GUI exports]
 - [ ] 08.4-04-PLAN.md — Wave 3: learning_loop.on_trade_close (INFRA-03 / D-10..D-13) + adr.compute_adr (D-18) + backfill_rag (D-14) + backtest wire (D-11) + BandD_TradeReplay.mq5 + ADR_Levels.mq5 (INFRA-04 / D-15..D-19, D-16) + mempalace D-20 + REQUIREMENTS traceability flip [checkpoint — operator MQ5 visual verification]

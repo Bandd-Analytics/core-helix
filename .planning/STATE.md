@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-25T11:38:04.888Z"
+last_updated: "2026-04-26T06:42:01.768Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 16
+  completed_plans: 13
 ---
 
 # STATE: MarketMind Helix
@@ -28,8 +28,8 @@ progress:
 
 ## Current Position
 
-Phase: 8 (HMM-GARCH Regime + PiT Port) — READY FOR VERIFICATION
-Plan: 4 of 4 (all complete)
+Phase: 08.4 (infrastructure-prereqs-ohlcv-cache-rag-learning-loop-trade-replay) — EXECUTING
+Plan: 2 of 4
 
 ### Progress Bar
 
@@ -37,11 +37,12 @@ Plan: 4 of 4 (all complete)
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
+Phase 8.4[##........] 25%  Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plan 01 complete (INFRA-01..04 registered + Wave 0 RED scaffold landed); Task 2 + Task 3 partial deferred (operator follow-up)
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 12/20 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04)
+**Overall milestone:** 12/24 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04; INFRA-01..04 registered Phase 8.4 Plan 01 — implementation pending Plans 02-04)
 
 ---
 
@@ -68,6 +69,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P02 | 32 min | 3 tasks | 7 files | - |
 | Phase 08 P03 | 9 min | 3 tasks | 5 files | - |
 | Phase 08 P04 | 12 min | 4 tasks | 9 files | - |
+| Phase 08.4 P01 | 9 min (resume pass) | 4 tasks | 11 files | Wave 0 RED scaffold (32 fns / 53 items / 8 files) + INFRA-01..04 registered + psycopg/dotenv deps + bars-table migration provenance. Task 2 deferred (no SUPABASE_DB_URL); Task 3 partial (migration application deferred). Phase 8 regression: 109 passed, 20F/7E are new Wave 0 RED only |
 
 ## Plan Execution Metrics
 
@@ -124,6 +126,9 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Linux/MT5 failover applied per Phase 7 D-15 (08-04) | MetaTrader5 Python package not available on Linux dev host; download_history.py `_fetch_4yr_pairs_linux_failover()` copies existing 730d-shape H1 CSVs into *_H1_4yr.csv paths to preserve naming continuity. All 5 detectors fit on ~17k bars Jul-2023→Apr-2026 with strong regime separation (CRISIS/TRENDING ratios 69x-101x). Windows MT5 refresh recommended before LIVE-04 paper trade gate (non-blocking for Phase 9) |
 | REGM-04 grep gate refined to functional patterns (08-04) | test_viterbi_ban.py switched from literal-substring scan to functional regex (imports + calls + attribute access) + viterbi.py file scan as defense-in-depth. Permits docstring/comment documentation of D-04 deliberate omission without false positives; catches actual re-introduction. 3/3 GREEN |
 | v1_parity_tested metadata uses two-stage flip (08-04 / D-11) | fit_regime_detectors.py emits False at fit time; Task 3 flips to True only after the 4 @pytest.mark.slow parity tests clear at rtol=1e-6 vs V1 baseline. Keeps on-disk artefact an honest provenance record; pattern reusable for v3.0 EXPN-03 walk-forward refits |
+| Wave 0 RED scaffold = 32 test fns / 53 collected items across 8 files (08.4-01) | Mirrors Phase 8 P01 pattern; Plans 02-04 turn them GREEN. Nyquist compliance: every implementation task has a `<verify>` command pointing to a real test file on disk |
+| Task 2 deferred — SUPABASE_DB_URL not provisioned (08.4-01) | Operator chose deferred path; Plan 02 slow integration tests will RED-block (psycopg connection error) rather than RED-import-only until URL provisioned. Plan 02 cache.py development unaffected (unit tests use mock_psycopg_conn fixture) |
+| Task 3 partial — bars-table migration provenance committed; application deferred (08.4-01) | mcp__supabase__* tools not in resumed agent context AND no SUPABASE_DB_URL for direct psql application. V2/migrations/0001_create_bars.sql committed with re-application playbook (Options A/B/C: MCP / psql / Python). DDL on disk is canonical source-of-truth; application is re-runnable side-effect |
 
 ### Critical Gates
 
@@ -135,21 +140,30 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | ROUT-04 simulation Sharpe gate | Phase 9 | Phase 10 live deployment |
 | LIVE-04 7-day paper trade | Phase 10 | Live capital deployment |
 
+### Roadmap Evolution
+
+- Phase 8.5 added 2026-04-25: Temporal & Session Analysis (prerequisite for Phase 9 StrategyRouter)
+- Phase 8.4 inserted 2026-04-25 after Phase 8: Infrastructure Prereqs — OHLCV Cache + RAG Learning Loop + GBPNZD parity + Trade Replay (URGENT — addresses 2026-04-25 architectural audit findings: CSV-only data layer, unclosed RAG learning loop, missing GBPNZD 4yr H1, no MQ5 strategy-replay indicator, mempalace/claude-mem ambiguity). Inserted before Phase 8.5 so the heavy temporal analysis runs on a stable cache and produces decision_log entries that flow back into RAG memory.
+- Scope correction 2026-04-25: PROJECT.md "5 forex pairs / daily-only" prose was stale; project-default scope restored to 8 pairs × M15/H1/Daily as committed in [pair_config.py](../V2/v3_intelligence/pair_config.py). H4 timeframe flagged as not-currently-in-scope, awaiting explicit decision.
+
 ### Todos
 
 - [ ] Start Phase 6 planning: `/gsd:plan-phase 6`
+- [ ] **Phase 8.4 follow-up:** Operator provisions SUPABASE_DB_URL in V2/.env (Session pooler URI, port 5432) — unblocks Plan 02 slow integration tests
+- [ ] **Phase 8.4 follow-up:** Apply 0001_create_bars migration via Option A (MCP-enabled agent re-spawn) / B (`psql "$SUPABASE_DB_URL" -f V2/migrations/0001_create_bars.sql`) / C (Python psycopg) — provenance file already on disk
 
 ### Blockers
 
-None currently.
+None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.py dev can proceed under mocked psycopg; only slow integration tests gate on Supabase availability).
 
 ---
 
 ## Session Continuity
 
-**Last action:** Phase 8 Plan 04 COMPLETE — fit_regime_detectors.py CLI + 5 detector JSONs (USDJPY/GBPJPY/GBPAUD/GBPUSD/EURGBP) landed in V2/data/regime/ with monotonically ascending variance ordering (CRISIS/TRENDING ratios 69x-101x); REGM-04 grep gate refined to functional-pattern regex and ratified 3/3 GREEN; D-16 parity GREEN at rtol=1e-6 (4/4 slow tests); v1_parity_tested=True stamped on all 5 JSONs; full v3_intelligence suite 42/42 GREEN; full V2 project suite 112/112 GREEN. Operator approved 2026-04-25 (no caveats). Linux/MT5 failover applied per D-15 — Windows refresh recommended before LIVE-04. **Phase 8 complete — ready for Phase 9 planning.** (2026-04-25)
-**Last agent:** execute-phase
-**Next action:** Run `/gsd:verify-work 08` to verify Phase 8 phase gate (REGM-01..04), then `/gsd:plan-phase 8.5` (Temporal & Session Analysis is the next phase per ROADMAP.md dependency graph; Phase 9 router requires Phase 8.5 first).
+**Last action:** Phase 8.4 Plan 01 COMPLETE — Wave 0 RED scaffold (32 test fns / 53 collected items across 8 files: conftest_infra + test_cache×2 + test_gbpnzd_parity + test_h4_provisioning + test_learning_loop + test_backfill_rag + test_adr) + INFRA-01..04 added to REQUIREMENTS.md (D-21 satisfied) + psycopg[binary]>=3.3 + python-dotenv>=1.0 in V2/pyproject.toml + V2/.env.example + V2/migrations/0001_create_bars.sql provenance. Task 2 deferred by operator (SUPABASE_DB_URL not provisioned); Task 3 partial — migration application deferred (mcp__supabase__* not in resumed agent context AND no DB URL for direct psql). Both deferrals tracked as Phase 8.4 known follow-ups; Plans 02-04 unblocked. Phase 8 fast-suite regression GREEN: 109 passed, 20 failed/7 errors are exclusively new Wave 0 RED tests (expected). Commits: 7aa2cf1 (T1), 502df94 (T3 partial), 7250313 (T4), bb03d2b (T5). (2026-04-26)
+**Last agent:** execute-plan (resume pass)
+**Stopped at:** Completed 08.4-01-PLAN.md (Tasks 3/4/5 of resume pass; Task 1 from prior agent; Task 2 operator-deferred)
+**Next action:** Continue Phase 8.4 with Plan 02 (cache.py implementation). Plan 02 unit tests can run immediately under mocked psycopg; slow integration tests will skip until SUPABASE_DB_URL provisioned. Operator follow-up: provision SUPABASE_DB_URL + apply 0001_create_bars migration (three documented paths in file header) when ready.
 
 ---
 
@@ -162,3 +176,5 @@ None currently.
 ---
 
 *Last updated: 2026-04-25 — Phase 8 Plan 04 COMPLETE: fit_regime_detectors.py CLI + 5 detector JSONs + REGM-04 ratified (functional grep gate 3/3 GREEN) + D-16 parity GREEN at rtol=1e-6. All four REGM requirements (REGM-01/02/03/04) satisfied. Operator approved 2026-04-25. v3_intelligence 42/42 GREEN; full V2 project suite 112/112 GREEN. Phase 8 ready for verification (`/gsd:verify-work 08`). Phase 9 ROUT-04 unblocked (after Phase 8.5).*
+
+*2026-04-26 — Phase 8.4 Plan 01 COMPLETE: Wave 0 RED scaffold (8 files / 32 test fns / 53 collected items) + INFRA-01..04 registered + psycopg/dotenv deps + V2/migrations/0001_create_bars.sql provenance. Operator deferred Task 2 (SUPABASE_DB_URL); Task 3 partial (migration application deferred). Plans 02-04 unblocked. Phase 8 regression GREEN (109 passed; 20 fails/7 errors are exclusively new Wave 0 RED — expected). Commits: 7aa2cf1, 502df94, 7250313, bb03d2b.*
