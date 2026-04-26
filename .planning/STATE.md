@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 08.4-04-PLAN.md (4/5 tasks; Task 3b operator visual verification deferred)
-last_updated: "2026-04-26T14:28:29.756Z"
+stopped_at: Completed 11-01-PLAN.md (Tier 0 helpers — 3/3 tasks; AWAITING Tier 0 user review before Plan 02)
+last_updated: "2026-04-26T17:10:55.855Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 21
+  completed_plans: 18
 ---
 
 # STATE: MarketMind Helix
@@ -29,8 +29,8 @@ progress:
 
 ## Current Position
 
-Phase: 08.4 (infrastructure-prereqs-ohlcv-cache-rag-learning-loop-trade-replay) — EXECUTING
-Plan: 4 of 4
+Phase: 11 (sm-indicators-full-spec-documentation) — EXECUTING
+Plan: 2 of 5
 
 ### Progress Bar
 
@@ -73,6 +73,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08.4 P01 | 9 min (resume pass) | 4 tasks | 11 files | Wave 0 RED scaffold (32 fns / 53 items / 8 files) + INFRA-01..04 registered + psycopg/dotenv deps + bars-table migration provenance. Task 2 deferred (no SUPABASE_DB_URL); Task 3 partial (migration application deferred). Phase 8 regression: 109 passed, 20F/7E are new Wave 0 RED only |
 | Phase 08.4 P02 | 365 | 3 tasks | 5 files | - |
 | Phase 08.4 P04 | 50 min | 4 of 4 (Task 3b deferred) tasks | 14 files | - |
+| Phase 11 P01 | 367 | 3 tasks | 3 files | - |
 
 ## Plan Execution Metrics
 
@@ -174,7 +175,7 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 **Last action:** Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred) — RAG learning loop closed (`learning_loop.on_trade_close` glue layer + `_maybe_log_param_diff` D-12 decision_log diff via OFFSET 1 prev-trade lookup); `compute_adr` helper (D-18); `scripts.backfill_rag` CLI (D-14); `BandD_TradeReplay.mq5` + `ADR_Levels.mq5` indicators (D-15/D-17/D-18/D-19, timeframe-agnostic per D-16); `backtest_hybrid.py` wired `on_trade_close(rec)` at swing-close + m15-close sites with `params_json` snapshots; `rag_signal_filter` default collection 'trades'->'trade_memory' (Warning 6); `mempalace init`+`mine` populated 'helix' wing (~2311+ drawers); `mempalace.yaml` taxonomy expanded across 8 domain rooms; `PROJECT.md` §Memory Architecture documents claude-mem vs mempalace vs chroma_rag/trade_memory; `REQUIREMENTS.md` INFRA-01/02/03 -> Complete. INFRA-04 stays Pending — Wine MT5 IS running locally but spawned executor cannot capture GUI screenshots; .mq5 sources copied to `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/` for follow-up operator session. 12/12 Plan 01 RED tests GREEN (6 learning_loop + 4 adr + 2 slow backfill_rag); full Phase 6/7/8 + 8.4 P02/P03/P04 fast suite: 147 passed / 18 deselected / 0 failed. Three Rule 3 deviations auto-fixed (V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header-skip from 2-read to 10-read). Commits: ec8a403 (T1 logger+learning_loop+adr), f38af53 (T2 backfill_rag+wire), 66d0909 (T3a indicators+sample csv), dd6a111 (T5 mempalace+PROJECT.md+REQUIREMENTS). (2026-04-26)
 **Last agent:** execute-plan (Plan 04)
-**Stopped at:** Completed 08.4-04-PLAN.md (4/5 tasks; Task 3b operator visual verification deferred)
+**Stopped at:** Completed 11-01-PLAN.md (Tier 0 helpers — 3/3 tasks; AWAITING Tier 0 user review before Plan 02)
 **Next action:** Phase 8.4 ready for `/gsd:verify-work 08.4` with INFRA-04 visual-verification deferral noted. New follow-ups beyond carried Plan 02/03 ones: (a) operator visual verification of BandD_TradeReplay + ADR_Levels on M15/H1/H4/Daily under Wine MT5 — 8 PNG screenshots into `evidence/`; (b) `mempalace mine .` to completion (was running at commit time); (c) once SUPABASE_DB_URL provisioned: `python -m scripts.backfill_rag` to populate trade_memory from existing marketmind.db. Carried follow-ups: SUPABASE_DB_URL provisioning + 0001_create_bars migration application + AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
@@ -194,3 +195,5 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 *2026-04-26 — Phase 8.4 Plan 02 COMPLETE (~6min): OHLCVCache + pit_active augmentation + scripts.update_cache CLI. Plan 01 RED tests in test_cache.py: 8/8 GREEN. Phase 8 PitClock regression: 8/8 GREEN. Full Phase 8 fast-suite regression: 38/38 GREEN. 3 slow integration tests SKIP cleanly (SUPABASE_DB_URL deferred). One Rule 3 deviation auto-fixed (conftest fixture-discovery bridge). Commits: 97c082b, 7bc8328, d983374.*
 
 *2026-04-26 — Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred — ~50 min): RAG learning loop closure (learning_loop.on_trade_close + decision_log diff via OFFSET 1 + ChromaDB index_trade) + ADR helper (compute_adr) + backfill_rag.py CLI + BandD_TradeReplay.mq5 + ADR_Levels.mq5 indicators (timeframe-agnostic D-16) + backtest_hybrid wired at swing+m15 close sites with params_json snapshots + rag_signal_filter default collection 'trades'->'trade_memory' + mempalace D-20 reframed (init+mine helix wing 2311+ drawers; YAML taxonomy across 8 domain rooms; PROJECT.md §Memory Architecture role split) + REQUIREMENTS INFRA-01/02/03 -> Complete. INFRA-04 stays Pending (visual verification deferred — Wine MT5 IS running, sources copied to Indicators dir, 8-PNG evidence pending). 12/12 RED tests GREEN; 147 passed/0 failed full fast suite. Three Rule 3 deviations: V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header skip 2->10. Commits: ec8a403, f38af53, 66d0909, dd6a111.*
+
+*2026-04-26 — Phase 11 Plan 01 COMPLETE (~6 min): Tier 0 helper specs — sm_gmtoffset.md (12-section, 192 lines; Confidence: Medium; TimeCurrent()-TimeGMT() detection algorithm; GlobalVariable sm_GMTOffset; 12 [INFER] bullets; check_spec.sh PASS) + sm_WorkTime.md (12-section, 247 lines; cites MMM Book p. 8 session times 00:30/07:30/13:30 GMT + p. 40 Colour-Coded Sessions quote; Dependencies: sm_gmtoffset declared; 32 [INFER] bullets; 50-line pseudocode; check_spec.sh PASS) + sm_WorkTime_no_autogmt.md (12-section, 244 lines; Dependencies: None — no sm_gmtoffset by design; BrokerGMT manual input; Sep 2011 original predates Dec 2011 sm_WorkTime; 10 [INFER] bullets; check_spec.sh PASS). All 3 specs pass check_spec.sh. Style/voice patterns established for Tier 1 anchor. AWAITING Tier 0 user review before Plan 02 starts. Commits: bf265fd, 892d1ed, 97d406f.*
