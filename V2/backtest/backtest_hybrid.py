@@ -24,6 +24,7 @@ NOTE: BEC Partial Close shelved — revisit when win rate reaches >=40%.
 """
 import sys
 import io
+import json
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -35,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from v3_intelligence.trade_logger import TradeLogger
 from v3_intelligence.pair_config import get_pair_config, print_pair_summary
 from v3_intelligence.rag_signal_filter import RAGSignalFilter, CHROMA_AVAILABLE
+from v3_intelligence.learning_loop import on_trade_close
 from signal_filters import rolling_hurst
 
 # Session windows (UTC hours)
@@ -259,9 +261,18 @@ class HybridMultiTimeframeBacktest:
                         'session':       position['session'],
                         'hour_utc':      position['entry_hour'],
                     }
+                    # INFRA-03 / D-10..D-13 — close RAG learning loop synchronously.
+                    # decision_log diff requires strategy_type column (matches trades
+                    # table column name) and a params_json JSON-string snapshot.
+                    rec['strategy_type'] = 'SWING'
+                    rec['params_json'] = json.dumps({
+                        'swing_z_threshold': cfg.swing_z_threshold,
+                        'swing_target_atr':  cfg.swing_target_atr,
+                        'swing_stop_atr':    cfg.swing_stop_atr,
+                        'swing_size_mult':   cfg.swing_size_mult,
+                    })
                     trades.append(rec)
-                    if self.logger:
-                        self.logger.log_trade(rec)
+                    on_trade_close(rec)
                     position = None
 
             # ── ENTRY ─────────────────────────────────────────────────────────
@@ -395,9 +406,17 @@ class HybridMultiTimeframeBacktest:
                         'session':       position['session'],
                         'hour_utc':      position['entry_hour'],
                     }
+                    # INFRA-03 / D-10..D-13 — same hook as swing site, m15 cfg keys.
+                    rec['strategy_type'] = 'M15_SCALP'
+                    rec['params_json'] = json.dumps({
+                        'm15_z_threshold': cfg.m15_z_threshold,
+                        'm15_target_atr':  cfg.m15_target_atr,
+                        'm15_stop_atr':    cfg.m15_stop_atr,
+                        'm15_size_mult':   cfg.m15_size_mult,
+                        'm15_max_bars':    cfg.m15_max_bars,
+                    })
                     trades.append(rec)
-                    if self.logger:
-                        self.logger.log_trade(rec)
+                    on_trade_close(rec)
                     position = None
 
             # ── ENTRY ─────────────────────────────────────────────────────────
