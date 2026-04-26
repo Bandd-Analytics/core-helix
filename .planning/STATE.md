@@ -3,12 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-26T06:42:01.768Z"
+stopped_at: Completed 08.4-02-PLAN.md
+last_updated: "2026-04-26T07:09:03.281Z"
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # STATE: MarketMind Helix
@@ -29,7 +30,7 @@ progress:
 ## Current Position
 
 Phase: 08.4 (infrastructure-prereqs-ohlcv-cache-rag-learning-loop-trade-replay) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ### Progress Bar
 
@@ -70,6 +71,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P03 | 9 min | 3 tasks | 5 files | - |
 | Phase 08 P04 | 12 min | 4 tasks | 9 files | - |
 | Phase 08.4 P01 | 9 min (resume pass) | 4 tasks | 11 files | Wave 0 RED scaffold (32 fns / 53 items / 8 files) + INFRA-01..04 registered + psycopg/dotenv deps + bars-table migration provenance. Task 2 deferred (no SUPABASE_DB_URL); Task 3 partial (migration application deferred). Phase 8 regression: 109 passed, 20F/7E are new Wave 0 RED only |
+| Phase 08.4 P02 | 365 | 3 tasks | 5 files | - |
 
 ## Plan Execution Metrics
 
@@ -129,6 +131,10 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Wave 0 RED scaffold = 32 test fns / 53 collected items across 8 files (08.4-01) | Mirrors Phase 8 P01 pattern; Plans 02-04 turn them GREEN. Nyquist compliance: every implementation task has a `<verify>` command pointing to a real test file on disk |
 | Task 2 deferred — SUPABASE_DB_URL not provisioned (08.4-01) | Operator chose deferred path; Plan 02 slow integration tests will RED-block (psycopg connection error) rather than RED-import-only until URL provisioned. Plan 02 cache.py development unaffected (unit tests use mock_psycopg_conn fixture) |
 | Task 3 partial — bars-table migration provenance committed; application deferred (08.4-01) | mcp__supabase__* tools not in resumed agent context AND no SUPABASE_DB_URL for direct psql application. V2/migrations/0001_create_bars.sql committed with re-application playbook (Options A/B/C: MCP / psql / Python). DDL on disk is canonical source-of-truth; application is re-runnable side-effect |
+| pit.py augmentation strictly additive (08.4-02 / D-25) | Phase 8 contract preserved by `if self._as_of is not None: _bump(±1)` — UNBOUNDED stays at depth=0 by construction. pit.py grew 134→165 lines without removing or renaming any existing symbol; 8/8 Phase 8 PitClock tests still PASS. New thread-local `_PIT_THREAD_DEPTH` + `pit_active()` predicate consumed by cache.py to refuse auto-pull during PiT replay (RESEARCH Pattern 2 / Anti-Patterns) |
+| cache.py landed with PiT-safe auto-pull + Title-case OHLC (08.4-02 / D-01..D-04) | OHLCVCache wired to Supabase Postgres: `psycopg.connect(prepare_threshold=None)` for pgbouncer compat; `INSERT … ON CONFLICT (pair, timeframe, ts) DO NOTHING` for idempotency; inside non-UNBOUNDED PitClock raises FutureBarReadError on out-of-range read; outside, calls `_auto_pull` and retries via non-recursive `_read_only`. 8/8 Plan 01 RED tests in test_cache.py turned GREEN; 3/3 slow integration tests SKIP cleanly until SUPABASE_DB_URL provisioned |
+| Conftest fixture-discovery bridge (08.4-02 / Rule 3 deviation) | Pytest only auto-discovers `conftest.py`, NOT `conftest_infra.py`. Plan 01's RED scaffold designed `conftest_infra.py` for visual separation but pytest never loaded the fixtures. Fix: 11-line bridge in existing `conftest.py` re-exporting the 4 Phase 8.4 fixtures (`from .conftest_infra import …`). Preserves Plan 01 separation while satisfying pytest discovery; Phase 8 fixtures (synthetic_three_regime_returns, v1_baseline) untouched |
+| update_cache.py CLI uses lazy import to break module cycle (08.4-02 / D-04) | `cache._auto_pull` does `from scripts.update_cache import fetch_range` inside the method body, not at module top — cache.py imports cleanly without scripts/ on path; only the auto-pull code path requires it. CLI exposes `--pair / --tf / --since {auto\|all\|YYYY-MM-DD} / --all` for batch pre-warming (8 pairs × 4 timeframes). Linux failover (Phase 7 D-15 reused) reads existing `V2/data/{PAIR}_{TF}_*.csv` when MetaTrader5 unavailable |
 
 ### Critical Gates
 
@@ -160,10 +166,10 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 ## Session Continuity
 
-**Last action:** Phase 8.4 Plan 01 COMPLETE — Wave 0 RED scaffold (32 test fns / 53 collected items across 8 files: conftest_infra + test_cache×2 + test_gbpnzd_parity + test_h4_provisioning + test_learning_loop + test_backfill_rag + test_adr) + INFRA-01..04 added to REQUIREMENTS.md (D-21 satisfied) + psycopg[binary]>=3.3 + python-dotenv>=1.0 in V2/pyproject.toml + V2/.env.example + V2/migrations/0001_create_bars.sql provenance. Task 2 deferred by operator (SUPABASE_DB_URL not provisioned); Task 3 partial — migration application deferred (mcp__supabase__* not in resumed agent context AND no DB URL for direct psql). Both deferrals tracked as Phase 8.4 known follow-ups; Plans 02-04 unblocked. Phase 8 fast-suite regression GREEN: 109 passed, 20 failed/7 errors are exclusively new Wave 0 RED tests (expected). Commits: 7aa2cf1 (T1), 502df94 (T3 partial), 7250313 (T4), bb03d2b (T5). (2026-04-26)
-**Last agent:** execute-plan (resume pass)
-**Stopped at:** Completed 08.4-01-PLAN.md (Tasks 3/4/5 of resume pass; Task 1 from prior agent; Task 2 operator-deferred)
-**Next action:** Continue Phase 8.4 with Plan 02 (cache.py implementation). Plan 02 unit tests can run immediately under mocked psycopg; slow integration tests will skip until SUPABASE_DB_URL provisioned. Operator follow-up: provision SUPABASE_DB_URL + apply 0001_create_bars migration (three documented paths in file header) when ready.
+**Last action:** Phase 8.4 Plan 02 COMPLETE — OHLCVCache landed on Supabase Postgres backing with PiT-safe auto-pull (RESEARCH §Pattern 1). pit.py augmented additively with `pit_active()` + thread-local depth counter (UNBOUNDED stays inactive per D-25). `scripts.update_cache` CLI shipped with --pair/--tf/--since/--all + Linux/MT5 failover (Phase 7 D-15 reused). 8/8 Plan 01 RED tests in test_cache.py turned GREEN; 8/8 Phase 8 PitClock tests still PASS; 38/38 full Phase 8 fast-suite regression GREEN. 3/3 slow integration tests SKIP cleanly until SUPABASE_DB_URL provisioned (operator deferral preserved). One Rule 3 deviation: pytest doesn't auto-discover conftest_infra.py — fixed via 11-line bridge in conftest.py. Commits: 97c082b (T1 pit.py), 7bc8328 (T2 cache.py + conftest bridge), d983374 (T3 update_cache.py). (2026-04-26)
+**Last agent:** execute-plan (Plan 02)
+**Stopped at:** Completed 08.4-02-PLAN.md
+**Next action:** Continue Phase 8.4 with Plan 03 (GBPNZD H1 4yr fetch + 8-pair H4 4yr fetch + GBPNZD matrix re-eval). Plan 03 will use the new cache.upsert_bars to persist fetched bars and turn 30 RED tests GREEN (test_gbpnzd_parity 6 + test_h4_provisioning 24). Operator follow-ups (SUPABASE_DB_URL + migration application) still tracked but not blocking Plans 03/04 development.
 
 ---
 
@@ -178,3 +184,5 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 *Last updated: 2026-04-25 — Phase 8 Plan 04 COMPLETE: fit_regime_detectors.py CLI + 5 detector JSONs + REGM-04 ratified (functional grep gate 3/3 GREEN) + D-16 parity GREEN at rtol=1e-6. All four REGM requirements (REGM-01/02/03/04) satisfied. Operator approved 2026-04-25. v3_intelligence 42/42 GREEN; full V2 project suite 112/112 GREEN. Phase 8 ready for verification (`/gsd:verify-work 08`). Phase 9 ROUT-04 unblocked (after Phase 8.5).*
 
 *2026-04-26 — Phase 8.4 Plan 01 COMPLETE: Wave 0 RED scaffold (8 files / 32 test fns / 53 collected items) + INFRA-01..04 registered + psycopg/dotenv deps + V2/migrations/0001_create_bars.sql provenance. Operator deferred Task 2 (SUPABASE_DB_URL); Task 3 partial (migration application deferred). Plans 02-04 unblocked. Phase 8 regression GREEN (109 passed; 20 fails/7 errors are exclusively new Wave 0 RED — expected). Commits: 7aa2cf1, 502df94, 7250313, bb03d2b.*
+
+*2026-04-26 — Phase 8.4 Plan 02 COMPLETE (~6min): OHLCVCache + pit_active augmentation + scripts.update_cache CLI. Plan 01 RED tests in test_cache.py: 8/8 GREEN. Phase 8 PitClock regression: 8/8 GREEN. Full Phase 8 fast-suite regression: 38/38 GREEN. 3 slow integration tests SKIP cleanly (SUPABASE_DB_URL deferred). One Rule 3 deviation auto-fixed (conftest fixture-discovery bridge). Commits: 97c082b, 7bc8328, d983374.*
