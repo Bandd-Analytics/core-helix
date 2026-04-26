@@ -4,12 +4,12 @@
 -- Intended target: Supabase project nubmgoyyndtolsjyynln (public schema)
 -- Application path: mcp__supabase__apply_migration (MCP server in /home/user/Desktop/BA.ORG/.mcp.json)
 --
--- STATUS (2026-04-25): NOT YET APPLIED.
--- Plan 08.4-01 Task 2 was deferred by operator (SUPABASE_DB_URL not provisioned).
--- Plan 08.4-01 Task 3 was executed without an MCP-capable agent (mcp__supabase__* tools
---   were not injected into the resumed executor context). The DDL below is the verbatim
---   payload that mcp__supabase__apply_migration should send when re-run by an MCP-enabled
---   agent or applied directly via psql once SUPABASE_DB_URL is provisioned.
+-- STATUS (2026-04-26): APPLIED via mcp__supabase__apply_migration from /gsd:execute-phase
+--   orchestrator (post-Plan-08.4-01). Schema verified via information_schema.columns: 9
+--   columns (pair/timeframe TEXT, ts TIMESTAMPTZ, open/high/low/close/volume NUMERIC,
+--   source TEXT) + composite PK (pair, timeframe, ts) + idx_bars_pair_tf_ts_desc.
+--   Plan 08.4-01 Task 2 (operator URL provisioning) remains deferred — required for
+--   Plan 02 integration tests + scripts/update_cache.py runtime reads/writes.
 --
 -- Operator follow-up to apply:
 --   Option A (MCP):   spawn an executor with mcp__supabase__* tools attached, then run
