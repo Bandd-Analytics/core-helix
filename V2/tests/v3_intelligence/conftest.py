@@ -46,3 +46,17 @@ def v1_baseline():
     if not BASELINE_PATH.exists():
         pytest.skip(f"parity_baseline.npz not present at {BASELINE_PATH}")
     return np.load(BASELINE_PATH)
+
+
+# Phase 8.4 INFRA-01..04 fixtures live in conftest_infra.py (Plan 01 chose this
+# filename to keep Phase 8.4 scaffold visually separate from the Phase 8 baseline
+# fixtures above). Pytest only auto-discovers files literally named conftest.py,
+# so we re-export the Phase 8.4 fixtures from here. This preserves
+# conftest_infra.py as canonical source while making fixtures usable in
+# test_cache.py / test_learning_loop.py / test_adr.py / etc.
+from .conftest_infra import (  # noqa: E402, F401
+    sample_trade,
+    in_memory_logger,
+    mock_chroma_collection,
+    mock_psycopg_conn,
+)
