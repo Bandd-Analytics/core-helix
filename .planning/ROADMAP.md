@@ -232,13 +232,13 @@ Plans:
 **Goal:** Reconstruct all 14 `!SM_*` / `!sm_*` MT4 indicators (3 helpers + 11 indicators) into a 15-file markdown reference set under `resource_pack/MMM/SM Indicators/docs/`. Source `.ex4` binaries are non-decompilable; reconstruction is from indicator names + MMM/SM (Steve Mauro Market Maker Method) community knowledge + `resource_pack/MMM/docs/` (MMM Book, TDI Tradestation PDF, Glossary, Knowledge Base) + the Helix INFRA-04 ADR_Levels.mq5 / BandD_TradeReplay.mq5 precedents. Goal: enable future MQ4/MQ5/Python implementation without original source. Tier-based execution with user review after each tier (Tier 0 helpers → Tier 1 atomic → Tier 2 composite, INDEX.md last). Documentation phase — no REQ-ID mapping, no executable code produced.
 **Requirements**: none (documentation phase)
 **Depends on:** none (independent of milestone critical path; can be executed any time after the SM Indicators source binaries are present)
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 11-00-PLAN.md — Wave 0: Validation infrastructure (3 audit scripts: check_spec.sh / check_all.sh / check_index.sh) + docs/ directory tree
 - [x] 11-01-PLAN.md — Wave 1: Tier 0 helpers (sm_gmtoffset, sm_WorkTime, sm_WorkTime_no_autogmt) — 3 specs
 - [x] 11-02-PLAN.md — Wave 2: Tier 1 atomic indicators (SM_ADR_Marker, SM_Daily_HiLo, SM_BPCT, SM_IlsleyPsychLevels, SM_Crossover_Arrows) — 5 specs
-- [ ] 11-03-PLAN.md — Wave 3: Tier 2 composite indicators (SM_TDI, SM_PivotPoints, SM_AlertZone_1, SM_AlertZone_2, SM_Alerting+TL, SM_NewHUD) — 6 specs (NewHUD is 5-7 pages, ~2x the others)
+- [x] 11-03-PLAN.md — Wave 3: Tier 2 composite indicators (SM_TDI, SM_PivotPoints, SM_AlertZone_1, SM_AlertZone_2, SM_Alerting+TL, SM_NewHUD) — 6 specs (NewHUD is 5-7 pages, ~2x the others)
 - [ ] 11-04-PLAN.md — Wave 4: INDEX.md sweep (overview, ASCII dep graph, 14 spec links, MMM glossary cross-refs, confidence summary)
 
 ---
