@@ -13,9 +13,32 @@ Per CONTEXT.md decisions:
 """
 from __future__ import annotations
 
+import threading
 from typing import Any, Callable, ClassVar, Optional
 
 import pandas as pd
+
+# Thread-local PitClock depth counter (Phase 8.4 INFRA-01 / RESEARCH Pattern 2).
+# Used by V2/v3_intelligence/cache.py via pit_active() to refuse auto-pull during
+# PiT replay (RESEARCH Anti-Patterns: auto-pulling inside PitClock leaks the future).
+# UNBOUNDED sentinel does NOT bump this counter (Phase 8 D-25 honored).
+_PIT_THREAD_DEPTH = threading.local()
+
+
+def _bump(delta: int) -> None:
+    """Adjust thread-local PitClock depth counter; floor at 0."""
+    cur = getattr(_PIT_THREAD_DEPTH, "depth", 0)
+    _PIT_THREAD_DEPTH.depth = max(0, cur + delta)
+
+
+def pit_active() -> bool:
+    """True iff a non-UNBOUNDED PitClock with-block is active on this thread.
+
+    Used by V2/v3_intelligence/cache.py to refuse auto-pull during PiT replay
+    (RESEARCH Anti-Patterns: auto-pulling inside PitClock leaks the future).
+    UNBOUNDED sentinel keeps depth at 0 — preserves Phase 8 D-25 contract.
+    """
+    return getattr(_PIT_THREAD_DEPTH, "depth", 0) > 0
 
 
 class FutureBarReadError(Exception):
@@ -35,6 +58,8 @@ class PitClock:
 
     def __enter__(self) -> "PitClock":
         self._active = True
+        if self._as_of is not None:   # UNBOUNDED sentinel stays inactive (D-25)
+            _bump(+1)
         return self
 
     def __exit__(
@@ -44,6 +69,8 @@ class PitClock:
         exc_tb: Any,
     ) -> None:
         self._active = False
+        if self._as_of is not None:   # UNBOUNDED sentinel stays inactive (D-25)
+            _bump(-1)
 
     def advance(self, new_ts: pd.Timestamp) -> None:
         """Move the cutoff forward inside the loop body.
@@ -131,4 +158,4 @@ def pit_gated(method: Callable[..., Any]) -> Callable[..., Any]:
     return wrapper
 
 
-__all__ = ["PitClock", "FutureBarReadError", "pit_gated"]
+__all__ = ["PitClock", "FutureBarReadError", "pit_gated", "pit_active"]
