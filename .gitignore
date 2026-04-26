@@ -14,6 +14,11 @@ venv/
 *.csv
 *.bin
 
+# Track canonical OHLC CSVs (Phase 8.4 INFRA-02 / D-08 — used as Linux failover
+# data source when MT5/Wine unavailable; updated via Path A MT5 GUI export).
+!V2/data/*_4yr.csv
+!V2/data/*_DAILY*.csv
+
 # ChromaDB & mempalace
 .mempalace/
 data/chroma_rag/
