@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Completed 08.4-03-PLAN.md
-last_updated: "2026-04-26T11:21:00.000Z"
+status: unknown
+stopped_at: Completed 08.4-04-PLAN.md (4/5 tasks; Task 3b operator visual verification deferred)
+last_updated: "2026-04-26T12:16:15.386Z"
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # STATE: MarketMind Helix
@@ -30,7 +30,7 @@ progress:
 ## Current Position
 
 Phase: 08.4 (infrastructure-prereqs-ohlcv-cache-rag-learning-loop-trade-replay) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 ### Progress Bar
 
@@ -38,12 +38,12 @@ Plan: 3 of 4
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
-Phase 8.4[#######...] 75%  Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plans 01/02/03 complete (24 4yr CSVs landed via MT5 Path A; GBPNZD allow_scalp flipped True per D-07 4yr PiT eval Sh 0.66/928 trades); Plan 04 next
+Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plans 01/02/03/04 complete; INFRA-01/02/03 satisfied; INFRA-04 sources landed but visual verification on M15/H1/H4/Daily deferred (Wine MT5 running locally; 8 PNG evidence pending operator follow-up session)
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 12/24 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04; INFRA-01..04 registered Phase 8.4 Plan 01 — implementation pending Plans 02-04)
+**Overall milestone:** 15/24 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04, INFRA-01/02/03; INFRA-04 sources landed Plan 04 Task 3a but visual verification on M15/H1/H4/Daily deferred to follow-up operator session)
 
 ---
 
@@ -72,6 +72,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P04 | 12 min | 4 tasks | 9 files | - |
 | Phase 08.4 P01 | 9 min (resume pass) | 4 tasks | 11 files | Wave 0 RED scaffold (32 fns / 53 items / 8 files) + INFRA-01..04 registered + psycopg/dotenv deps + bars-table migration provenance. Task 2 deferred (no SUPABASE_DB_URL); Task 3 partial (migration application deferred). Phase 8 regression: 109 passed, 20F/7E are new Wave 0 RED only |
 | Phase 08.4 P02 | 365 | 3 tasks | 5 files | - |
+| Phase 08.4 P04 | 50 min | 4 of 5 (Task 3b deferred) tasks | 14 files | - |
 
 ## Plan Execution Metrics
 
@@ -155,8 +156,12 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ### Todos
 
 - [ ] Start Phase 6 planning: `/gsd:plan-phase 6`
-- [ ] **Phase 8.4 follow-up:** Operator provisions SUPABASE_DB_URL in V2/.env (Session pooler URI, port 5432) — unblocks Plan 02 slow integration tests
+- [ ] **Phase 8.4 follow-up:** Operator provisions SUPABASE_DB_URL in V2/.env (Session pooler URI, port 5432) — unblocks Plan 02 slow integration tests + cache.upsert_bars runtime ops + Plan 04 backfill_rag end-to-end run
 - [ ] **Phase 8.4 follow-up:** Apply 0001_create_bars migration via Option A (MCP-enabled agent re-spawn) / B (`psql "$SUPABASE_DB_URL" -f V2/migrations/0001_create_bars.sql`) / C (Python psycopg) — provenance file already on disk
+- [ ] **Phase 8.4 P04 follow-up:** Operator visual verification of `BandD_TradeReplay.mq5` + `ADR_Levels.mq5` on M15/H1/H4/Daily charts under Wine MT5 (IC Markets KE MT5 Terminal) — .mq5 sources already copied to `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/`. Capture 8 PNG screenshots into `.planning/phases/08.4-.../evidence/` then flip INFRA-04 to Complete in REQUIREMENTS.md
+- [ ] **Phase 8.4 P04 follow-up:** Run `mempalace mine .` to completion (process was still running at Plan 04 commit time; current 'helix' wing has 2311+ drawers but mining hadn't fully finished)
+- [ ] **Phase 8.4 P04 follow-up:** Once SUPABASE_DB_URL provisioned: `cd V2 && python3 -m scripts.backfill_rag` to populate ChromaDB `trade_memory` from existing marketmind.db trades (D-14)
+- [ ] **Phase 8.4 P04 follow-up:** AUDNZD H4 broker constraint — re-fetch ~2029-01-02 when 4yr depth reached (Plan 03 carried)
 
 ### Blockers
 
@@ -166,10 +171,10 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 ## Session Continuity
 
-**Last action:** Phase 8.4 Plan 02 COMPLETE — OHLCVCache landed on Supabase Postgres backing with PiT-safe auto-pull (RESEARCH §Pattern 1). pit.py augmented additively with `pit_active()` + thread-local depth counter (UNBOUNDED stays inactive per D-25). `scripts.update_cache` CLI shipped with --pair/--tf/--since/--all + Linux/MT5 failover (Phase 7 D-15 reused). 8/8 Plan 01 RED tests in test_cache.py turned GREEN; 8/8 Phase 8 PitClock tests still PASS; 38/38 full Phase 8 fast-suite regression GREEN. 3/3 slow integration tests SKIP cleanly until SUPABASE_DB_URL provisioned (operator deferral preserved). One Rule 3 deviation: pytest doesn't auto-discover conftest_infra.py — fixed via 11-line bridge in conftest.py. Commits: 97c082b (T1 pit.py), 7bc8328 (T2 cache.py + conftest bridge), d983374 (T3 update_cache.py). (2026-04-26)
-**Last agent:** execute-plan (Plan 02)
-**Stopped at:** Completed 08.4-02-PLAN.md
-**Next action:** Continue Phase 8.4 with Plan 04 (RAG learning loop closure INFRA-03 + ADR/trade-replay indicators INFRA-04 + mempalace D-20). Plans 01/02/03 complete: 37/46 fast tests GREEN (9 slow @SUPABASE_DB_URL deselected). Operator follow-ups: SUPABASE_DB_URL provisioning still pending (blocks slow integration tests + cache.upsert_bars runtime ops); AUDNZD H4 broker constraint flagged for re-fetch ~2029-01-02 when 4yr depth reached.
+**Last action:** Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred) — RAG learning loop closed (`learning_loop.on_trade_close` glue layer + `_maybe_log_param_diff` D-12 decision_log diff via OFFSET 1 prev-trade lookup); `compute_adr` helper (D-18); `scripts.backfill_rag` CLI (D-14); `BandD_TradeReplay.mq5` + `ADR_Levels.mq5` indicators (D-15/D-17/D-18/D-19, timeframe-agnostic per D-16); `backtest_hybrid.py` wired `on_trade_close(rec)` at swing-close + m15-close sites with `params_json` snapshots; `rag_signal_filter` default collection 'trades'->'trade_memory' (Warning 6); `mempalace init`+`mine` populated 'helix' wing (~2311+ drawers); `mempalace.yaml` taxonomy expanded across 8 domain rooms; `PROJECT.md` §Memory Architecture documents claude-mem vs mempalace vs chroma_rag/trade_memory; `REQUIREMENTS.md` INFRA-01/02/03 -> Complete. INFRA-04 stays Pending — Wine MT5 IS running locally but spawned executor cannot capture GUI screenshots; .mq5 sources copied to `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/` for follow-up operator session. 12/12 Plan 01 RED tests GREEN (6 learning_loop + 4 adr + 2 slow backfill_rag); full Phase 6/7/8 + 8.4 P02/P03/P04 fast suite: 147 passed / 18 deselected / 0 failed. Three Rule 3 deviations auto-fixed (V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header-skip from 2-read to 10-read). Commits: ec8a403 (T1 logger+learning_loop+adr), f38af53 (T2 backfill_rag+wire), 66d0909 (T3a indicators+sample csv), dd6a111 (T5 mempalace+PROJECT.md+REQUIREMENTS). (2026-04-26)
+**Last agent:** execute-plan (Plan 04)
+**Stopped at:** Completed 08.4-04-PLAN.md (4/5 tasks; Task 3b operator visual verification deferred)
+**Next action:** Phase 8.4 ready for `/gsd:verify-work 08.4` with INFRA-04 visual-verification deferral noted. New follow-ups beyond carried Plan 02/03 ones: (a) operator visual verification of BandD_TradeReplay + ADR_Levels on M15/H1/H4/Daily under Wine MT5 — 8 PNG screenshots into `evidence/`; (b) `mempalace mine .` to completion (was running at commit time); (c) once SUPABASE_DB_URL provisioned: `python -m scripts.backfill_rag` to populate trade_memory from existing marketmind.db. Carried follow-ups: SUPABASE_DB_URL provisioning + 0001_create_bars migration application + AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
 
@@ -186,3 +191,5 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 *2026-04-26 — Phase 8.4 Plan 01 COMPLETE: Wave 0 RED scaffold (8 files / 32 test fns / 53 collected items) + INFRA-01..04 registered + psycopg/dotenv deps + V2/migrations/0001_create_bars.sql provenance. Operator deferred Task 2 (SUPABASE_DB_URL); Task 3 partial (migration application deferred). Plans 02-04 unblocked. Phase 8 regression GREEN (109 passed; 20 fails/7 errors are exclusively new Wave 0 RED — expected). Commits: 7aa2cf1, 502df94, 7250313, bb03d2b.*
 
 *2026-04-26 — Phase 8.4 Plan 02 COMPLETE (~6min): OHLCVCache + pit_active augmentation + scripts.update_cache CLI. Plan 01 RED tests in test_cache.py: 8/8 GREEN. Phase 8 PitClock regression: 8/8 GREEN. Full Phase 8 fast-suite regression: 38/38 GREEN. 3 slow integration tests SKIP cleanly (SUPABASE_DB_URL deferred). One Rule 3 deviation auto-fixed (conftest fixture-discovery bridge). Commits: 97c082b, 7bc8328, d983374.*
+
+*2026-04-26 — Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred — ~50 min): RAG learning loop closure (learning_loop.on_trade_close + decision_log diff via OFFSET 1 + ChromaDB index_trade) + ADR helper (compute_adr) + backfill_rag.py CLI + BandD_TradeReplay.mq5 + ADR_Levels.mq5 indicators (timeframe-agnostic D-16) + backtest_hybrid wired at swing+m15 close sites with params_json snapshots + rag_signal_filter default collection 'trades'->'trade_memory' + mempalace D-20 reframed (init+mine helix wing 2311+ drawers; YAML taxonomy across 8 domain rooms; PROJECT.md §Memory Architecture role split) + REQUIREMENTS INFRA-01/02/03 -> Complete. INFRA-04 stays Pending (visual verification deferred — Wine MT5 IS running, sources copied to Indicators dir, 8-PNG evidence pending). 12/12 RED tests GREEN; 147 passed/0 failed full fast suite. Three Rule 3 deviations: V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header skip 2->10. Commits: ec8a403, f38af53, 66d0909, dd6a111.*

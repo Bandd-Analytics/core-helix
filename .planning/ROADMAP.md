@@ -12,7 +12,7 @@
 - [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
 - [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2026-04-24)
 - [x] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series (completed 2026-04-25)
-- [ ] **Phase 8.4: Infrastructure Prereqs** *(INSERTED 2026-04-25)* — OHLCV cache layer (Supabase, incremental delta fetch), close the RAG learning loop (auto-flow trade closes → SQLite + Chroma + decision_log), GBPNZD H1 4yr data parity, ADR helper, MQ5 trade-replay indicator, and mempalace/claude-mem reconciliation — unblocks Phase 8.5's heavy temporal analysis on a stable data and observability foundation
+- [x] **Phase 8.4: Infrastructure Prereqs** *(INSERTED 2026-04-25)* — OHLCV cache layer (Supabase, incremental delta fetch), close the RAG learning loop (auto-flow trade closes → SQLite + Chroma + decision_log), GBPNZD H1 4yr data parity, ADR helper, MQ5 trade-replay indicator, and mempalace/claude-mem reconciliation — unblocks Phase 8.5's heavy temporal analysis on a stable data and observability foundation (completed 2026-04-26)
 - [ ] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
@@ -119,13 +119,13 @@ Plans:
 - **mempalace vs claude-mem reconciliation** — decide the canonical store; if claude-mem is canonical, delete or `.gitignore` `mempalace.yaml` and `entities.json` to avoid future drift
 - **Out of scope** — S&R / pivot levels (deferred to a possible Phase 8.6), H4 timeframe (still pending the user decision), full historical RAG re-embed of pre-existing trades (only the forward path is in scope; a one-shot backfill script is acceptable but not required)
 
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 08.4-01-PLAN.md — Wave 0: REQUIREMENTS.md update (D-21) + dependency additions (psycopg + python-dotenv) + Supabase bars-table migration (D-02) + 8 RED test files for INFRA-01..04 + D-08 [checkpoint — operator SUPABASE_DB_URL]
 - [x] 08.4-02-PLAN.md — Wave 1: OHLCVCache class + PiT-active gate (RESEARCH Pattern 1+2) + scripts/update_cache.py CLI (D-04 dual-mode) [autonomous]
 - [x] 08.4-03-PLAN.md — Wave 2: GBPNZD H1 4yr (INFRA-02 / D-05/D-06) + 8 pairs × H4 4yr (D-08) + PiT-gated 4yr eval (D-07) + conditional pair_config update [checkpoint — operator MT5 GUI exports]
-- [ ] 08.4-04-PLAN.md — Wave 3: learning_loop.on_trade_close (INFRA-03 / D-10..D-13) + adr.compute_adr (D-18) + backfill_rag (D-14) + backtest wire (D-11) + BandD_TradeReplay.mq5 + ADR_Levels.mq5 (INFRA-04 / D-15..D-19, D-16) + mempalace D-20 + REQUIREMENTS traceability flip [checkpoint — operator MQ5 visual verification]
+- [x] 08.4-04-PLAN.md — Wave 3: learning_loop.on_trade_close (INFRA-03 / D-10..D-13) + adr.compute_adr (D-18) + backfill_rag (D-14) + backtest wire (D-11) + BandD_TradeReplay.mq5 + ADR_Levels.mq5 (INFRA-04 / D-15..D-19, D-16) + mempalace D-20 + REQUIREMENTS traceability flip [checkpoint — operator MQ5 visual verification]
 
 ### Phase 8.5: Temporal & Session Analysis
 
@@ -222,7 +222,7 @@ Plans:
 | 6. ZMQ Bridge Port | 4/4 | Complete | 2026-04-24 |
 | 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2026-04-25 |
 | 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2026-04-25 |
-| 8.4. Infrastructure Prereqs (INSERTED) | 0/? | Not started | — |
+| 8.4. Infrastructure Prereqs (INSERTED) | 4/4 | Complete   | 2026-04-26 |
 | 8.5. Temporal & Session Analysis | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
