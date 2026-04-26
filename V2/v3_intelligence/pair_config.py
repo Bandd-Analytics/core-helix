@@ -148,18 +148,18 @@ PAIR_CONFIGS: dict[str, PairConfig] = {
         notes="Multi-strategy: Swing Sh 0.45, H1 Scalp Sh 1.32, Momentum Sh 1.57, M15 Sh 1.86. All positive. | 4yr corrected — 2026-04-25: scalp Sh=1.09 win=48.3% n=974; momentum Sh=0.84 win=49.7% n=1651",
     ),
 
-    # ── GBPNZD: Swing negative. M15 is the best M15 pair (Sh 3.65). ──────────
+    # ── GBPNZD: M15 still best. H1 scalp re-enabled per Phase 8.4 D-07 4yr re-eval. ──
     "GBPNZD": PairConfig(
         symbol="GBPNZD", tier=2,
         swing_size_mult=0.0,
         swing_z_threshold=99.0,
         allow_swing=False,           # Swing Sh -0.34 — disabled
-        allow_scalp=False,           # H1 scalp Sh -0.60 — disabled
-        allow_momentum=False,        # Momentum Sh -1.23 — disabled
+        allow_scalp=True,            # H1 scalp Sh 0.66 (4yr PiT, 928 trades) — re-enabled per 08.4-03 D-07
+        allow_momentum=False,        # Momentum Sh 0.42 (4yr PiT, 1880 trades) — below 0.5 threshold, kept disabled
         allow_m15_scalp=True,        # M15 Sh 3.65 — BEST M15 pair in portfolio
         m15_z_threshold=2.0,
         m15_size_mult=0.7,
-        notes="Swing/H1/Momentum all negative. M15 Sh 3.65 — highest M15 Sharpe. Active M15 only.",
+        notes="08.4-03 4yr PiT re-eval (real GBPNZD H1 4yr from MT5 Path A): scalp Sh=0.66 n=928 wr=47.5% — CROSSED, allow_scalp flipped True. Momentum Sh=0.42 n=1880 wr=46.2% — below 0.5 threshold, stays disabled. M15 Sh 3.65 unchanged. Eval JSON: backtest/results/gbpnzd_4yr_eval_2026-04-26.json.",
     ),
 
     # ── EURUSD: Swing/H1/Momentum negative. M15 Sh 2.62 — re-enabled. ────────

@@ -1,0 +1,27 @@
+{
+  "pair": "GBPNZD",
+  "data_window_end": "2026-04-24 23:00:00",
+  "pit_active": true,
+  "thresholds": {
+    "sharpe": 0.5,
+    "min_trades": 30
+  },
+  "strategies": {
+    "scalp": {
+      "sharpe": 0.6649,
+      "win_rate": 0.4752,
+      "trade_count": 928,
+      "sharpe_threshold_met": true,
+      "min_trades_met": true,
+      "allow_flag": true
+    },
+    "momentum": {
+      "sharpe": 0.4217,
+      "win_rate": 0.4622,
+      "trade_count": 1880,
+      "sharpe_threshold_met": false,
+      "min_trades_met": true,
+      "allow_flag": false
+    }
+  }
+}
