@@ -1,20 +1,164 @@
-wing: ba_prj___helix
+# Phase 8.4 D-20 — Project keyword taxonomy for mempalace structured-knowledge palace.
+#
+# This file documents the room/keyword shape. The actual palace state (drawers,
+# vector index) lives at ~/.mempalace/palace/ — populated by `mempalace init`
+# (one-time) + `mempalace mine .` (periodic re-index).
+#
+# Role split (D-20 / RESEARCH §"D-20 Reframing" lines 928-931):
+#   claude-mem        = canonical conversation memory (cross-session)
+#   mempalace         = structured-knowledge palace (rooms × keywords; user-global)
+#   ~/.claude/.../memory/ = Claude internal session auto-memory (orthogonal)
+#   chroma_rag/trade_memory = RAG learning loop (separate concern; INFRA-03)
+#
+# DO NOT re-run `mempalace init` after editing this file — RESEARCH Pitfall 7,
+# init overwrites the YAML.
+wing: helix
 rooms:
+- name: regime
+  description: HMM-GARCH regime classifier, PiT, online filter (Phase 8 outputs)
+  keywords:
+  - HMM-GARCH
+  - regime classifier
+  - OnlineRegimeFilter
+  - PitClock
+  - FutureBarReadError
+  - TRENDING
+  - MEAN_REVERTING
+  - CRISIS
+  - variance ranking
+  - state pinning
+  - Viterbi ban
+  - REGM-01
+  - REGM-02
+  - REGM-03
+  - REGM-04
+- name: backtest
+  description: backtest harness, 4yr evaluators, PiT validator, routing matrix
+  keywords:
+  - backtest_hybrid
+  - backtest_4yr_evaluate
+  - pit_validator
+  - swing
+  - scalp
+  - momentum
+  - M15 scalp
+  - Sharpe
+  - win rate
+  - trade count
+  - 4yr matrix
+  - BKTS-01
+  - BKTS-02
+  - BKTS-03
+  - BKTS-04
+  - INFRA-02
+- name: bridge
+  description: ZMQ bridge contracts (msgpack + JSON Option A) and EA wiring
+  keywords:
+  - ZMQ
+  - msgpack
+  - bridge schema
+  - BridgeConsumer
+  - BridgePublisher
+  - heartbeat
+  - auto-reconnect
+  - BRDG-01
+  - BRDG-02
+  - BRDG-03
+  - BRDG-04
+- name: data
+  description: OHLCV cache, Supabase bars table, pair_config, multi-timeframe corpus
+  keywords:
+  - OHLCV cache
+  - Supabase bars table
+  - psycopg
+  - pair_config
+  - 8 pairs
+  - USDJPY
+  - GBPJPY
+  - GBPAUD
+  - GBPUSD
+  - EURGBP
+  - GBPNZD
+  - EURUSD
+  - AUDNZD
+  - timeframes M15 H1 H4 Daily
+  - IC Markets
+  - MT5
+  - INFRA-01
+  - INFRA-02
+- name: rag
+  description: RAG learning loop (ChromaDB + decision_log) — INFRA-03 (Plan 04)
+  keywords:
+  - RAG signal filter
+  - ChromaDB
+  - trade_memory collection
+  - learning_loop
+  - on_trade_close
+  - decision_log
+  - params_json
+  - backfill_rag
+  - INFRA-03
+- name: indicators
+  description: MQ5 indicators (timeframe-agnostic per D-16 invariant)
+  keywords:
+  - MQ5
+  - BandD_TradeReplay
+  - ADR_Levels
+  - AdaptiveATR
+  - SessionFilter
+  - RegimeClassifier
+  - timeframe-agnostic rendering
+  - D-16
+  - INFRA-04
+- name: memory
+  description: Memory-architecture role split — D-20 documentation
+  keywords:
+  - claude-mem
+  - mempalace
+  - structured-knowledge
+  - user-global palace
+  - D-20
+  - conversation memory
+  - palace wing
 - name: documentation
   description: Files from docs/
   keywords:
   - documentation
   - docs
+- name: bugs
+  description: Files from bugs/
+  keywords:
+  - bugs
+  - debugging
+- name: sealed
+  description: Files from sealed/ (SEALED-LAYER.md — never tracked by git)
+  keywords:
+  - sealed
+  - sealed-layer
+- name: resource_pack
+  description: Files from resource_pack/
+  keywords:
+  - resource_pack
 - name: scripts
   description: Files from scripts/
   keywords:
   - scripts
-  - scripts
+  - download_history
+  - backfill_rag
+  - update_cache
+  - normalize_mt5_exports
 - name: testing
   description: Files from tests/
   keywords:
   - testing
   - tests
+  - pytest
+  - parity_baseline
+- name: research
+  description: Files from research/ (per-phase RESEARCH.md)
+  keywords:
+  - research
+  - phase research
 - name: general
   description: Files that don't fit other rooms
   keywords: []

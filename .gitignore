@@ -51,3 +51,10 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# MemPalace per-project files (issue #185)
+# Phase 8.4 D-20 — keep mempalace.yaml tracked as documentation of the
+# project's room/keyword taxonomy (the actual palace state lives at
+# ~/.mempalace/palace/). DO NOT re-run `mempalace init` after editing
+# (RESEARCH Pitfall 7 — init overwrites the YAML).
+# mempalace.yaml  -- intentionally NOT ignored
