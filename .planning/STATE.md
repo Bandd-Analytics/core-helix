@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed 08.4-02-PLAN.md
-last_updated: "2026-04-26T07:09:03.281Z"
+status: in_progress
+stopped_at: Completed 08.4-03-PLAN.md
+last_updated: "2026-04-26T11:21:00.000Z"
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # STATE: MarketMind Helix
@@ -38,7 +38,7 @@ Plan: 3 of 4
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
-Phase 8.4[##........] 25%  Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plan 01 complete (INFRA-01..04 registered + Wave 0 RED scaffold landed); Task 2 + Task 3 partial deferred (operator follow-up)
+Phase 8.4[#######...] 75%  Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plans 01/02/03 complete (24 4yr CSVs landed via MT5 Path A; GBPNZD allow_scalp flipped True per D-07 4yr PiT eval Sh 0.66/928 trades); Plan 04 next
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
@@ -169,7 +169,7 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 **Last action:** Phase 8.4 Plan 02 COMPLETE — OHLCVCache landed on Supabase Postgres backing with PiT-safe auto-pull (RESEARCH §Pattern 1). pit.py augmented additively with `pit_active()` + thread-local depth counter (UNBOUNDED stays inactive per D-25). `scripts.update_cache` CLI shipped with --pair/--tf/--since/--all + Linux/MT5 failover (Phase 7 D-15 reused). 8/8 Plan 01 RED tests in test_cache.py turned GREEN; 8/8 Phase 8 PitClock tests still PASS; 38/38 full Phase 8 fast-suite regression GREEN. 3/3 slow integration tests SKIP cleanly until SUPABASE_DB_URL provisioned (operator deferral preserved). One Rule 3 deviation: pytest doesn't auto-discover conftest_infra.py — fixed via 11-line bridge in conftest.py. Commits: 97c082b (T1 pit.py), 7bc8328 (T2 cache.py + conftest bridge), d983374 (T3 update_cache.py). (2026-04-26)
 **Last agent:** execute-plan (Plan 02)
 **Stopped at:** Completed 08.4-02-PLAN.md
-**Next action:** Continue Phase 8.4 with Plan 03 (GBPNZD H1 4yr fetch + 8-pair H4 4yr fetch + GBPNZD matrix re-eval). Plan 03 will use the new cache.upsert_bars to persist fetched bars and turn 30 RED tests GREEN (test_gbpnzd_parity 6 + test_h4_provisioning 24). Operator follow-ups (SUPABASE_DB_URL + migration application) still tracked but not blocking Plans 03/04 development.
+**Next action:** Continue Phase 8.4 with Plan 04 (RAG learning loop closure INFRA-03 + ADR/trade-replay indicators INFRA-04 + mempalace D-20). Plans 01/02/03 complete: 37/46 fast tests GREEN (9 slow @SUPABASE_DB_URL deselected). Operator follow-ups: SUPABASE_DB_URL provisioning still pending (blocks slow integration tests + cache.upsert_bars runtime ops); AUDNZD H4 broker constraint flagged for re-fetch ~2029-01-02 when 4yr depth reached.
 
 ---
 
