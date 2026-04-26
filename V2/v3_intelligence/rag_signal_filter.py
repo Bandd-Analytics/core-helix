@@ -76,7 +76,7 @@ class RAGSignalFilter:
             # take trade at score["size_modifier"] * base_size
     """
 
-    def __init__(self, chroma_path: Path = CHROMA_PATH, collection: str = "trades"):
+    def __init__(self, chroma_path: Path = CHROMA_PATH, collection: str = "trade_memory"):
         if not CHROMA_AVAILABLE:
             raise ImportError("chromadb is required: pip install chromadb")
         CHROMA_PATH.mkdir(parents=True, exist_ok=True)
