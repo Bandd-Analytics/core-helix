@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: milestone
 status: unknown
 stopped_at: Completed 08.4-04-PLAN.md (4/5 tasks; Task 3b operator visual verification deferred)
-last_updated: "2026-04-26T12:16:15.386Z"
+last_updated: "2026-04-26T14:28:29.756Z"
 progress:
   total_phases: 7
   completed_phases: 4
@@ -72,7 +72,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 08 P04 | 12 min | 4 tasks | 9 files | - |
 | Phase 08.4 P01 | 9 min (resume pass) | 4 tasks | 11 files | Wave 0 RED scaffold (32 fns / 53 items / 8 files) + INFRA-01..04 registered + psycopg/dotenv deps + bars-table migration provenance. Task 2 deferred (no SUPABASE_DB_URL); Task 3 partial (migration application deferred). Phase 8 regression: 109 passed, 20F/7E are new Wave 0 RED only |
 | Phase 08.4 P02 | 365 | 3 tasks | 5 files | - |
-| Phase 08.4 P04 | 50 min | 4 of 5 (Task 3b deferred) tasks | 14 files | - |
+| Phase 08.4 P04 | 50 min | 4 of 4 (Task 3b deferred) tasks | 14 files | - |
 
 ## Plan Execution Metrics
 
@@ -152,6 +152,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 - Phase 8.5 added 2026-04-25: Temporal & Session Analysis (prerequisite for Phase 9 StrategyRouter)
 - Phase 8.4 inserted 2026-04-25 after Phase 8: Infrastructure Prereqs — OHLCV Cache + RAG Learning Loop + GBPNZD parity + Trade Replay (URGENT — addresses 2026-04-25 architectural audit findings: CSV-only data layer, unclosed RAG learning loop, missing GBPNZD 4yr H1, no MQ5 strategy-replay indicator, mempalace/claude-mem ambiguity). Inserted before Phase 8.5 so the heavy temporal analysis runs on a stable cache and produces decision_log entries that flow back into RAG memory.
 - Scope correction 2026-04-25: PROJECT.md "5 forex pairs / daily-only" prose was stale; project-default scope restored to 8 pairs × M15/H1/Daily as committed in [pair_config.py](../V2/v3_intelligence/pair_config.py). H4 timeframe flagged as not-currently-in-scope, awaiting explicit decision.
+- Phase 11 added 2026-04-26: SM Indicators full-spec documentation — reconstruct all 14 `!SM_*`/`!sm_*` MT4 indicators (3 helpers + 11 uppercase) at Full level (12-section template) into `resource_pack/MMM/SM Indicators/docs/` (15 files: INDEX + 3 helpers + 11 indicators). Source `.ex4` binaries are compiled and not decompilable; reconstruction is from indicator names + MMM/SM (Steve Mauro Market Maker Method) community knowledge + `resource_pack/MMM/docs/` (MMM Book, Glossary, Knowledge Base, TDI strategies). Goal: enable future MQ4/MQ5/Python implementation without original source. Tier-based execution with user review after each tier (Tier 0 helpers → Tier 1 atomic → Tier 2 composite, INDEX.md last).
 
 ### Todos
 

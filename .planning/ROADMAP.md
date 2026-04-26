@@ -1,7 +1,7 @@
 # ROADMAP: MarketMind Helix
 
 **Milestone:** v2.0 — V3 Adaptive Strategy Dispatch System
-**Created:** 2026-04-22
+**Created:** 2011-04-22
 **Phases:** 6–10 + 8.4 + 8.5 (v1.0 ended at Phase 5)
 **Coverage:** 20/20 v2.0 requirements mapped
 
@@ -9,10 +9,10 @@
 
 ## Phases
 
-- [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2026-04-24)
-- [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2026-04-24)
-- [x] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series (completed 2026-04-25)
-- [x] **Phase 8.4: Infrastructure Prereqs** *(INSERTED 2026-04-25)* — OHLCV cache layer (Supabase, incremental delta fetch), close the RAG learning loop (auto-flow trade closes → SQLite + Chroma + decision_log), GBPNZD H1 4yr data parity, ADR helper, MQ5 trade-replay indicator, and mempalace/claude-mem reconciliation — unblocks Phase 8.5's heavy temporal analysis on a stable data and observability foundation (completed 2026-04-26)
+- [x] **Phase 6: ZMQ Bridge Port** — Establish the Python-MT5 communication layer with schema contract, heartbeat, DLL compatibility spike, and bar-close event push (completed 2011-04-24)
+- [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2011-04-24)
+- [x] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series (completed 2011-04-25)
+- [x] **Phase 8.4: Infrastructure Prereqs** *(INSERTED 2011-04-25)* — OHLCV cache layer (Supabase, incremental delta fetch), close the RAG learning loop (auto-flow trade closes → SQLite + Chroma + decision_log), GBPNZD H1 4yr data parity, ADR helper, MQ5 trade-replay indicator, and mempalace/claude-mem reconciliation — unblocks Phase 8.5's heavy temporal analysis on a stable data and observability foundation (completed 2011-04-26)
 - [ ] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
@@ -93,9 +93,9 @@ Plans:
 
 ---
 
-### Phase 8.4: Infrastructure Prereqs — OHLCV Cache + RAG Learning Loop + Trade Replay (INSERTED 2026-04-25)
+### Phase 8.4: Infrastructure Prereqs — OHLCV Cache + RAG Learning Loop + Trade Replay (INSERTED 2011-04-25)
 
-**Goal:** Close the architectural gaps identified in the 2026-04-25 audit so Phase 8.5's heavy temporal analysis runs on a stable data layer with observable feedback. Specifically: a persistent OHLCV cache replaces the ad-hoc CSV-on-disk pattern (incremental delta fetch, no full re-downloads), the RAG learning loop is closed end-to-end (every closed trade auto-flows into SQLite trades, decision_log, and ChromaDB), GBPNZD's missing 4yr H1 data is filled, ADR is computable per timeframe, and an MQ5 trade-replay indicator visualizes Python strategy entries/exits on chart.
+**Goal:** Close the architectural gaps identified in the 2011-04-25 audit so Phase 8.5's heavy temporal analysis runs on a stable data layer with observable feedback. Specifically: a persistent OHLCV cache replaces the ad-hoc CSV-on-disk pattern (incremental delta fetch, no full re-downloads), the RAG learning loop is closed end-to-end (every closed trade auto-flows into SQLite trades, decision_log, and ChromaDB), GBPNZD's missing 4yr H1 data is filled, ADR is computable per timeframe, and an MQ5 trade-replay indicator visualizes Python strategy entries/exits on chart.
 
 **Pairs in scope:** all 8 (USDJPY, GBPJPY, GBPAUD, GBPUSD, EURGBP, GBPNZD, EURUSD, AUDNZD) — the cache and learning-loop layers are pair-agnostic but must round-trip every pair.
 
@@ -153,7 +153,7 @@ Plans:
 **Data prerequisites (must be resolved in plan 01 before analysis runs):**
 - GBPNZD lacks `*_H1_4yr.csv` (currently 730d) — fetch or document
 - M15 window is 60d for all pairs — DoY/DoM bucketing is statistically thin; either extend M15 history or restrict DoY/DoM analysis to H1+Daily
-- Persistent OHLCV cache strategy is ad-hoc (raw CSV on disk) — no incremental delta fetch, every re-run risks re-downloading; flagged as architectural gap (see infrastructure audit 2026-04-25)
+- Persistent OHLCV cache strategy is ad-hoc (raw CSV on disk) — no incremental delta fetch, every re-run risks re-downloading; flagged as architectural gap (see infrastructure audit 2011-04-25)
 
 **Requirements:** SESS-01, SESS-02, SESS-03, SESS-04 *(definitions to be added to REQUIREMENTS.md as the first task of plan 01)*
 
@@ -219,13 +219,27 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. ZMQ Bridge Port | 4/4 | Complete | 2026-04-24 |
-| 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2026-04-25 |
-| 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2026-04-25 |
-| 8.4. Infrastructure Prereqs (INSERTED) | 4/4 | Complete   | 2026-04-26 |
+| 6. ZMQ Bridge Port | 4/4 | Complete | 2011-04-24 |
+| 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2011-04-25 |
+| 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2011-04-25 |
+| 8.4. Infrastructure Prereqs (INSERTED) | 4/4 | Complete   | 2011-04-26 |
 | 8.5. Temporal & Session Analysis | 0/? | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
+
+### Phase 11: SM Indicators full-spec documentation
+
+**Goal:** Reconstruct all 14 `!SM_*` / `!sm_*` MT4 indicators (3 helpers + 11 indicators) into a 15-file markdown reference set under `resource_pack/MMM/SM Indicators/docs/`. Source `.ex4` binaries are non-decompilable; reconstruction is from indicator names + MMM/SM (Steve Mauro Market Maker Method) community knowledge + `resource_pack/MMM/docs/` (MMM Book, TDI Tradestation PDF, Glossary, Knowledge Base) + the Helix INFRA-04 ADR_Levels.mq5 / BandD_TradeReplay.mq5 precedents. Goal: enable future MQ4/MQ5/Python implementation without original source. Tier-based execution with user review after each tier (Tier 0 helpers → Tier 1 atomic → Tier 2 composite, INDEX.md last). Documentation phase — no REQ-ID mapping, no executable code produced.
+**Requirements**: none (documentation phase)
+**Depends on:** none (independent of milestone critical path; can be executed any time after the SM Indicators source binaries are present)
+**Plans:** 5 plans (1 Wave 0 + 4 content)
+
+Plans:
+- [ ] 11-00-PLAN.md — Wave 0: Validation infrastructure (3 audit scripts: check_spec.sh / check_all.sh / check_index.sh) + docs/ directory tree
+- [ ] 11-01-PLAN.md — Wave 1: Tier 0 helpers (sm_gmtoffset, sm_WorkTime, sm_WorkTime_no_autogmt) — 3 specs
+- [ ] 11-02-PLAN.md — Wave 2: Tier 1 atomic indicators (SM_ADR_Marker, SM_Daily_HiLo, SM_BPCT, SM_IlsleyPsychLevels, SM_Crossover_Arrows) — 5 specs
+- [ ] 11-03-PLAN.md — Wave 3: Tier 2 composite indicators (SM_TDI, SM_PivotPoints, SM_AlertZone_1, SM_AlertZone_2, SM_Alerting+TL, SM_NewHUD) — 6 specs (NewHUD is 5-7 pages, ~2x the others)
+- [ ] 11-04-PLAN.md — Wave 4: INDEX.md sweep (overview, ASCII dep graph, 14 spec links, MMM glossary cross-refs, confidence summary)
 
 ---
 
@@ -241,13 +255,3 @@ Phase 6 (Bridge)
 **Critical path:** Phase 6 → Phase 8 → Phase 8.4 → Phase 8.5 → Phase 9 → Phase 10
 
 Phase 7 can run in parallel with Phase 8 after Phase 6 completes. Phase 8.4 (Infra) is a prerequisite for Phase 8.5 — the OHLCV cache and learning loop must be in place before the heavy temporal analysis runs, so Phase 8.5 doesn't re-download data each iteration and produces decision_log entries that flow into the RAG memory. Phase 8.5 still requires Phase 7 (4yr data) and Phase 8 (regime labels). Phase 9 cannot begin until Phase 7, Phase 8, Phase 8.4, and Phase 8.5 are all done.
-
----
-
-*Roadmap created: 2026-04-22*
-*Phase 7 completed: 2026-04-25 (4 plans, 70/70 tests, BKTS-01/02/03/04 verified)*
-*Phase 8.5 added: 2026-04-25 — Temporal & Session Analysis, prerequisite for Phase 9 StrategyRouter*
-*Phase 8 planned: 2026-04-25 — 4 plans (Wave 0 RED scaffold → Wave 1 core port → Wave 2 OnlineRegimeFilter+PitClock+JSON → Wave 3 CLI+5 detector JSONs+grep gate+parity)*
-*Phase 8 completed: 2026-04-25 — 4/4 plans, 112/112 tests GREEN (v3_intelligence 42 + Phase 6 53 + Phase 7 17), REGM-01/02/03/04 verified, 5/5 detector JSONs landed (variance ratios 69x-101x), D-16 parity at rtol=1e-6, operator approved*
-*Phase 8.4 inserted: 2026-04-25 — Infrastructure Prereqs (OHLCV cache + RAG learning loop + GBPNZD parity + trade-replay indicator); inserted after architectural audit revealed CSV-only data layer and unclosed learning loop would bottleneck Phase 8.5*
-*Next: `/gsd:plan-phase 8.4`*
