@@ -25,7 +25,10 @@ data/chroma_rag/
 **/chroma_rag/
 
 # Generated backtest reports
-V2/reports/
+V2/reports/*
+# Phase 8.4 Plan 04 INFRA-04 / D-17: trades_sample.csv is a committed fixture
+# read by V2/indicators/BandD_TradeReplay.mq5 for operator visual verification
+!V2/reports/trades_sample.csv
 
 # IDE / tool artifacts
 entities.json
