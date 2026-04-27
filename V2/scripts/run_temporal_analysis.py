@@ -7,7 +7,7 @@ across cache timeframes, wraps the entire batch run in a SINGLE PitClock
 
 Plan 03 extends this driver to also render heatmaps;
 Plan 04 adds risk-calendar emission via detect_and_write_risk_calendar;
-Plan 05 will add session_config.py regeneration.
+Plan 05 adds session_config.py regeneration via regenerate_session_config.
 
 Usage:
   cd V2 && python -m scripts.run_temporal_analysis            # full run
@@ -119,6 +119,25 @@ def main(argv: list[str] | None = None) -> int:
                 f"  [FAIL] risk_calendar emission: {type(e).__name__}: {e}",
                 file=sys.stderr,
             )
+
+    # SESS-04 (Plan 05): regenerate session_config.py from evidence/. Sits
+    # OUTSIDE the PitClock — it reads CSVs + YAML on disk, no bar reads.
+    try:
+        sc_target = (
+            Path(__file__).resolve().parents[1]
+            / "v3_intelligence" / "session_config.py"
+        )
+        ta.regenerate_session_config(
+            evidence_dir=out_dir,
+            target=sc_target,
+            risk_calendar_path=out_dir / "risk_calendar.yaml",
+        )
+        print(f"  [OK] session_config.py regenerated -> {sc_target}")
+    except Exception as e:
+        print(
+            f"  [FAIL] session_config regeneration: {type(e).__name__}: {e}",
+            file=sys.stderr,
+        )
     return 0
 
 
