@@ -35,6 +35,13 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 - [x] **INFRA-03**: `V2/v3_intelligence/learning_loop.py` exposes a single `on_trade_close(trade)` entry point that synchronously: (a) writes the trade to `marketmind.db.trades`, (b) embeds it into the `chroma_rag.trade_memory` collection, (c) writes a `decision_log` entry if any strategy parameter changed since the last trade for that pair × strategy; the function is called from the backtest harness end-of-run hook and from the live signal engine's fill-handler — both paths covered by tests
 - [x] **INFRA-04**: `V2/indicators/BandD_TradeReplay.mq5` reads a CSV trade log (path configurable) and renders entry arrows, exit arrows, SL/TP lines, and R-multiple labels per trade; loads cleanly on M15/H1/H4/Daily charts in the IC Markets MT5 terminal under Wine; produces a visual artifact attached to phase verification *(structural contracts complete: .mq5 sources landed Phase 8.4 P04 Task 3a, copied into both `~/.mt5/.../MetaTrader 5/MQL5/Indicators/` and `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/`; sample CSV at `V2/reports/trades_sample.csv`. 8-PNG operator visual verification persists as non-blocking follow-up in `08.4-HUMAN-UAT.md` — verifier confirmed `gaps:[]`, does not gate Phase 8.5+)*
 
+### Temporal & Session Analysis (Phase 8.5)
+
+- [ ] **SESS-01**: Per-(pair, strategy, timeframe) session performance table covering Tokyo (00:00–09:00 UTC) / London (07:00–16:00 UTC) / NY (13:00–22:00 UTC) / London-NY overlap (13:00–16:00 UTC) / London-open (07:00–09:00 UTC), with Sharpe, win-rate, trade-count, status; thin buckets (<30 trades) marked `insufficient_evidence`; CSV under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
+- [ ] **SESS-02**: HoD/DoW heatmaps for every active pair × strategy × timeframe combo; DoM/DoY heatmaps for H1 + Daily combos only (M15 corpus too thin per CONTEXT D-14); PNGs committed under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
+- [ ] **SESS-03**: Empirically-detected risk calendar (`risk_calendar.yaml`) listing recurring high-volatility windows as parametric patterns (NOT hardcoded dates) with currency scoping (`affects: [USD]` etc.); manual override merge supported via ruamel.yaml round-trip; detection threshold = realized range > 2.5σ above same-(hour-of-day, day-of-week) 4yr baseline.
+- [ ] **SESS-04**: `V2/v3_intelligence/session_config.py` (generated literal config) + `V2/v3_intelligence/temporal_filters.py` (predicates) exposing `is_tradeable_session(pair: str, strategy: str, timeframe: str, ts: datetime) -> bool` (hard-veto) and `is_blackout_window(ts: datetime) -> bool` (global ts-only filter), consumed by Phase 9 StrategyRouter.
+
 ### Router
 
 - [ ] **ROUT-01**: StrategyRouter.route(pair, timestamp, market_data) → {strategy, direction, confidence, size_mult} or None, using regime gate → matrix check → RAG score
@@ -98,6 +105,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 8.4 | Complete |
 | INFRA-03 | Phase 8.4 | Complete |
 | INFRA-04 | Phase 8.4 | Complete (structural; 8-PNG operator visual UAT in 08.4-HUMAN-UAT.md as non-blocking follow-up — verifier `gaps:[]`) |
+| SESS-01 | Phase 8.5 | Pending |
+| SESS-02 | Phase 8.5 | Pending |
+| SESS-03 | Phase 8.5 | Pending |
+| SESS-04 | Phase 8.5 | Pending |
 | ROUT-01 | Phase 9 | Pending |
 | ROUT-02 | Phase 9 | Pending |
 | ROUT-03 | Phase 9 | Pending |
@@ -108,10 +119,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIVE-04 | Phase 10 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 24 total
-- Mapped to phases: 24
+- v2.0 requirements: 28 total
+- Mapped to phases: 28
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-27 — Phase 8.4 closed: INFRA-01/02/03/04 all Complete (INFRA-04 marked Complete on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up per verifier gaps:[])*
+*Last updated: 2026-04-27 — Phase 8.5 opened: SESS-01..04 defined per CONTEXT D-18*
