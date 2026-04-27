@@ -851,6 +851,175 @@ def detect_and_write_risk_calendar(
     return write_risk_calendar(list(by_key.values()), out_path)
 
 
+# =============================================================================
+# session_config.py code generator (Plan 05 — SESS-04)
+# =============================================================================
+
+import hashlib
+from datetime import datetime, timezone
+
+
+def _build_session_rules(
+    evidence_dir: Path,
+) -> dict[tuple[str, str, str], dict]:
+    """Read session_performance_{pair}_{strategy}_{timeframe}.csv files and derive rules.
+
+    Per CONTEXT D-04 + RESEARCH Pattern 6:
+      - blacklisted_hours: hours where Sharpe <= SHARPE_BAD AND status != insufficient_evidence
+      - blacklisted_dows:  dows  where Sharpe <= SHARPE_BAD AND status != insufficient_evidence
+      - tradeable_sessions: sessions where Sharpe >= SHARPE_GOOD AND status != insufficient_evidence
+
+    Buckets in (-0.2, 0.3) generate no rule (D-04 — neither allow nor block).
+    """
+    rules: dict[tuple[str, str, str], dict] = {}
+    if not evidence_dir.exists():
+        return rules
+    for csv_path in sorted(evidence_dir.glob("session_performance_*.csv")):
+        df = pd.read_csv(csv_path)
+        if df.empty:
+            continue
+        stem = csv_path.stem.removeprefix("session_performance_")
+        parts = stem.rsplit("_", 2)  # split from the right: pair_strategy_tf
+        if len(parts) != 3:
+            continue
+        pair, strategy, timeframe = parts[0], parts[1], parts[2]
+
+        evaluable = df[df["status"] != "insufficient_evidence"].copy()
+        evaluable["sharpe"] = pd.to_numeric(evaluable["sharpe"], errors="coerce")
+
+        blacklisted_hours = sorted({
+            int(r["bucket"]) for _, r in
+            evaluable[(evaluable["dim"] == "hour") &
+                      (evaluable["sharpe"] <= SHARPE_BAD)].iterrows()
+        })
+        blacklisted_dows = sorted({
+            int(r["bucket"]) for _, r in
+            evaluable[(evaluable["dim"] == "dow") &
+                      (evaluable["sharpe"] <= SHARPE_BAD)].iterrows()
+        })
+        tradeable_sessions = sorted({
+            str(r["bucket"]) for _, r in
+            evaluable[(evaluable["dim"] == "session") &
+                      (evaluable["sharpe"] >= SHARPE_GOOD)].iterrows()
+            if str(r["bucket"]) != "OFF"
+        })
+        if blacklisted_hours or blacklisted_dows or tradeable_sessions:
+            rules[(pair, strategy, timeframe)] = {
+                "blacklisted_hours":  blacklisted_hours,
+                "blacklisted_dows":   blacklisted_dows,
+                "tradeable_sessions": tradeable_sessions,
+            }
+    return rules
+
+
+def _read_blackout_patterns(risk_calendar_path: Path) -> list[dict]:
+    """Read risk_calendar.yaml and project to BLACKOUT_PATTERNS shape.
+
+    Each pattern dict: pattern, time_utc=(hh,mm), duration_min, affects, source,
+    plus pattern-specific fields (n, dow, day, month, dates).
+    """
+    if not risk_calendar_path.exists():
+        return []
+    from ruamel.yaml import YAML
+    yaml = YAML(typ="rt")
+    with risk_calendar_path.open() as f:
+        data = yaml.load(f) or {}
+    out: list[dict] = []
+    for entry in (data.get("blackouts") or []):
+        time_str = entry.get("time", "00:00")
+        try:
+            hh_s, mm_s = time_str.split(":")
+            hh, mm = int(hh_s), int(mm_s)
+        except (ValueError, AttributeError):
+            hh, mm = 0, 0
+        projected = {
+            "pattern":      entry.get("pattern", "dates"),
+            "time_utc":     (hh, mm),
+            "duration_min": int(entry.get("duration_min", 30)),
+            "affects":      list(entry.get("affects", []) or []),
+            "source":       entry.get("source", "empirical"),
+        }
+        for fld in ("n", "dow", "day", "month", "dates"):
+            if fld in entry:
+                projected[fld] = entry[fld]
+        out.append(projected)
+    return out
+
+
+def regenerate_session_config(
+    evidence_dir: Path,
+    target: Path,
+    risk_calendar_path: Path | None = None,
+) -> Path:
+    """SESS-04 / D-08 — generate V2/v3_intelligence/session_config.py from evidence/.
+
+    Output is a Python literal file (CONTEXT D-08) consumed by temporal_filters.py.
+    Per RESEARCH Pattern 6: matches pair_config.py convention (generated data as
+    Python literals so Phase 9 can import without parser dependencies).
+
+    Args:
+        evidence_dir: where session_performance_*.csv files live.
+        target: path to write session_config.py (V2/v3_intelligence/session_config.py).
+        risk_calendar_path: optional path to risk_calendar.yaml; defaults to
+            evidence_dir / "risk_calendar.yaml".
+
+    Returns:
+        Path written.
+    """
+    if risk_calendar_path is None:
+        risk_calendar_path = evidence_dir / "risk_calendar.yaml"
+
+    rules = _build_session_rules(evidence_dir)
+    patterns = _read_blackout_patterns(risk_calendar_path)
+
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    h = hashlib.sha256()
+    if evidence_dir.exists():
+        for csv_path in sorted(evidence_dir.glob("session_performance_*.csv")):
+            h.update(csv_path.read_bytes())
+    if risk_calendar_path.exists():
+        h.update(risk_calendar_path.read_bytes())
+    source_hash = h.hexdigest()[:16] or "seed-empty"
+
+    body: list[str] = [
+        '"""GENERATED BY V2/scripts/run_temporal_analysis.py — DO NOT EDIT BY HAND.',
+        "",
+        "Phase 8.5 SESS-04 — emitted from .planning/phases/08.5-temporal-session-analysis/evidence/",
+        "Re-generate via: cd V2 && python -m scripts.run_temporal_analysis",
+        '"""',
+        "from __future__ import annotations",
+        "",
+        f'GENERATED_AT: str = "{generated_at}"',
+        f'SOURCE_HASH:  str = "{source_hash}"',
+        "",
+        "# Per (pair, strategy, timeframe), the set of buckets that gate entries.",
+        "# blacklisted_hours / blacklisted_dows -> hard veto (Sharpe <= -0.2)",
+        "# tradeable_sessions -> empirically validated as Sharpe >= 0.3",
+        "SESSION_RULES: dict[tuple[str, str, str], dict] = {",
+    ]
+    for key, rule in sorted(rules.items()):
+        pair, strat, tf = key
+        body.append(f'    ({pair!r}, {strat!r}, {tf!r}): {{')
+        body.append(f'        "blacklisted_hours":  {rule["blacklisted_hours"]!r},')
+        body.append(f'        "blacklisted_dows":   {rule["blacklisted_dows"]!r},')
+        body.append(f'        "tradeable_sessions": {rule["tradeable_sessions"]!r},')
+        body.append('    },')
+    body += [
+        "}",
+        "",
+        "# Empirically detected + manually overridden recurring blackouts.",
+        "# Each entry resolved at call-time by temporal_filters.is_blackout_window(ts).",
+        "BLACKOUT_PATTERNS: list[dict] = [",
+    ]
+    for p in patterns:
+        body.append(f'    {p!r},')
+    body += ["]", ""]
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("\n".join(body))
+    return target
+
+
 __all__ = [
     # Constants
     "SHARPE_GOOD", "SHARPE_BAD", "MIN_TRADES",
@@ -871,6 +1040,7 @@ __all__ = [
     "cluster_into_patterns",
     "write_risk_calendar",
     "detect_and_write_risk_calendar",
+    "regenerate_session_config",
     # Re-exports for convenience
     "PitClock", "pit_active",
 ]
