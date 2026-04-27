@@ -58,3 +58,9 @@ Thumbs.db
 # ~/.mempalace/palace/). DO NOT re-run `mempalace init` after editing
 # (RESEARCH Pitfall 7 — init overwrites the YAML).
 # mempalace.yaml  -- intentionally NOT ignored
+
+# Phase 12 — compiled MetaEditor outputs (recompilable from .mq4/.mq5 source)
+*.ex5
+*.ex4
+# But preserve the original non-decompilable Phase 11 source binaries
+!resource_pack/MMM/SM Indicators/MT4/!SM.Indicators/*.ex4
