@@ -253,3 +253,31 @@ This pattern is consistent with the v1.0 daily Z-score mean-reversion logic alre
 - [INFER] Whether previous-day ADR markers are also drawn alongside today's
 - [INFER] Whether `sm_gmtoffset` GlobalVariable is consumed for D1 boundary alignment
 - [INFER] Exact fallback behavior when fewer than LookbackDays D1 bars are available
+
+---
+
+## Verified Updates (2026-04-27 from MT4 Inputs dialog)
+
+**MATERIAL CORRECTION:** Operator-captured screenshot of `!SM_ADR_Marker.ex4` Inputs tab shows **`ATRPeriod = 14`**, not 20. Prior spec assumed 20 days based on typical SM convention. The actual default is the standard ATR period (14). Phase 12 implementation MUST use **ATRPeriod = 14**.
+
+| Input | Default | Notes |
+|-------|---------|-------|
+| TimeZoneOfData | 0 | hours; tells the indicator broker server-time offset for correct D1 boundary detection |
+| TimeZoneOfSession | 0 | hours; the trading-session reference timezone (likely GMT) |
+| **ATRPeriod** | **14** | **CORRECTED — was claimed 20** |
+| UseManualADR | false | toggle to bypass auto-ATR computation |
+| ManualADRValuePips | 0 | used only if UseManualADR=true |
+| LineStyle | 2 | MQL `STYLE_DOT` |
+| LineThickness1 | 1 | first-line thickness |
+| LineColor1 | Orange | first line color (likely upper marker or full-ADR) |
+| LineThickness2 | 2 | second-line thickness |
+| LineColor2 | Red | second line color (likely lower marker or HoD/LoD pair) |
+| BarForLabels | -10 | negative = label drawn N bars to the right of last bar |
+| DebugLogger | false | toggle for verbose logs |
+| showtext | false | toggle for label text on the markers |
+
+**Implications for the calculation:** the ADR is computed as `ATR(14)` of D1 bars (rather than the 20-day average we initially specced). Marker placement remains `today_open ± ADR/2` per the original RESEARCH dossier and `ADR_Levels.mq5` precedent — only the ATR period differs.
+
+See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §3 for the full audit.
+
+**Confidence:** stays **High**. Spec's Inputs section needs to be regenerated to add the new fields (TimeZoneOfData/Session, UseManualADR, ManualADRValuePips, LineStyle/Thickness pairs, BarForLabels, DebugLogger, showtext) and the ATR period correction. Test cases need regeneration with ATR=14 instead of 20.

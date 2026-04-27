@@ -246,3 +246,21 @@ This would complement the existing Hurst exponent regime detection in Helix v2.0
 - [INFER] If interpretation #2 (Pip Count) is correct, the calculation reduces to `pips_from_session_open = (current_price - session_open) / pip_size`; also a complete rewrite
 
 **Recommendation to the future spec re-writer:** Once an operator runs `!SM_BPCT.ex4` in MT4 and reads the parameter names in the indicator Inputs tab, the abbreviation will be immediately resolved. This entire spec should then be rewritten with verified semantics. The current document is a structured placeholder for the highest-uncertainty Tier 1 indicator — it establishes the template skeleton and acknowledges the gap explicitly so that a future reviewer knows exactly what remains uncertain and why.
+
+---
+
+## Verified Updates (2026-04-27 from MT4 Inputs dialog)
+
+Operator-captured screenshots of `!SM_BPCT.ex4` running in live MT4 confirm the indicator is a **mini-HUD / status panel** (corner-positioned, real-time price + spread + HOD/LOD distance with proximity alert). 16 input parameters were captured. See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §1 for the full table; the most material elevations from `[INFER:guess]` to confirmed:
+
+| Input | Default | Notes |
+|-------|---------|-------|
+| Corner_of_Chart | RIGHT_TOP | enum (4 corners) |
+| Show_Price / Show_Xtra_Details / Show_Smaller_Size / Show_Trade_Pips | true | display toggles |
+| Shift_UP_DN / Adjust_Side_to_side | 0 | pixel offsets |
+| Label_color / Spread_color / Price_Up_color / PriceDn_color / Price_At_Extreme_color | White / Gold / Lime / Crimson / Dark Green | per-element colors |
+| Distance_From_Extreme | 12.0 | pip threshold for "at extreme" coloring |
+| HOD_LOD_Alert | false | toggle for HOD/LOD proximity alert |
+| Pips_To_HOD_LOD_For_Alert | 5.0 | alert-trigger distance |
+
+**Confidence elevation:** Low → **Medium** for inputs/UX. Algorithm internals (rolling HOD/LOD computation, exact extreme-detection threshold) remain inferred. The acronym BPCT is still unresolved verbally but its **function** is now confirmed: a Bid-Price/Corner Tracker style HUD. Phase 12 implementation should use these confirmed input names and defaults verbatim.

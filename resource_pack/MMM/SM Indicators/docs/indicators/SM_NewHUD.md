@@ -426,3 +426,54 @@ SM_NewHUD is therefore a **human analog** of what the Phase 9 StrategyRouter doe
 - [INFER] Whether session countdown displays hours:minutes:seconds (sub-second precision unnecessary for a 1-second timer) or minutes:seconds only
 
 **Recommendation to future spec re-writer:** Once an operator runs SM_NewHUD in MT4 on any chart, the indicator's Inputs dialog will reveal the exact parameter list and defaults. A screenshot of the HUD at London-open and at session-gap (inter-session quiet period) — both captured with all fields visible — should replace the entirely inferred field list in this spec. Until then, this spec documents the best-reconstruction of what an MMM-workflow HUD would display, grounded in MMM Book pp. 53-54, the Market Maker Cycle.jpg image, and the documented field sets of similar community HUD indicators.
+
+---
+
+## Verified Updates (2026-04-27 from MT4 Inputs + chart overlay)
+
+Operator-captured screenshots of `!SM_NewHUD.ex4` confirm **18+ visible HUD fields** (prior spec listed 10) and a substantial Inputs catalog. Notably, a **Half-Yearly ADR (HYADR)** field exists that was not anticipated in prior spec.
+
+### Confirmed visible HUD fields
+
+| Field | Description | Was in spec? |
+|-------|-------------|--------------|
+| ASK / BID | Live quote pair | implicit |
+| spread (pips) | Live spread, e.g., "1.8" | ✓ |
+| HOD + distance from current | E.g., "HOD 2.31540: 25" | ✓ |
+| LOD + distance from current | E.g., "LOD 2.30885: 41" | ✓ |
+| TDR | Today's Daily Range | ✓ as ADR |
+| YDR | Yesterday's Daily Range | ✗ NEW |
+| WADR | Weekly ADR | ✗ NEW |
+| MADR | Monthly ADR | ✗ NEW |
+| **HYADR** | **Half-Yearly ADR** | ✗ NEW |
+| PTO | Price-To-Open distance | ✗ NEW |
+| WH + distance | Week High + distance | ✗ NEW |
+| WL + distance | Week Low + distance | ✗ NEW |
+| WR | Weekly Range | ✗ NEW |
+| MWR / 3MWR / 6MWR | Monthly + 3-Month + 6-Month Weekly Range averages | ✗ NEW |
+| 3xADR | Triple-ADR multiple alert | ✗ NEW |
+| Candle Time | Countdown to next candle | ✓ |
+
+### Confirmed inputs (from params 1 + params 2 screenshots)
+
+**Display:** Code_Version=1, MaxSpread=1.75, Range_Today_Text="TDR", Range_Yest_Text="YDR", Range_Week_Text="WR", FontSize=9, FontColor=White, Symbol_FontColor=Black, Symbol_Font_Size=14, PriceColor=Black, Font_SizeADR3=9, FontColorADR3=Yellow, Show_4Digit_Price=false, ColorLast_Digit=false, LastDigitColor=(90,90,90).
+
+**HiLo alert thresholds:** HiLoAlert_Distance1=10 pips (warn), HiLoAlert_Distance2=20 pips (alert). Color pairs HOD/LOD AlertClr=Dark Green, NearClr=LawnGreen.
+
+**Week HiLo alert thresholds:** Week_HiLo_Alert_Distance3=25, Week_HiLo_Alert_Distance4=50. WH/WL Alert/Near color pairs same scheme.
+
+**ADR alert:** adrAlert_Distance=10. Three color-pair sets: wadr (weekly), madr (monthly), **hyadr (half-yearly)** — each with AlertColorHi/Lo + ExceedColorHi/Lo.
+
+**Background settings:** UseDark_Background=false, BackgroundColor=Gray, BackgroundSize=120, XL_Background_for_News=true, Overview_Mode=false, Trade_Track_Mode=false.
+
+**Average periods (Av_N):** y=18, y_distance=0, Av_1=0, Av_2=1, Av_3=4, Av_4=13, Av_5=?, Av_6=26, plus a trailing 52. **Likely EMA periods displayed on the HUD** in a Fibonacci-ish progression (1, 4, 13, 26, 52). NEW — not anticipated in prior spec.
+
+### Implications
+
+- HYADR section adds a half-yearly average daily range — needs a dedicated calculation block in Phase 12 implementation.
+- Av_N periods imply NewHUD computes/displays multiple EMAs (likely closing-price EMA at periods 1/4/13/26/52). If true, this is a small additional indicator inside the HUD.
+- The 18-field display means the HUD is denser than a standard mini-HUD — Phase 12 implementation must lay out 4-5 grouped clusters (price, daily ranges, weekly stats, alerts, candle timer) to fit cleanly.
+
+See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §4 for the full audit.
+
+**Confidence:** Inputs/visible-fields elevation **Low → Medium**. Internals (whether NewHUD calls other SM indicators via `iCustom` for TDI/Pivots/ADR data, or computes everything itself) **remain `[INFER]`** — needs MetaEditor inspection of the .ex4 source if recovered, or behavioral testing.

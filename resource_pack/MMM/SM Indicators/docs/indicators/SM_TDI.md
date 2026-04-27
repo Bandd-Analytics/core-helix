@@ -341,3 +341,36 @@ The TDI Hook pattern (mean-reversion from extreme) maps directly to the daily Z-
 - [INFER] Subwindow height / Y-axis minimum-maximum — likely MT4 auto-scale (0 to 100 approximate), but the indicator may set `IndicatorSetDouble(INDICATOR_MINIMUM, 0); IndicatorSetDouble(INDICATOR_MAXIMUM, 100)` explicitly
 - [INFER] AlertEmail / AlertPush parameter names — could be `SendEmail`, `SendPush`, or similar
 - [INFER] Whether the `!_TDI.ex4` 27,724-byte variant has additional features (e.g., multi-timeframe TDI, additional alert types, or buffer access) — the ~70% size differential implies significant extra code
+
+---
+
+## Verified Updates (2026-04-27 from MT4 Inputs dialog)
+
+**MATERIAL CORRECTION:** Operator-captured screenshot of `!SM_TDI.ex4` Inputs tab shows **`RSI_Period = 21`**, not 13. This contradicts the MMM TDI Tradestation PDF default (13). The spec's prior claim of RSI=13 was inferred from the PDF and is **wrong for this specific implementation**. Phase 12 implementation MUST use **RSI_Period 21** as the default.
+
+| Input | Default | Notes |
+|-------|---------|-------|
+| **RSI_Period** | **21** | **CORRECTED — was claimed 13** |
+| RSI_Price | 0 | `PRICE_CLOSE` |
+| Volatility_Band | 34 | Bollinger period (✓ matches prior spec) |
+| RSI_Price_Line | 2 | RSI_PL Green, 2-period SMA (✓) |
+| RSI_Price_Type | 0 | SMA (✓) |
+| Trade_Signal_Line | 7 | TSL Red, 7-period SMA (✓) |
+| Trade_Signal_Type | 0 | SMA (✓) |
+| Shark_Fin_Alert | false | toggle |
+| **Shark_Fin_Upper_Level** | **63.0** | **CORRECTED — was claimed 68** |
+| **Shark_Fin_Lower_Level** | **37.0** | **CORRECTED — was claimed 32** |
+| Squeeze_Alert / Squeeze_Entry_Alert | false / false | both off by default |
+| VB_High_Value | 45.0 | NEW input not in prior spec |
+| VB_Low_Value | 55.0 | NEW input not in prior spec |
+| Pop_Up_Alert | false | toggle |
+| Draw_MBL_Slope | false | toggle for MBL slope visualization |
+| Sensitivity | 0.0001 | likely alert-epsilon |
+
+**Levels tab:** Fixed minimum 19.2182, fixed maximum 77.5613 (subwindow Y-axis bounds). The standard "32 / 50 / 68" levels are NOT visible directly — likely drawn programmatically; the configurable Shark_Fin levels at 63/37 take that role in this build.
+
+**Bollinger StdDev multiplier:** NOT exposed in Inputs — internal constant. The MMM TDI Tradestation PDF cites 1.6185 as canonical Malone TDI; whether this build uses 1.6185 or 2.0 is still `[INFER]` and must be verified by inspecting the .ex4 buffer values against a known input series.
+
+See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §2 for full audit.
+
+**Confidence:** stays **High** but the spec's parameter table needs a full rewrite for Phase 12. Test cases that referenced RSI=13 numerically must be regenerated with RSI=21.
