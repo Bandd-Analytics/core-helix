@@ -46,6 +46,8 @@ A statistically validated multi-strategy alpha portfolio: daily Z-score swing (S
 - [x] H1 scalp strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
 - [x] Momentum strategy backtested over 4yr data across all active pairs — produces routing matrix entry (Phase 7, 2026-04-25)
 - [x] HMM-GARCH regime classifier ported from V1 with PiT discipline — zero future-bar leakage (Phase 8, 2026-04-25)
+- [x] OHLCV cache + RAG learning loop + GBPNZD H1 4yr parity + 8-pair H4/M15 4yr corpus + ADR/trade-replay MQ5 indicators + mempalace D-20 (Phase 8.4, 2026-04-27) — INFRA-01/02/03/04 all Complete; GBPNZD scalp re-enabled (Sh 0.66, 928 trades 4yr PiT)
+- [ ] Temporal & session analysis: per-pair × per-strategy session/HoD/DoW/DoM/DoY profiles → session_config.py + temporal_filters.py (Phase 8.5)
 - [ ] StrategyRouter dispatches per-pair per-bar to best strategy based on regime + 4yr matrix + RAG
 - [ ] Live signal engine service (Python) consumes MT5 ticks, calls router, publishes OrderRequest
 - [ ] MT5 EA reads OrderRequest from ZMQ, validates via CCircuitBreaker, executes
@@ -121,6 +123,6 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after Phase 8 completion — HMM-GARCH regime classifier and PitClock manager ported with REGM-01/02/03/04 verified; Viterbi banished; 5 detector JSONs landed; D-16 parity GREEN at rtol=1e-6.*
+*Last updated: 2026-04-27 after Phase 8.4 closure — OHLCV cache + PiT-safe auto-pull (cache.py + pit_active augmentation), GBPNZD H1 4yr parity via MT5 Path A (24 fresh CSVs across 8 pairs × M15/H1/H4), GBPNZD allow_scalp re-enabled (Sh 0.66 / 928 trades / 4yr PiT eval), RAG learning loop closed (on_trade_close fanout to SQLite + Chroma + decision_log wired into backtest_hybrid), ADR_Levels + BandD_TradeReplay MQ5 indicators landed, mempalace D-20 configured. INFRA-01/02/03/04 all Complete (INFRA-04 closed on structural contracts; 8-PNG operator visual UAT non-blocking). 8.4 follow-ups deferred: SUPABASE_DB_URL provisioning, 0001_create_bars migration application, AUDNZD H4 re-fetch ~2029-01-02. Next: Phase 8.5 (Temporal & Session Analysis).*
 *2026-04-25 (later): scope drift correction — restored 8-pair × multi-timeframe (M15/H1/Daily) framing as the project default; prior "5 pairs" wording was a stale v1.0-swing-era artifact contradicted by [pair_config.py](V2/v3_intelligence/pair_config.py).*
 *2026-04-27: Phase 11 complete — 14 SM/MMM indicator specs reconstructed at Full level (12-section template) into [resource_pack/MMM/SM Indicators/docs/](../resource_pack/MMM/SM%20Indicators/docs/). Source `.ex4` binaries are compiled and not decompilable; specs derived from MMM PDFs (TDI Tradestation, Glossary, Knowledge Base) + ADR_Levels.mq5 precedent + [INFER]-tagged reconstruction. Specs enable future MQ4/MQ5/Python implementation but no executable code was produced in this phase (explicit out-of-scope per CONTEXT.md). Next natural phase: reconstruct the indicators as runnable `.mq4` / `.mq5` / Python code from these specs.*

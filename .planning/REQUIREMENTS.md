@@ -33,7 +33,7 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 - [x] **INFRA-01**: A persistent bar store (Supabase Postgres `bars(pair, timeframe, ts, open, high, low, close, volume, source)` with composite PK `(pair, timeframe, ts)`) is the canonical OHLCV source; `download_history.py` and `download_intraday_data.py` are wrapped by an incremental-fetch layer that pulls only bars newer than `max(ts)` per (pair, timeframe); a single re-run of any phase performs zero redundant downloads when the cache is current; CSV-on-disk continues to work as a read-through fallback during transition
 - [x] **INFRA-02**: `V2/data/GBPNZD_H1_4yr.csv` exists with the same column conventions and date range as the other 7 pairs' 4yr files; the cache holds the same data and serves it interchangeably; routing-matrix re-evaluation including GBPNZD is unblocked
 - [x] **INFRA-03**: `V2/v3_intelligence/learning_loop.py` exposes a single `on_trade_close(trade)` entry point that synchronously: (a) writes the trade to `marketmind.db.trades`, (b) embeds it into the `chroma_rag.trade_memory` collection, (c) writes a `decision_log` entry if any strategy parameter changed since the last trade for that pair × strategy; the function is called from the backtest harness end-of-run hook and from the live signal engine's fill-handler — both paths covered by tests
-- [ ] **INFRA-04**: `V2/indicators/BandD_TradeReplay.mq5` reads a CSV trade log (path configurable) and renders entry arrows, exit arrows, SL/TP lines, and R-multiple labels per trade; loads cleanly on M15/H1/H4/Daily charts in the IC Markets MT5 terminal under Wine; produces a visual artifact attached to phase verification *(source files landed Phase 8.4 P04 Task 3a; visual verification on M15/H1/H4/Daily deferred to follow-up operator session — .mq5 sources copied into `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/`; sample CSV at `V2/reports/trades_sample.csv`; 8-screenshot evidence pending)*
+- [x] **INFRA-04**: `V2/indicators/BandD_TradeReplay.mq5` reads a CSV trade log (path configurable) and renders entry arrows, exit arrows, SL/TP lines, and R-multiple labels per trade; loads cleanly on M15/H1/H4/Daily charts in the IC Markets MT5 terminal under Wine; produces a visual artifact attached to phase verification *(structural contracts complete: .mq5 sources landed Phase 8.4 P04 Task 3a, copied into both `~/.mt5/.../MetaTrader 5/MQL5/Indicators/` and `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/`; sample CSV at `V2/reports/trades_sample.csv`. 8-PNG operator visual verification persists as non-blocking follow-up in `08.4-HUMAN-UAT.md` — verifier confirmed `gaps:[]`, does not gate Phase 8.5+)*
 
 ### Router
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-01 | Phase 8.4 | Complete |
 | INFRA-02 | Phase 8.4 | Complete |
 | INFRA-03 | Phase 8.4 | Complete |
-| INFRA-04 | Phase 8.4 | Pending (visual verification deferred — sources landed) |
+| INFRA-04 | Phase 8.4 | Complete (structural; 8-PNG operator visual UAT in 08.4-HUMAN-UAT.md as non-blocking follow-up — verifier `gaps:[]`) |
 | ROUT-01 | Phase 9 | Pending |
 | ROUT-02 | Phase 9 | Pending |
 | ROUT-03 | Phase 9 | Pending |
@@ -114,4 +114,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-26 — Phase 8.4 P04 complete: INFRA-01/02/03 marked Complete; INFRA-04 sources landed (.mq5 + sample CSV) but visual verification on M15/H1/H4/Daily deferred to follow-up operator session*
+*Last updated: 2026-04-27 — Phase 8.4 closed: INFRA-01/02/03/04 all Complete (INFRA-04 marked Complete on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up per verifier gaps:[])*

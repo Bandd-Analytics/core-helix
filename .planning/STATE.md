@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: "Completed 11-04-PLAN.md (INDEX.md — 1/1 tasks; HALTED for final user review of INDEX.md before /gsd:verify-work 11)"
+stopped_at: "Phase 8.4 CLOSED 2026-04-27 (all 4 INFRA reqs Complete; INFRA-04 visual UAT deferred non-blocking). Phase 8.5 next."
 last_updated: "2026-04-27T04:08:12.754Z"
 progress:
   total_phases: 8
@@ -38,7 +38,8 @@ Plan: Not started
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
-Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — Plans 01/02/03/04 complete; INFRA-01/02/03 satisfied; INFRA-04 sources landed but visual verification on M15/H1/H4/Daily deferred (Wine MT5 running locally; 8 PNG evidence pending operator follow-up session)
+Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — CLOSED 2026-04-27. INFRA-01/02/03/04 all Complete. INFRA-04 closed on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up (verifier gaps:[]).
+Phase 8.5[..........] 0%   Temporal & Session Analysis — NEXT (SESS-01..04)
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
@@ -180,7 +181,7 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 **Last action:** Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred) — RAG learning loop closed (`learning_loop.on_trade_close` glue layer + `_maybe_log_param_diff` D-12 decision_log diff via OFFSET 1 prev-trade lookup); `compute_adr` helper (D-18); `scripts.backfill_rag` CLI (D-14); `BandD_TradeReplay.mq5` + `ADR_Levels.mq5` indicators (D-15/D-17/D-18/D-19, timeframe-agnostic per D-16); `backtest_hybrid.py` wired `on_trade_close(rec)` at swing-close + m15-close sites with `params_json` snapshots; `rag_signal_filter` default collection 'trades'->'trade_memory' (Warning 6); `mempalace init`+`mine` populated 'helix' wing (~2311+ drawers); `mempalace.yaml` taxonomy expanded across 8 domain rooms; `PROJECT.md` §Memory Architecture documents claude-mem vs mempalace vs chroma_rag/trade_memory; `REQUIREMENTS.md` INFRA-01/02/03 -> Complete. INFRA-04 stays Pending — Wine MT5 IS running locally but spawned executor cannot capture GUI screenshots; .mq5 sources copied to `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/` for follow-up operator session. 12/12 Plan 01 RED tests GREEN (6 learning_loop + 4 adr + 2 slow backfill_rag); full Phase 6/7/8 + 8.4 P02/P03/P04 fast suite: 147 passed / 18 deselected / 0 failed. Three Rule 3 deviations auto-fixed (V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header-skip from 2-read to 10-read). Commits: ec8a403 (T1 logger+learning_loop+adr), f38af53 (T2 backfill_rag+wire), 66d0909 (T3a indicators+sample csv), dd6a111 (T5 mempalace+PROJECT.md+REQUIREMENTS). (2026-04-26)
 **Last agent:** execute-plan (Plan 04)
 **Stopped at:** Completed 11-04-PLAN.md (INDEX.md — 1/1 tasks; HALTED for final user review of INDEX.md before /gsd:verify-work 11)
-**Next action:** Phase 8.4 ready for `/gsd:verify-work 08.4` with INFRA-04 visual-verification deferral noted. New follow-ups beyond carried Plan 02/03 ones: (a) operator visual verification of BandD_TradeReplay + ADR_Levels on M15/H1/H4/Daily under Wine MT5 — 8 PNG screenshots into `evidence/`; (b) `mempalace mine .` to completion (was running at commit time); (c) once SUPABASE_DB_URL provisioned: `python -m scripts.backfill_rag` to populate trade_memory from existing marketmind.db. Carried follow-ups: SUPABASE_DB_URL provisioning + 0001_create_bars migration application + AUDNZD H4 re-fetch ~2029-01-02.
+**Next action:** Phase 8.5 (Temporal & Session Analysis) — discuss → plan → execute. Define SESS-01..04 in REQUIREMENTS.md as first task of plan 01. 8 pairs × 4 strategies × 3 timeframes corpus is now in V2/data/ (24 4yr CSVs from Phase 8.4 P03 Path A). Deferred Phase 8.4 follow-ups (non-blocking): SUPABASE_DB_URL provisioning, 0001_create_bars migration application, INFRA-04 8-PNG visual UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
 
