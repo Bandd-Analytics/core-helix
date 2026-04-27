@@ -241,6 +241,16 @@ Plans:
 - [x] 11-03-PLAN.md — Wave 3: Tier 2 composite indicators (SM_TDI, SM_PivotPoints, SM_AlertZone_1, SM_AlertZone_2, SM_Alerting+TL, SM_NewHUD) — 6 specs (NewHUD is 5-7 pages, ~2x the others)
 - [x] 11-04-PLAN.md — Wave 4: INDEX.md sweep (overview, ASCII dep graph, 14 spec links, MMM glossary cross-refs, confidence summary)
 
+### Phase 12: SM Indicators implementation
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
+
 ---
 
 ## Dependency Graph
