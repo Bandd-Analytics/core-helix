@@ -530,12 +530,334 @@ def render_combo_heatmaps(
     return written
 
 
+# =============================================================================
+# Risk-calendar pipeline (Plan 04 — SESS-03)
+# =============================================================================
+
+# D-10: detection threshold
+RISK_SIGMA = 2.5
+# Pitfall 4: spread-proxy noise floor — buckets with vanishingly small dispersion
+# are skipped to avoid spurious detections from quantization or sparse data.
+RISK_NOISE_FLOOR = 1e-5
+# Robust scale: 1.4826 * MAD == σ for a normal distribution. Robust to up to ~50%
+# contamination — required because the (hour, dow) buckets that hold our spike
+# patterns ARE polluted with the spikes themselves (e.g. ~23% of the
+# (hour=12, dow=Friday) bucket on a 1st-Friday-12:30 release pattern).
+_MAD_TO_STD = 1.4826
+# Default blackout window duration if not otherwise specified
+RISK_DEFAULT_DURATION_MIN = 30
+
+
+def _infer_currencies(pair: str | None) -> list[str]:
+    """Split a 6-letter pair into [base, quote]. Empty list if pair is None / malformed."""
+    if not pair or len(pair) != 6 or not pair.isalpha():
+        return []
+    return [pair[:3].upper(), pair[3:].upper()]
+
+
+def detect_blackout_bars(
+    bars: pd.DataFrame,
+    sigma: float = RISK_SIGMA,
+) -> pd.DatetimeIndex:
+    """SESS-03 / D-10 — identify bars where realized range exceeds robust baseline.
+
+    Baseline is computed per (hour-of-day, day-of-week) bucket on the bar's
+    realized range (High - Low). We use median + MAD-based scale (rather than
+    mean + std) because the same bucket holds the spikes we're trying to detect
+    — naive moments are dragged up by the very outliers we want to flag.
+
+    A bar is flagged iff:
+      (range - median) / (1.4826 * MAD) > sigma   AND   1.4826*MAD >= NOISE_FLOOR
+
+    Pitfall 4 noise floor (RESEARCH.md): buckets where the scaled MAD is below
+    1e-5 are considered too quiet to trust — skip detection rather than emit
+    false positives from quantization noise.
+
+    Args:
+        bars: DataFrame with DatetimeIndex (UTC) and Title-case OHLC columns.
+        sigma: Robust z-score threshold (default 2.5 per CONTEXT D-10).
+
+    Returns:
+        DatetimeIndex of timestamps where the bar exceeds the threshold.
+    """
+    if bars is None or len(bars) == 0:
+        return pd.DatetimeIndex([])
+    if "High" not in bars.columns or "Low" not in bars.columns:
+        raise ValueError("detect_blackout_bars requires Title-case High + Low columns")
+
+    df = pd.DataFrame(index=bars.index)
+    df["range"] = bars["High"] - bars["Low"]
+    df["hour"] = df.index.hour
+    df["dow"] = df.index.dayofweek
+
+    grp = df.groupby(["hour", "dow"])["range"]
+    df["median"] = grp.transform("median")
+    abs_dev = (df["range"] - df["median"]).abs()
+    df["mad"] = abs_dev.groupby([df["hour"], df["dow"]]).transform("median")
+    df["scale"] = _MAD_TO_STD * df["mad"]
+
+    valid = df["scale"] >= RISK_NOISE_FLOOR
+    safe_scale = df["scale"].where(valid, np.nan)
+    df["zscore"] = (df["range"] - df["median"]) / safe_scale
+
+    detected = df[valid & (df["zscore"] > sigma)].index
+    return pd.DatetimeIndex(detected)
+
+
+def cluster_into_patterns(
+    stamps: pd.DatetimeIndex,
+    source_pair: str | None = None,
+) -> list[dict[str, Any]]:
+    """SESS-03 / D-11 — collapse a list of detected timestamps into parametric patterns.
+
+    Recognizes (in order of precedence):
+      - wom    — Nth weekday-of-month at HH:MM (e.g. 1st Friday 12:30 = NFP)
+      - dow    — every weekday-N at HH:MM (e.g. every Wed 14:00 = FOMC fallback)
+      - mom    — Nth day of every month at HH:MM (e.g. 15th at 18:00)
+      - dates  — explicit dates fallback for the unmatched residual
+
+    Each emitted pattern is a recurring rule (NOT a date list) so the calendar
+    generalizes forward without yearly re-fitting. `affects` defaults to
+    [base, quote] of source_pair if provided; downstream policy (D-13) may
+    refine this to USD-only for known FOMC/NFP windows.
+
+    Args:
+        stamps: DatetimeIndex of detected blackout timestamps.
+        source_pair: Optional 6-letter pair (e.g. "EURUSD") used to infer affects.
+
+    Returns:
+        List of pattern dicts. Each dict carries: pattern, time, duration_min,
+        affects, source, plus pattern-specific keys (n/dow/dates).
+    """
+    if stamps is None or len(stamps) == 0:
+        return []
+
+    affects = _infer_currencies(source_pair)
+    df = pd.DataFrame({"ts": pd.DatetimeIndex(stamps)})
+    df["dow"] = df["ts"].dt.dayofweek
+    df["dom"] = df["ts"].dt.day
+    df["wom"] = ((df["dom"] - 1) // 7) + 1
+    df["time"] = df["ts"].dt.strftime("%H:%M")
+
+    patterns: list[dict[str, Any]] = []
+    used: set[int] = set()
+
+    # Pattern 1: wom — recurring Nth weekday-of-month at HH:MM
+    # Confidence: ≥3 occurrences AND covers ≥50% of expected month-spans.
+    for (wom, dow, time), grp in df.groupby(["wom", "dow", "time"]):
+        if len(grp) < 3:
+            continue
+        span_days = max((grp["ts"].max() - grp["ts"].min()).days, 30)
+        expected_months = max(span_days / 30, 1)
+        if len(grp) >= max(3, expected_months * 0.5):
+            patterns.append({
+                "pattern": "wom",
+                "n": int(wom),
+                "dow": int(dow),
+                "time": str(time),
+                "duration_min": RISK_DEFAULT_DURATION_MIN,
+                "affects": list(affects),
+                "source": "empirical",
+            })
+            used.update(grp.index.tolist())
+
+    # Pattern 2: dow — every-weekday recurrence at HH:MM
+    remaining = df[~df.index.isin(used)]
+    for (dow, time), grp in remaining.groupby(["dow", "time"]):
+        if len(grp) < 4:
+            continue
+        span_days = max((grp["ts"].max() - grp["ts"].min()).days, 7)
+        expected_weeks = max(span_days / 7, 1)
+        if len(grp) >= max(4, expected_weeks * 0.5):
+            patterns.append({
+                "pattern": "dow",
+                "dow": int(dow),
+                "time": str(time),
+                "duration_min": RISK_DEFAULT_DURATION_MIN,
+                "affects": list(affects),
+                "source": "empirical",
+            })
+            used.update(grp.index.tolist())
+
+    # Pattern 3: mom — Nth day of month at HH:MM (e.g. 15th @ 18:00)
+    remaining = df[~df.index.isin(used)]
+    for (dom, time), grp in remaining.groupby(["dom", "time"]):
+        if len(grp) < 3:
+            continue
+        span_days = max((grp["ts"].max() - grp["ts"].min()).days, 30)
+        expected_months = max(span_days / 30, 1)
+        if len(grp) >= max(3, expected_months * 0.5):
+            patterns.append({
+                "pattern": "mom",
+                "n": int(dom),
+                "time": str(time),
+                "duration_min": RISK_DEFAULT_DURATION_MIN,
+                "affects": list(affects),
+                "source": "empirical",
+            })
+            used.update(grp.index.tolist())
+
+    # Pattern 4: dates fallback — unmatched residual flagged as explicit dates.
+    # Capped to keep YAML manageable; operator can review and convert manually.
+    remaining = df[~df.index.isin(used)]
+    if len(remaining) > 0:
+        date_strs = sorted({ts.strftime("%Y-%m-%d") for ts in remaining["ts"]})[:50]
+        if date_strs:
+            mode_time = remaining["time"].mode()
+            time_str = str(mode_time.iloc[0]) if not mode_time.empty else "00:00"
+            patterns.append({
+                "pattern": "dates",
+                "dates": date_strs,
+                "time": time_str,
+                "duration_min": RISK_DEFAULT_DURATION_MIN,
+                "affects": list(affects),
+                "source": "empirical",
+            })
+
+    return patterns
+
+
+def _blackout_key(b: dict[str, Any]) -> tuple:
+    """Conflict key for blackout-merge: (pattern, time, sorted affects)."""
+    return (
+        b.get("pattern"),
+        b.get("time"),
+        tuple(sorted(b.get("affects", []) or [])),
+    )
+
+
+def write_risk_calendar(
+    empirical_patterns: list[dict[str, Any]],
+    path: Path,
+) -> Path:
+    """SESS-03 / D-12 — round-trip risk_calendar.yaml preserving comments + manual entries.
+
+    Merge semantics:
+      - Detection takes PRECEDENCE on (pattern, time, affects) conflict.
+        An empirical entry replaces a manual entry with the same conflict key.
+      - Manual entries (source: manual) without an empirical conflict are KEPT.
+      - Operator comments (lines starting with '#') and structural formatting
+        survive across re-runs via ruamel.yaml round-trip mode (PyYAML loses
+        these — see RESEARCH Pitfall on YAML library choice).
+
+    Args:
+        empirical_patterns: list of pattern dicts as produced by cluster_into_patterns.
+        path: Output path. Created with parent directories if needed.
+
+    Returns:
+        The path written.
+    """
+    from ruamel.yaml import YAML
+
+    yaml = YAML(typ="rt")
+    yaml.preserve_quotes = True
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Load existing doc (if any) to preserve top-level comments + manual entries
+    if path.exists():
+        with path.open("r") as f:
+            doc = yaml.load(f) or {}
+    else:
+        doc = {}
+
+    existing_blackouts = list(doc.get("blackouts", []) or [])
+
+    # Index existing manuals by conflict key
+    manual_by_key: dict[tuple, dict[str, Any]] = {}
+    for b in existing_blackouts:
+        if (b.get("source") == "manual"):
+            manual_by_key[_blackout_key(b)] = dict(b)
+
+    empirical_keys = {_blackout_key(b) for b in empirical_patterns}
+
+    # Merge: empirical first (precedence), then non-conflicting manuals
+    merged: list[dict[str, Any]] = [dict(b) for b in empirical_patterns]
+    for k, b in manual_by_key.items():
+        if k not in empirical_keys:
+            merged.append(b)
+
+    # Replace value but preserve key-level comments by editing the existing
+    # CommentedMap in place rather than reconstructing it.
+    doc["blackouts"] = merged
+
+    with path.open("w") as f:
+        yaml.dump(doc, f)
+
+    return path
+
+
+def detect_and_write_risk_calendar(
+    cache: OHLCVCache,
+    pairs: list[str],
+    timeframe: str,
+    end_ts: pd.Timestamp,
+    out_path: Path,
+    sigma: float = RISK_SIGMA,
+    history_years: int = 4,
+) -> Path:
+    """End-to-end risk-calendar pass driver — for run_temporal_analysis.py CLI use.
+
+    Aggregates blackout detections across the supplied pairs (all using one
+    shared timeframe — H1 by default per RESEARCH §"H4 confirmatory") and
+    writes the merged parametric calendar.
+
+    Each pattern's `affects` is the union of currency codes from the pairs
+    that contributed detections to that pattern. Manual entries from any
+    prior run survive per write_risk_calendar's merge contract.
+
+    Args:
+        cache: OHLCVCache instance.
+        pairs: list of 6-letter pair codes.
+        timeframe: bar timeframe to detect on (typically "H1").
+        end_ts: PiT clamp — bar reads are bounded by this timestamp.
+        out_path: target risk_calendar.yaml path.
+        sigma: detection threshold (default 2.5).
+        history_years: lookback window in years (default 4).
+
+    Returns:
+        Path written.
+    """
+    start_ts = end_ts - pd.DateOffset(years=history_years)
+    pattern_pool: list[dict[str, Any]] = []
+
+    for pair in pairs:
+        try:
+            bars = cache.get_bars(pair, timeframe, start_ts, end_ts)
+        except Exception:
+            continue
+        if bars is None or len(bars) == 0:
+            continue
+        stamps = detect_blackout_bars(bars, sigma=sigma)
+        if len(stamps) == 0:
+            continue
+        pattern_pool.extend(cluster_into_patterns(stamps, source_pair=pair))
+
+    # Merge same-pattern entries from different pairs by unioning their affects
+    by_key: dict[tuple, dict[str, Any]] = {}
+    for p in pattern_pool:
+        # Use a key WITHOUT affects so we union currencies across pairs
+        k = (p.get("pattern"), p.get("time"),
+             p.get("n"), p.get("dow"),
+             tuple(p.get("dates", []) or []))
+        if k in by_key:
+            merged_affects = sorted(set(by_key[k]["affects"]) | set(p["affects"]))
+            by_key[k]["affects"] = merged_affects
+        else:
+            by_key[k] = dict(p)
+
+    return write_risk_calendar(list(by_key.values()), out_path)
+
+
 __all__ = [
     # Constants
     "SHARPE_GOOD", "SHARPE_BAD", "MIN_TRADES",
     "SESSION_BOUNDS_UTC", "OVERLAP_BOUNDS", "LONDON_OPEN_BOUNDS",
     "DIMS_ALWAYS", "DIMS_H1_DAILY_ONLY",
     "RENDER_KWARGS",
+    "RISK_SIGMA", "RISK_NOISE_FLOOR", "RISK_DEFAULT_DURATION_MIN",
     # Public API
     "assign_session",
     "discover_active_combos",
@@ -545,6 +867,10 @@ __all__ = [
     "write_combo_csv",
     "build_heatmap_mask",
     "render_combo_heatmaps",
+    "detect_blackout_bars",
+    "cluster_into_patterns",
+    "write_risk_calendar",
+    "detect_and_write_risk_calendar",
     # Re-exports for convenience
     "PitClock", "pit_active",
 ]
