@@ -245,3 +245,17 @@ sm_WorkTime is **purely visual** and has no backtester role — the session boxe
 - [INFER] NY-reversal sub-box spanning 13:30–16:30 GMT (3 h) — MMM Book p. 40 says "about 3 hours" without specifying end time exactly
 - [INFER] Z-order send-to-back via `ObjectSetInteger(0, name, OBJPROP_BACK, true)` — standard MQL4 pattern for background rectangles; the indicator may also adjust the OBJPROP_FILL property for transparency
 - [INFER] No text labels on boxes by default — some variants of this indicator draw "ASIA", "LONDON", "NY" labels at the top edge; presence and format unknown
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Commit | Date |
+|--------|--------|------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4` | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5` | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime.py` | `<TBD>` | 2026-04-XX |
+
+Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py` (6 tests GREEN)
+Confidence: Medium (matches Phase 11 spec).
+Notes: depends on `sm_gmtoffset` (Python `compute_sm_gmtoffset`; MQ5/MQ4 GlobalVariable `sm_GMTOffset`). Session boundaries follow MMM Book p. 8 (00:30 / 07:30 / 13:30 GMT) and p. 40 NY-reversal sub-box (13:30–16:30 GMT, ~3 h).

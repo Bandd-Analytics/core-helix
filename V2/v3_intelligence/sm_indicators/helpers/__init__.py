@@ -2,5 +2,11 @@
 from __future__ import annotations
 
 from .sm_gmtoffset import SMGMTOffsetParams, compute_sm_gmtoffset
+from .sm_worktime import SMWorkTimeParams, compute_sm_worktime
 
-__all__ = ["SMGMTOffsetParams", "compute_sm_gmtoffset"]
+__all__ = [
+    "SMGMTOffsetParams",
+    "compute_sm_gmtoffset",
+    "SMWorkTimeParams",
+    "compute_sm_worktime",
+]
