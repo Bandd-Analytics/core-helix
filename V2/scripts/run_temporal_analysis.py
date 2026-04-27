@@ -5,8 +5,8 @@ across cache timeframes, wraps the entire batch run in a SINGLE PitClock
 (RESEARCH Pitfall 5 — no nesting), writes per-combo CSVs to
 .planning/phases/08.5-temporal-session-analysis/evidence/.
 
-Plan 03 will extend this driver to also render heatmaps;
-Plan 04 will add risk-calendar emission;
+Plan 03 extends this driver to also render heatmaps;
+Plan 04 adds risk-calendar emission via detect_and_write_risk_calendar;
 Plan 05 will add session_config.py regeneration.
 
 Usage:
@@ -98,6 +98,27 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
                 # Don't stop the batch — record the failure and continue
+
+        # SESS-03 (Plan 04): emit empirical risk calendar after per-combo work.
+        # Pool detections across the unique pairs (single H1 pass per pair) so
+        # patterns generalize beyond a single pair's view. Manual operator
+        # entries from prior runs survive via write_risk_calendar's merge.
+        try:
+            unique_pairs = sorted({pair for pair, _, _ in combos})
+            risk_path = out_dir / "risk_calendar.yaml"
+            ta.detect_and_write_risk_calendar(
+                cache=cache,
+                pairs=unique_pairs,
+                timeframe="H1",
+                end_ts=end_ts,
+                out_path=risk_path,
+            )
+            print(f"  [OK] risk_calendar.yaml -> {risk_path.name}")
+        except Exception as e:
+            print(
+                f"  [FAIL] risk_calendar emission: {type(e).__name__}: {e}",
+                file=sys.stderr,
+            )
     return 0
 
 
