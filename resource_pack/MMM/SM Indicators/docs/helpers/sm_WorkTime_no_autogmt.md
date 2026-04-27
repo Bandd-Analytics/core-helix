@@ -242,3 +242,17 @@ Identical to `sm_WorkTime` — purely visual, no backtester role. The same sessi
 - [INFER] ObjectPrefix "smWT_" shared with sm_WorkTime — could differ; if both indicators are loaded simultaneously with the same prefix, object-name collisions would occur. A distinct prefix (e.g., "smWTna_") would be more robust
 - [INFER] ShowNYReversal parameter presence in this older variant — MMM Book p. 40 documents the NY-reversal box but the Sep 2011 binary may predate that feature
 - [INFER] BrokerDSTAdjust uses a Northern Hemisphere calendar heuristic — could instead use a fixed date table (last Sunday of March / October), or could be entirely absent (manual-only DST handling expected from the user)
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Commit | Date |
+|--------|--------|------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4` | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5` | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime_no_autogmt.py` | `<TBD>` | 2026-04-XX |
+
+Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py` (4 tests GREEN)
+Confidence: Medium (matches Phase 11 spec).
+Notes: explicitly NO `sm_gmtoffset` dependency by design (D-19 architectural distinction). Verified by grep gate (`test_no_sm_gmtoffset_dependency`) on the Python module and absence of `GlobalVariableGet("sm_GMTOffset")` from the MQ5/MQ4 sources. Object prefix is `smWTnoauto_` to avoid collision with the auto-variant's `smWT_` prefix when both are loaded on the same chart.
