@@ -181,7 +181,7 @@ Plans:
 - [x] 08.5-01-PLAN.md — Wave 0: RED scaffold (REQUIREMENTS SESS-01..04 + ruamel.yaml dep + 3 RED test files + synthetic-data fixtures) [autonomous]
 - [x] 08.5-02-PLAN.md — Wave 1: temporal_analysis.py core (session masks, bucketing, trade-source dispatcher) + run_temporal_analysis.py CLI driver (SESS-01) [autonomous]
 - [x] 08.5-03-PLAN.md — Wave 2: Heatmap rendering (HoD/DoW/DoM/DoY with diverging colormap + insufficient_evidence masking) (SESS-02) [autonomous]
-- [ ] 08.5-04-PLAN.md — Wave 3: Risk-calendar pipeline (detect/cluster/emit) + ruamel.yaml round-trip + manual-override merge (SESS-03) [autonomous]
+- [x] 08.5-04-PLAN.md — Wave 3: Risk-calendar pipeline (detect/cluster/emit) + ruamel.yaml round-trip + manual-override merge (SESS-03) [autonomous]
 - [ ] 08.5-05-PLAN.md — Wave 4: session_config.py emitter + temporal_filters.py predicates + phase-gate full-corpus run (SESS-04) [checkpoint — operator runs full pipeline + visual verification]
 
 ---
