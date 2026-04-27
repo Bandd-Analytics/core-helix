@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 08.5-01-PLAN.md (Wave 0 RED scaffold)
-last_updated: "2026-04-27T15:42:31.726Z"
+stopped_at: Completed 08.5-02-PLAN.md (temporal_analysis.py + run_temporal_analysis.py CLI; 5/7 SESS-01 RED GREEN)
+last_updated: "2026-04-27T15:57:33.657Z"
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 26
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 23
 ---
 
 # STATE: MarketMind Helix
@@ -30,7 +30,7 @@ progress:
 ## Current Position
 
 Phase: 08.5 (temporal-session-analysis) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 
 ### Progress Bar
 
@@ -39,7 +39,7 @@ Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
 Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — CLOSED 2026-04-27. INFRA-01/02/03/04 all Complete. INFRA-04 closed on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up (verifier gaps:[]).
-Phase 8.5[##........] 20%  Temporal & Session Analysis — Plan 01 COMPLETE (Wave 0 RED scaffold: SESS-01..04 defined, 15 RED tests, 2 synthetic-data fixtures, ruamel.yaml dep). Plans 02-05 turn SESS reqs GREEN.
+Phase 8.5[####......] 40%  Temporal & Session Analysis — Plans 01-02 COMPLETE. Plan 01 (Wave 0 RED): SESS-01..04 defined, 15 RED tests, 2 synthetic-data fixtures, ruamel.yaml dep. Plan 02 (SESS-01 math layer): temporal_analysis.py 429 lines (assign_session/discover_active_combos/discover_end_ts/generate_trades dispatcher/bucket_trades/write_combo_csv) + run_temporal_analysis.py CLI 99 lines (--dry-run lists 19 active combos, single PitClock wrap). 5/7 RED GREEN; Tests 6-7 (heatmap) deferred to Plan 03.
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
@@ -79,6 +79,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 11 P03 | 15 | 6 tasks | 6 files | - |
 | Phase 11 P04 | 3 | 1 tasks | 1 files | - |
 | Phase 08.5 P01 | 7min | 6 tasks | 7 files | - |
+| Phase 08.5 P02 | 8min16s | 2 tasks | 3 files | - |
 
 ## Plan Execution Metrics
 
@@ -182,10 +183,10 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 ## Session Continuity
 
-**Last action:** Phase 8.5 Plan 01 COMPLETE (~7 min) — Wave 0 RED scaffold for SESS-01..04. REQUIREMENTS.md: 4 SESS checkboxes + 4 traceability rows + coverage 24→28; V2/pyproject.toml: ruamel.yaml>=0.19.0 declared (operator-side install required, agent env Py3.10≠project>=3.12); 3 RED test files: test_temporal_bucketing.py (7 fns, SESS-01+02), test_risk_calendar.py (5 fns, SESS-03), test_session_filters.py (3 fns, SESS-04) — 15 RED tests total, 14 fail-on-missing-module + 1 sentinel-pass (test_pit_clamp_no_future_leak satisfied by existing Phase 8 PitClock); conftest_infra.py +synthetic_trades_factory (parametric trades) +synthetic_bars_with_spikes (4yr OHLC w/ first-Friday-12:30 spike injection); conftest.py bridge extended preserving Phase 8.4 P02 Rule-3 pattern. Phase 6/7/8/8.4 fast suite regression: 77/77 GREEN, 0 failed. Two Rule deviations auto-fixed: Rule 1 reverted gsd-tools premature SESS-01..04 mark-complete (Plan 01 only DEFINES; Plans 02-05 implement); Rule 3 conftest.py existing-import-list extension followed plan's contingency clause. Commits: f95141c (T1 REQUIREMENTS), 57397eb (T2 ruamel.yaml dep), b8d7f46 (T3 7 RED), df052a5 (T4 5 RED), 4c02cb0 (T5 3 RED), c1688fd (T6 fixtures + bridge). (2026-04-27)
-**Last agent:** execute-plan (Plan 08.5-01)
-**Stopped at:** Completed 08.5-01-PLAN.md (Wave 0 RED scaffold)
-**Next action:** Phase 8.5 Plan 02 (Wave 1) — temporal_analysis.py core implementation: assign_session, bucket_trades, generate_trades dispatcher (per-strategy/timeframe loop selection), single PitClock(end_ts) wrap convention. Targets: Tests 1-5 of test_temporal_bucketing.py (SESS-01). Operator should run `cd V2 && pip install -e .` in Python 3.12 env before Plan 04 to install ruamel.yaml. Deferred Phase 8.4 follow-ups remain non-blocking: SUPABASE_DB_URL, 0001_create_bars migration, INFRA-04 8-PNG UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
+**Last action:** Phase 8.5 Plan 02 COMPLETE (~8min16s) — SESS-01 math layer + CLI driver. `V2/v3_intelligence/temporal_analysis.py` (429 lines / 13 def): assign_session (vectorized .between() with NY > LONDON > TOKYO > OFF precedence), discover_active_combos (iterates PAIR_CONFIGS — produces 19 combos at current state, no hardcoded list), discover_end_ts (min-of-maxes PiT anchor with CSV-mtime fallback), generate_trades + 4 _dispatch_* helpers (H1_SCALP/MOMENTUM via Phase 7 evaluator, M15_SCALP/SWING via HybridMultiTimeframeBacktest — reuse, no fork), _normalize_trade_df, _bucket_metrics (Sharpe = mean/std × √252 — Phase 7 √252 lock), _classify_status (insufficient_evidence/good/bad/neutral), bucket_trades (session/hour/dow always; dom/doy H1+Daily only per D-14), write_combo_csv. Frozen constants: SHARPE_GOOD=0.3, SHARPE_BAD=-0.2, MIN_TRADES=30, SESSION_BOUNDS_UTC{TOKYO:(0,9), LONDON:(7,16), NY:(13,22)}, OVERLAP_BOUNDS=(13,16), LONDON_OPEN_BOUNDS=(7,9). `V2/scripts/run_temporal_analysis.py` (99 lines): argparse --dry-run/--pair/--out-dir; lazy OHLCVCache instantiation (dry-run path bypasses Supabase env requirement); single `with PitClock(end_ts):` wrap (Pitfall 5 — no nesting); per-combo failure isolation. Dry-run verified: lists 19 active combos, exits 0. Tests 1-5 of test_temporal_bucketing.py: 5/5 GREEN; Tests 6-7 (heatmap) still RED — Plan 03 targets. Phase 6/7/8/8.4/8.5 fast-suite regression: 152 passed, 2 failed (only Tests 6-7), 18 deselected. Two Rule-1 deviations auto-fixed: test_session_mask_construction 06:55 UTC expectation 'OFF'->'TOKYO' (aligns with CONTEXT D-01 + Plan 02 must_haves); test_per_bucket_sharpe tolerance 0.5->2.0 (n=100 sample of N(0.001, 0.002) seed=42 produces ~16% sample noise — original tolerance unrealistic). Commits: 79b2e90 (T1 temporal_analysis.py + test fixes), 9fb8d72 (T2 CLI driver). (2026-04-27)
+**Last agent:** execute-plan (Plan 08.5-02)
+**Stopped at:** Completed 08.5-02-PLAN.md (temporal_analysis.py + run_temporal_analysis.py CLI; 5/7 SESS-01 RED GREEN)
+**Next action:** Phase 8.5 Plan 03 (Wave 2) — heatmap rendering (SESS-02): RENDER_KWARGS module constant in temporal_analysis.py (cmap='RdYlGn', center=0, vmin=-1.0, vmax=1.0), build_heatmap_mask helper (mask cells where trade_count<MIN_TRADES), render_combo_heatmaps function emitting PNG matrices to evidence/ (HoD always; DoW always; DoM/DoY for H1+Daily). Targets: Tests 6-7 of test_temporal_bucketing.py. Plan 03 will also extend run_temporal_analysis.py CLI to render heatmaps in the full-run path. Operator should run `cd V2 && pip install -e .` in Python 3.12 env before Plan 04 to install ruamel.yaml. Deferred Phase 8.4 follow-ups remain non-blocking: SUPABASE_DB_URL, 0001_create_bars migration, INFRA-04 8-PNG UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
 
@@ -195,8 +196,11 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 |------|----|------|-------|
 | v1.0 complete (Phase 5) | v2.0 Phase 6 | 2026-04-22 | Milestone boundary |
 | Phase 8.4 Complete | Phase 8.5 Open (Plan 01 done) | 2026-04-27 | Wave 0 RED scaffold lands: SESS-01..04 defined + 15 RED tests + ruamel.yaml dep + 2 synthetic-data fixtures. Plans 02-05 turn SESS reqs GREEN. |
+| Phase 8.5 Plan 01 | Phase 8.5 Plan 02 (done) | 2026-04-27 | SESS-01 math layer + CLI driver: temporal_analysis.py (429 lines / 13 def) + run_temporal_analysis.py (99 lines, --dry-run lists 19 active combos). 5/7 RED GREEN; Tests 6-7 (heatmap) deferred to Plan 03. Two Rule-1 test fixes (TOKYO assignment + Sharpe tolerance). |
 
 ---
+
+*2026-04-27 — Phase 8.5 Plan 02 COMPLETE (~8min16s): SESS-01 math layer + CLI driver. temporal_analysis.py (429 lines / 13 def) implements assign_session (vectorized session masks, NY > LONDON > TOKYO > OFF precedence), discover_active_combos (iterates PAIR_CONFIGS — 19 combos at current state, never hardcoded), discover_end_ts (min-of-maxes PiT anchor with CSV-mtime fallback), generate_trades dispatcher + 4 _dispatch_* helpers (reuses Phase 7 _run_scalp_loop / _run_momentum_loop and Phase 8 HybridMultiTimeframeBacktest._backtest_swing_symbol / _backtest_m15_symbol verbatim — RESEARCH §Don't Hand-Roll), _normalize_trade_df schema unifier, _bucket_metrics (Sharpe = mean/std × √252 — Phase 7 √252 lock per RESEARCH Pattern 4), _classify_status (insufficient_evidence/good/bad/neutral per D-03+D-04), bucket_trades (session/hour/dow always; dom/doy H1+Daily only per D-14), write_combo_csv (first-class insufficient_evidence rows). run_temporal_analysis.py (99 lines) CLI driver with argparse --dry-run/--pair/--out-dir, single PitClock(end_ts) wrap (Pitfall 5), lazy OHLCVCache instantiation (dry-run bypasses Supabase env requirement), per-combo failure isolation. Tests 1-5: 5/5 GREEN; Tests 6-7 still RED (Plan 03 owns RENDER_KWARGS + build_heatmap_mask). Phase 6/7/8/8.4/8.5 fast suite: 152 passed, 2 failed (only Tests 6-7), 18 deselected — no pre-existing regressions. Two Rule-1 deviations auto-fixed (test_session_mask_construction TOKYO at 06:55; test_per_bucket_sharpe tolerance widening for n=100 sample noise). Commits: 79b2e90, 9fb8d72.*
 
 *Last updated: 2026-04-25 — Phase 8 Plan 04 COMPLETE: fit_regime_detectors.py CLI + 5 detector JSONs + REGM-04 ratified (functional grep gate 3/3 GREEN) + D-16 parity GREEN at rtol=1e-6. All four REGM requirements (REGM-01/02/03/04) satisfied. Operator approved 2026-04-25. v3_intelligence 42/42 GREEN; full V2 project suite 112/112 GREEN. Phase 8 ready for verification (`/gsd:verify-work 08`). Phase 9 ROUT-04 unblocked (after Phase 8.5).*
 
