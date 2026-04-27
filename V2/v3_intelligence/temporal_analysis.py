@@ -23,8 +23,16 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import matplotlib
+
+# Use Agg backend for headless PNG rendering — no display required (CONTEXT D-16).
+# Set BEFORE importing pyplot so the backend is locked in.
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np
 import pandas as pd
+import seaborn as sns  # noqa: E402
 
 from v3_intelligence.cache import OHLCVCache
 from v3_intelligence.pair_config import (
@@ -412,11 +420,122 @@ def write_combo_csv(
     return path
 
 
+# ── SESS-02: Heatmap rendering (Plan 03) ──────────────────────────────────────
+# Frozen render contract — test_heatmap_diverging_colormap inspects this dict.
+# Locked per RESEARCH §Pattern 3 — diverging RdYlGn anchored at zero with ±1.0 clip
+# so cell color encodes Sharpe sign + magnitude consistently across combos.
+RENDER_KWARGS: dict = {
+    "cmap":   "RdYlGn",   # diverging: red negative, yellow ~zero, green positive
+    "center": 0,          # anchors zero-Sharpe to colormap midpoint (critical)
+    "vmin":   -1.0,       # clip extreme outliers below (rare bucket Sharpe < -1
+                          # would otherwise dominate the colormap)
+    "vmax":    1.0,       # clip extreme outliers above
+    "annot":   True,      # cell-level numeric annotation
+    "fmt":    ".2f",
+}
+
+
+def build_heatmap_mask(
+    bucket_df: pd.DataFrame,
+    min_trades: int = MIN_TRADES,
+) -> pd.Series:
+    """Return a boolean Series indexed by the bucket dim (e.g., hour/dow/dom/doy).
+
+    True  = mask out (trade_count < min_trades — render gray, "no data").
+    False = render normally (sufficient evidence).
+
+    Per CONTEXT D-03 + D-04 + RESEARCH §Anti-Patterns: cells with insufficient
+    evidence MUST be masked (gray), NOT zero-filled. Zero-fill lies green/yellow
+    on a diverging colormap and would mislead operators.
+
+    Input contract: bucket_df has the dim column as its first column, plus
+    columns [sharpe, win_rate, trade_count, status] (the bucket_trades schema).
+    """
+    # The dim column name is the first column (matches bucket_trades output).
+    dim_col = bucket_df.columns[0]
+    mask = bucket_df.set_index(dim_col)["trade_count"] < min_trades
+    return mask
+
+
+def render_combo_heatmaps(
+    buckets: dict[str, pd.DataFrame],
+    pair: str, strategy: str, timeframe: str,
+    out_dir: Path,
+) -> list[Path]:
+    """Render one PNG per dimension per (pair, strategy, timeframe).
+
+    Per CONTEXT D-14:
+      - hour + dow always rendered for every combo
+      - dom + doy ONLY rendered for H1 / Daily combos (M15 corpus too thin per
+        RESEARCH §Pitfall 2 — DoM/DoY buckets would be sparse and noisy at M15)
+    Per RESEARCH §Pattern 3 (locked render contract):
+      - cmap='RdYlGn', center=0, vmin/vmax=±1.0, annot=True, fmt='.2f'
+      - mask=trade_count<MIN_TRADES (gray cells, never zero-filled)
+    Per CONTEXT D-14 (output path convention):
+      - {out_dir}/heatmap_{dim}_{pair}_{strategy}_{timeframe}.png
+
+    Note on `session` dim: session is a categorical (TOKYO/LONDON/NY/OFF) and
+    is reported in the CSV alongside other dims. We deliberately skip a session
+    heatmap here — heatmaps are for the integer-keyed dims (hour/dow/dom/doy)
+    where the diverging colormap reads naturally as a 1×N strip.
+
+    Returns the list of written PNG paths.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+
+    # Determine which dims to render. M15 skips dom/doy per CONTEXT D-14.
+    dims_to_render = list(DIMS_ALWAYS)  # session, hour, dow
+    if timeframe in ("H1", "Daily"):
+        dims_to_render += list(DIMS_H1_DAILY_ONLY)  # dom, doy
+    # session is reported via CSV; heatmaps are for integer dims only.
+    dims_to_render = [d for d in dims_to_render if d != "session"]
+
+    for dim in dims_to_render:
+        df = buckets.get(dim)
+        if df is None or df.empty:
+            continue
+
+        # Build matrix: 1 row × N columns (N = bucket count for this dim).
+        matrix = df.set_index(dim)[["sharpe"]].T   # shape (1, N)
+        mask_series = build_heatmap_mask(df)        # Series indexed by dim
+        mask = mask_series.values.reshape(1, -1)    # shape (1, N), aligned
+
+        # Figure sizing: scale width with bucket count (24 hours wide → 12in).
+        width = max(8.0, 0.5 * len(df))
+        fig, ax = plt.subplots(figsize=(width, 2.5))
+
+        sns.heatmap(
+            matrix,
+            mask=mask,
+            cmap=RENDER_KWARGS["cmap"],
+            center=RENDER_KWARGS["center"],
+            vmin=RENDER_KWARGS["vmin"],
+            vmax=RENDER_KWARGS["vmax"],
+            annot=RENDER_KWARGS["annot"],
+            fmt=RENDER_KWARGS["fmt"],
+            cbar_kws={"label": "Sharpe (annualized, clipped to ±1.0)"},
+            ax=ax,
+        )
+        ax.set_title(f"{pair} / {strategy} / {timeframe} — Sharpe by {dim}")
+        ax.set_xlabel(dim)
+        ax.set_ylabel("")
+        fig.tight_layout()
+
+        out_path = out_dir / f"heatmap_{dim}_{pair}_{strategy}_{timeframe}.png"
+        fig.savefig(out_path, dpi=120)
+        plt.close(fig)
+        written.append(out_path)
+
+    return written
+
+
 __all__ = [
     # Constants
     "SHARPE_GOOD", "SHARPE_BAD", "MIN_TRADES",
     "SESSION_BOUNDS_UTC", "OVERLAP_BOUNDS", "LONDON_OPEN_BOUNDS",
     "DIMS_ALWAYS", "DIMS_H1_DAILY_ONLY",
+    "RENDER_KWARGS",
     # Public API
     "assign_session",
     "discover_active_combos",
@@ -424,6 +543,8 @@ __all__ = [
     "generate_trades",
     "bucket_trades",
     "write_combo_csv",
+    "build_heatmap_mask",
+    "render_combo_heatmaps",
     # Re-exports for convenience
     "PitClock", "pit_active",
 ]
