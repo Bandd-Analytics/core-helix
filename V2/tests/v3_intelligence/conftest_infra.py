@@ -80,3 +80,87 @@ def mock_psycopg_conn():
         cur.rowcount = 0
         yield conn
     return _connect
+
+
+# ── Phase 8.5 fixtures (Wave 0) ───────────────────────────────────────────
+
+@pytest.fixture
+def synthetic_trades_factory():
+    """Factory: produce a trades DataFrame with controllable session/hour distribution.
+
+    Returns a callable: factory(n_trades, entry_hour=8, pnl_mean=0.001, pnl_std=0.002,
+                                 pair='USDJPY', start='2024-01-15')
+    Output columns: entry_ts (UTC), exit_ts, pnl_pct, direction, strategy, pair, timeframe.
+    """
+    import numpy as np
+    import pandas as pd
+
+    def _factory(n_trades: int, entry_hour: int = 8,
+                 pnl_mean: float = 0.001, pnl_std: float = 0.002,
+                 pair: str = "USDJPY",
+                 start: str = "2024-01-15") -> pd.DataFrame:
+        rng = np.random.default_rng(seed=42)
+        base = pd.Timestamp(start, tz="UTC")
+        # Spread n_trades across consecutive weekdays at the given hour
+        entry_ts = pd.DatetimeIndex([
+            base + pd.Timedelta(days=i) + pd.Timedelta(hours=entry_hour)
+            for i in range(n_trades)
+        ])
+        pnl = rng.normal(pnl_mean, pnl_std, n_trades)
+        return pd.DataFrame({
+            "entry_ts":  entry_ts,
+            "exit_ts":   entry_ts + pd.Timedelta(hours=4),
+            "pnl_pct":   pnl,
+            "direction": ["LONG" if p > 0 else "SHORT" for p in pnl],
+            "strategy":  "TEST_STRAT",
+            "pair":      pair,
+            "timeframe": "H1",
+        })
+
+    return _factory
+
+
+@pytest.fixture
+def synthetic_bars_with_spikes():
+    """Factory: produce 4yr OHLC bars with injected volatility spikes at a given pattern.
+
+    Returns: (bars_df, injected_timestamps).
+    spike_pattern values: 'first_friday_1230' -> 1st Friday of every month at 12:30 UTC.
+    Spike injection: multiply (High - Low) by spike_magnitude on those bars.
+    """
+    import numpy as np
+    import pandas as pd
+
+    def _factory(pair: str = "EURUSD", timeframe: str = "H1",
+                 n_years: int = 4, spike_pattern: str = "first_friday_1230",
+                 spike_magnitude: float = 10.0):
+        freq = {"H1": "h", "M15": "15min", "Daily": "D", "H4": "4h"}[timeframe]
+        end = pd.Timestamp("2026-01-01", tz="UTC")
+        start = end - pd.DateOffset(years=n_years)
+        idx = pd.date_range(start, end, freq=freq, tz="UTC")
+        rng = np.random.default_rng(seed=123)
+
+        close = 1.10 + np.cumsum(rng.normal(0, 0.0001, len(idx)))
+        high = close + np.abs(rng.normal(0, 0.0005, len(idx)))
+        low  = close - np.abs(rng.normal(0, 0.0005, len(idx)))
+        opn  = close + rng.normal(0, 0.0001, len(idx))
+        vol  = rng.integers(100, 1000, len(idx))
+
+        bars = pd.DataFrame({
+            "Open": opn, "High": high, "Low": low, "Close": close, "Volume": vol,
+        }, index=idx)
+        bars.index.name = "ts"
+
+        # Inject spikes
+        injected = []
+        if spike_pattern == "first_friday_1230":
+            for ts in idx:
+                if ts.dayofweek == 4 and 1 <= ts.day <= 7 and ts.hour == 12:
+                    bars.loc[ts, "High"] = bars.loc[ts, "Close"] + abs(
+                        bars.loc[ts, "High"] - bars.loc[ts, "Close"]) * spike_magnitude
+                    bars.loc[ts, "Low"]  = bars.loc[ts, "Close"] - abs(
+                        bars.loc[ts, "Close"] - bars.loc[ts, "Low"])  * spike_magnitude
+                    injected.append(ts)
+        return bars, pd.DatetimeIndex(injected)
+
+    return _factory

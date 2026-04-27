@@ -59,4 +59,6 @@ from .conftest_infra import (  # noqa: E402, F401
     in_memory_logger,
     mock_chroma_collection,
     mock_psycopg_conn,
+    synthetic_trades_factory,
+    synthetic_bars_with_spikes,
 )
