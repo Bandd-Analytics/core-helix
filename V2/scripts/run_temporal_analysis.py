@@ -81,9 +81,15 @@ def main(argv: list[str] | None = None) -> int:
                 csv_path = ta.write_combo_csv(
                     buckets, pair, strategy, timeframe, out_dir
                 )
+                # SESS-02 (Plan 03): render heatmaps inside the same PitClock so
+                # any incidental bar reads remain PiT-clamped. M15 emits hour+dow
+                # only; H1/Daily additionally emit dom+doy (CONTEXT D-14).
+                png_paths = ta.render_combo_heatmaps(
+                    buckets, pair, strategy, timeframe, out_dir
+                )
                 print(
                     f"  [OK] {pair}/{strategy}/{timeframe} -> {csv_path.name} "
-                    f"({len(trades)} trades)"
+                    f"+ {len(png_paths)} PNGs ({len(trades)} trades)"
                 )
             except Exception as e:
                 print(
