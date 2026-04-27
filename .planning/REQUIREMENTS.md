@@ -38,7 +38,7 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 ### Temporal & Session Analysis (Phase 8.5)
 
 - [ ] **SESS-01**: Per-(pair, strategy, timeframe) session performance table covering Tokyo (00:00–09:00 UTC) / London (07:00–16:00 UTC) / NY (13:00–22:00 UTC) / London-NY overlap (13:00–16:00 UTC) / London-open (07:00–09:00 UTC), with Sharpe, win-rate, trade-count, status; thin buckets (<30 trades) marked `insufficient_evidence`; CSV under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
-- [ ] **SESS-02**: HoD/DoW heatmaps for every active pair × strategy × timeframe combo; DoM/DoY heatmaps for H1 + Daily combos only (M15 corpus too thin per CONTEXT D-14); PNGs committed under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
+- [x] **SESS-02**: HoD/DoW heatmaps for every active pair × strategy × timeframe combo; DoM/DoY heatmaps for H1 + Daily combos only (M15 corpus too thin per CONTEXT D-14); PNGs committed under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
 - [ ] **SESS-03**: Empirically-detected risk calendar (`risk_calendar.yaml`) listing recurring high-volatility windows as parametric patterns (NOT hardcoded dates) with currency scoping (`affects: [USD]` etc.); manual override merge supported via ruamel.yaml round-trip; detection threshold = realized range > 2.5σ above same-(hour-of-day, day-of-week) 4yr baseline.
 - [ ] **SESS-04**: `V2/v3_intelligence/session_config.py` (generated literal config) + `V2/v3_intelligence/temporal_filters.py` (predicates) exposing `is_tradeable_session(pair: str, strategy: str, timeframe: str, ts: datetime) -> bool` (hard-veto) and `is_blackout_window(ts: datetime) -> bool` (global ts-only filter), consumed by Phase 9 StrategyRouter.
 
@@ -106,7 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-03 | Phase 8.4 | Complete |
 | INFRA-04 | Phase 8.4 | Complete (structural; 8-PNG operator visual UAT in 08.4-HUMAN-UAT.md as non-blocking follow-up — verifier `gaps:[]`) |
 | SESS-01 | Phase 8.5 | Pending |
-| SESS-02 | Phase 8.5 | Pending |
+| SESS-02 | Phase 8.5 | Complete |
 | SESS-03 | Phase 8.5 | Pending |
 | SESS-04 | Phase 8.5 | Pending |
 | ROUT-01 | Phase 9 | Pending |
