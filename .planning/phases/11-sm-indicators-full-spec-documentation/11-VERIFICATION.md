@@ -1,8 +1,8 @@
 ---
 phase: 11-sm-indicators-full-spec-documentation
 verified: 2026-04-26T00:00:00Z
-status: human_needed
-score: 6/7 must-haves verified (must-have 4 partial — Tier 0/1/2 approved, INDEX review pending)
+status: passed
+score: 7/7 must-haves verified (final INDEX review approved by user 2026-04-27)
 human_verification:
   - test: "Read INDEX.md at resource_pack/MMM/SM Indicators/docs/INDEX.md and confirm: (1) ASCII dependency graph accurately reflects the relationships declared in the 14 spec Dependencies sections; (2) all 14 spec links resolve; (3) MMM glossary cross-references are complete and accurate; (4) the file is reconstruction-grade as a nav entry point."
     expected: "User responds 'approved' (or describes specific issues to fix). On approval, phase status advances to passed and roadmap is updated."
@@ -13,8 +13,8 @@ human_verification:
 
 **Phase Goal:** Produce reconstruction-grade documentation for all 14 `!SM_*` / `!sm_*` MT4 indicators (3 helpers + 11 SM_\*) at "Full" detail using a fixed 12-section template. Output: 15 markdown files (1 INDEX + 3 helpers + 11 indicators) under `resource_pack/MMM/SM Indicators/docs/`. Enable any future implementer to reconstruct any of these 14 indicators in MQ4, MQ5, or Python without access to original source.
 
-**Verified:** 2026-04-26
-**Status:** human_needed
+**Verified:** 2026-04-26 (auto), 2026-04-27 (human INDEX review)
+**Status:** passed
 **Re-verification:** No — initial verification
 
 ---
