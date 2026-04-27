@@ -15,10 +15,14 @@ import pytest
 def test_session_mask_construction(synthetic_trades_factory):
     """SESS-01 — assign_session must tag trades by entry_ts hour-of-day per D-01.
 
-    Bar at 06:55 UTC -> session='OFF' (no session active).
-    Bar at 07:00 UTC -> session='LONDON' (London opens; in_london_open=True).
-    Bar at 13:00 UTC -> session='NY' (NY opens; in_overlap=True until 16:00).
-    Bar at 22:00 UTC -> session='OFF' (NY closes).
+    Per CONTEXT D-01 (UTC, no DST):
+      Tokyo  00:00-09:00, London 07:00-16:00, NY 13:00-22:00,
+      Overlap 13:00-16:00, London-open 07:00-09:00.
+    Precedence (Plan 02 deviation note 1): NY > London > Tokyo on overlapping hours.
+      06:55 UTC (h=6) -> 'TOKYO' (Tokyo only — London hasn't opened yet).
+      07:00 UTC (h=7) -> 'LONDON' (London opens; overrides Tokyo overlap; in_london_open=True).
+      13:00 UTC (h=13) -> 'NY' (NY opens; overrides London overlap; in_overlap=True until 16:00).
+      22:00 UTC (h=22) -> 'OFF' (NY closes — exclusive-right boundary).
     """
     from v3_intelligence.temporal_analysis import assign_session
     ts_list = [
@@ -30,7 +34,7 @@ def test_session_mask_construction(synthetic_trades_factory):
     trades = pd.DataFrame({"entry_ts": ts_list, "exit_ts": ts_list,
                             "pnl_pct": [0.001, 0.002, -0.001, 0.001]})
     out = assign_session(trades)
-    assert list(out["session"]) == ["OFF", "LONDON", "NY", "OFF"]
+    assert list(out["session"]) == ["TOKYO", "LONDON", "NY", "OFF"]
     assert list(out["in_overlap"]) == [False, False, True, False]
     assert list(out["in_london_open"]) == [False, True, False, False]
 
@@ -49,7 +53,11 @@ def test_per_bucket_sharpe(synthetic_trades_factory):
     assert "session" in out and "hour" in out and "dow" in out
     london_row = out["session"].set_index("session").loc["LONDON"]
     expected_sharpe = (0.001 / 0.002) * np.sqrt(252)
-    assert abs(london_row["sharpe"] - expected_sharpe) < 0.5  # tol for synthetic noise
+    # Plan 02 deviation 2: tolerance widened from 0.5 to 2.0 — n=100 sample of
+    # N(0.001, 0.002) under seed=42 yields sample mean=0.000899 / std=0.001553,
+    # giving Sharpe 9.19 (vs population 7.94 — ~16% deviation from sample noise).
+    # Tighter tolerance is unrealistic without n>>1000.
+    assert abs(london_row["sharpe"] - expected_sharpe) < 2.0
     assert london_row["trade_count"] == 100
 
 
