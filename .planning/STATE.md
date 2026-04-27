@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 12 context gathered
-last_updated: "2026-04-27T13:40:10.511Z"
+stopped_at: Completed 08.5-01-PLAN.md (Wave 0 RED scaffold)
+last_updated: "2026-04-27T15:42:31.726Z"
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 26
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # STATE: MarketMind Helix
@@ -29,8 +29,8 @@ progress:
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
+Phase: 08.5 (temporal-session-analysis) — EXECUTING
+Plan: 2 of 5
 
 ### Progress Bar
 
@@ -39,12 +39,12 @@ Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
 Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — CLOSED 2026-04-27. INFRA-01/02/03/04 all Complete. INFRA-04 closed on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up (verifier gaps:[]).
-Phase 8.5[..........] 0%   Temporal & Session Analysis — NEXT (SESS-01..04)
+Phase 8.5[##........] 20%  Temporal & Session Analysis — Plan 01 COMPLETE (Wave 0 RED scaffold: SESS-01..04 defined, 15 RED tests, 2 synthetic-data fixtures, ruamel.yaml dep). Plans 02-05 turn SESS reqs GREEN.
 Phase 9  [..........] 0%   Strategy Router
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 ```
 
-**Overall milestone:** 15/24 requirements complete (BRDG-01..04, BKTS-01..04, REGM-01..04, INFRA-01/02/03; INFRA-04 sources landed Plan 04 Task 3a but visual verification on M15/H1/H4/Daily deferred to follow-up operator session)
+**Overall milestone:** 16/28 requirements complete (BRDG-01/02/04, BKTS-01..04, REGM-01..04, INFRA-01/02/03/04; INFRA-04 closed structurally with non-blocking visual UAT in 08.4-HUMAN-UAT.md). SESS-01..04 defined and scaffolded by Plan 08.5-01 (Pending — Plans 02-05 close them). ROUT-01..04 + LIVE-01..04 + BRDG-03 still Pending.
 
 ---
 
@@ -78,6 +78,7 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | Phase 11 P02 | 35 | 5 tasks | 5 files | - |
 | Phase 11 P03 | 15 | 6 tasks | 6 files | - |
 | Phase 11 P04 | 3 | 1 tasks | 1 files | - |
+| Phase 08.5 P01 | 7min | 6 tasks | 7 files | - |
 
 ## Plan Execution Metrics
 
@@ -141,6 +142,9 @@ Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
 | cache.py landed with PiT-safe auto-pull + Title-case OHLC (08.4-02 / D-01..D-04) | OHLCVCache wired to Supabase Postgres: `psycopg.connect(prepare_threshold=None)` for pgbouncer compat; `INSERT … ON CONFLICT (pair, timeframe, ts) DO NOTHING` for idempotency; inside non-UNBOUNDED PitClock raises FutureBarReadError on out-of-range read; outside, calls `_auto_pull` and retries via non-recursive `_read_only`. 8/8 Plan 01 RED tests in test_cache.py turned GREEN; 3/3 slow integration tests SKIP cleanly until SUPABASE_DB_URL provisioned |
 | Conftest fixture-discovery bridge (08.4-02 / Rule 3 deviation) | Pytest only auto-discovers `conftest.py`, NOT `conftest_infra.py`. Plan 01's RED scaffold designed `conftest_infra.py` for visual separation but pytest never loaded the fixtures. Fix: 11-line bridge in existing `conftest.py` re-exporting the 4 Phase 8.4 fixtures (`from .conftest_infra import …`). Preserves Plan 01 separation while satisfying pytest discovery; Phase 8 fixtures (synthetic_three_regime_returns, v1_baseline) untouched |
 | update_cache.py CLI uses lazy import to break module cycle (08.4-02 / D-04) | `cache._auto_pull` does `from scripts.update_cache import fetch_range` inside the method body, not at module top — cache.py imports cleanly without scripts/ on path; only the auto-pull code path requires it. CLI exposes `--pair / --tf / --since {auto\|all\|YYYY-MM-DD} / --all` for batch pre-warming (8 pairs × 4 timeframes). Linux failover (Phase 7 D-15 reused) reads existing `V2/data/{PAIR}_{TF}_*.csv` when MetaTrader5 unavailable |
+| Wave 0 RED scaffold = 15 test fns / 15 collected items across 3 files (08.5-01) | Mirrors Phase 8.4 P01 / Phase 8 P01 / Phase 7 P01 pattern, scaled to 4 SESS reqs. Plans 02-05 turn them GREEN: Plan 02 owns Tests 1-5 of test_temporal_bucketing.py; Plan 03 owns Tests 6-7; Plan 04 owns all 5 of test_risk_calendar.py; Plan 05 owns all 3 of test_session_filters.py. Nyquist compliance: every implementation task has a `<verify>` command pointing to a real test file on disk |
+| ruamel.yaml install deferred to operator (08.5-01 / Task 2) | Agent env Python 3.10 ≠ project requires-python>=3.12 — `pip install ruamel.yaml` fails in scaffold context. Declared `ruamel.yaml>=0.19.0` in `V2/pyproject.toml`; Plan 04 RED tests (`test_yaml_roundtrip_preserves_comments`, `test_manual_override_merge`) act as the de facto install gate — cannot turn GREEN until operator runs `cd V2 && pip install -e .` in a 3.12 env. Pure-Python parser preserves comments per CONTEXT D-12 (PyYAML rejected) |
+| test_pit_clamp_no_future_leak passes GREEN at scaffold time (08.5-01) | PitClock from Phase 8 already satisfies the contract (the test only asserts `pit_active()` False/True/False around `with PitClock(end_ts):`). Test serves as documented regression guard for the Phase 8.5 wrapper convention rather than a RED-fails-on-missing-impl gate. Plan-stated success criterion "All 15 tests fail RED" relaxed to "All 15 tests collect cleanly with the contract Plans 02-05 must satisfy" — counts as 14F+1P at scaffold time |
 
 ### Critical Gates
 
@@ -178,10 +182,10 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 ## Session Continuity
 
-**Last action:** Phase 8.4 Plan 04 COMPLETE (4/5 tasks; Task 3b deferred) — RAG learning loop closed (`learning_loop.on_trade_close` glue layer + `_maybe_log_param_diff` D-12 decision_log diff via OFFSET 1 prev-trade lookup); `compute_adr` helper (D-18); `scripts.backfill_rag` CLI (D-14); `BandD_TradeReplay.mq5` + `ADR_Levels.mq5` indicators (D-15/D-17/D-18/D-19, timeframe-agnostic per D-16); `backtest_hybrid.py` wired `on_trade_close(rec)` at swing-close + m15-close sites with `params_json` snapshots; `rag_signal_filter` default collection 'trades'->'trade_memory' (Warning 6); `mempalace init`+`mine` populated 'helix' wing (~2311+ drawers); `mempalace.yaml` taxonomy expanded across 8 domain rooms; `PROJECT.md` §Memory Architecture documents claude-mem vs mempalace vs chroma_rag/trade_memory; `REQUIREMENTS.md` INFRA-01/02/03 -> Complete. INFRA-04 stays Pending — Wine MT5 IS running locally but spawned executor cannot capture GUI screenshots; .mq5 sources copied to `~/.mt5/.../IC Markets KE MT5 Terminal/MQL5/Indicators/` for follow-up operator session. 12/12 Plan 01 RED tests GREEN (6 learning_loop + 4 adr + 2 slow backfill_rag); full Phase 6/7/8 + 8.4 P02/P03/P04 fast suite: 147 passed / 18 deselected / 0 failed. Three Rule 3 deviations auto-fixed (V2/reports/ gitignore exception; mempalace.yaml gitignore override; BandD_TradeReplay header-skip from 2-read to 10-read). Commits: ec8a403 (T1 logger+learning_loop+adr), f38af53 (T2 backfill_rag+wire), 66d0909 (T3a indicators+sample csv), dd6a111 (T5 mempalace+PROJECT.md+REQUIREMENTS). (2026-04-26)
-**Last agent:** execute-plan (Plan 04)
-**Stopped at:** Phase 12 context gathered
-**Next action:** Phase 8.5 (Temporal & Session Analysis) — discuss → plan → execute. Define SESS-01..04 in REQUIREMENTS.md as first task of plan 01. 8 pairs × 4 strategies × 3 timeframes corpus is now in V2/data/ (24 4yr CSVs from Phase 8.4 P03 Path A). Deferred Phase 8.4 follow-ups (non-blocking): SUPABASE_DB_URL provisioning, 0001_create_bars migration application, INFRA-04 8-PNG visual UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
+**Last action:** Phase 8.5 Plan 01 COMPLETE (~7 min) — Wave 0 RED scaffold for SESS-01..04. REQUIREMENTS.md: 4 SESS checkboxes + 4 traceability rows + coverage 24→28; V2/pyproject.toml: ruamel.yaml>=0.19.0 declared (operator-side install required, agent env Py3.10≠project>=3.12); 3 RED test files: test_temporal_bucketing.py (7 fns, SESS-01+02), test_risk_calendar.py (5 fns, SESS-03), test_session_filters.py (3 fns, SESS-04) — 15 RED tests total, 14 fail-on-missing-module + 1 sentinel-pass (test_pit_clamp_no_future_leak satisfied by existing Phase 8 PitClock); conftest_infra.py +synthetic_trades_factory (parametric trades) +synthetic_bars_with_spikes (4yr OHLC w/ first-Friday-12:30 spike injection); conftest.py bridge extended preserving Phase 8.4 P02 Rule-3 pattern. Phase 6/7/8/8.4 fast suite regression: 77/77 GREEN, 0 failed. Two Rule deviations auto-fixed: Rule 1 reverted gsd-tools premature SESS-01..04 mark-complete (Plan 01 only DEFINES; Plans 02-05 implement); Rule 3 conftest.py existing-import-list extension followed plan's contingency clause. Commits: f95141c (T1 REQUIREMENTS), 57397eb (T2 ruamel.yaml dep), b8d7f46 (T3 7 RED), df052a5 (T4 5 RED), 4c02cb0 (T5 3 RED), c1688fd (T6 fixtures + bridge). (2026-04-27)
+**Last agent:** execute-plan (Plan 08.5-01)
+**Stopped at:** Completed 08.5-01-PLAN.md (Wave 0 RED scaffold)
+**Next action:** Phase 8.5 Plan 02 (Wave 1) — temporal_analysis.py core implementation: assign_session, bucket_trades, generate_trades dispatcher (per-strategy/timeframe loop selection), single PitClock(end_ts) wrap convention. Targets: Tests 1-5 of test_temporal_bucketing.py (SESS-01). Operator should run `cd V2 && pip install -e .` in Python 3.12 env before Plan 04 to install ruamel.yaml. Deferred Phase 8.4 follow-ups remain non-blocking: SUPABASE_DB_URL, 0001_create_bars migration, INFRA-04 8-PNG UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
 
@@ -190,6 +194,7 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 | From | To | Date | Notes |
 |------|----|------|-------|
 | v1.0 complete (Phase 5) | v2.0 Phase 6 | 2026-04-22 | Milestone boundary |
+| Phase 8.4 Complete | Phase 8.5 Open (Plan 01 done) | 2026-04-27 | Wave 0 RED scaffold lands: SESS-01..04 defined + 15 RED tests + ruamel.yaml dep + 2 synthetic-data fixtures. Plans 02-05 turn SESS reqs GREEN. |
 
 ---
 
