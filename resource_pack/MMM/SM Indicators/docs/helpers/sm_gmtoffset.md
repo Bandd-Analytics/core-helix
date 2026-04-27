@@ -190,3 +190,16 @@ The Helix V2 backtester reads OHLCV data from CSV files that have already been t
 - [INFER] `Comment()` call for human verification — common pattern in utility indicators; the indicator may produce zero visible output
 - [INFER] GlobalVariable is NOT deleted on `OnDeinit` — some implementations do delete it; the downstream "graceful 0-fallback" behavior in sm_WorkTime depends on the non-deletion assumption
 - [INFER] Integer-only GMT offset model — half-hour offsets (e.g., India IST UTC+5:30, Iran IRST UTC+3:30) are unsupported; most Forex broker servers run on integer-hour offsets so this is a reasonable constraint
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Commit | Date |
+|--------|--------|------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4` | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5` | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_gmtoffset.py` | `<TBD>` | 2026-04-XX |
+
+Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py` (5 tests GREEN)
+Confidence: Medium (matches Phase 11 spec).
