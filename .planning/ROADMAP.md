@@ -175,7 +175,14 @@ Plans:
 - **Risk calendar** — recurring event windows with empirical spread/volatility spikes flagged as blackouts
 - **Outputs** — session_config.py, temporal_filters.py, plus analysis CSVs and PNG heatmaps committed under .planning/phases/08.5-temporal-session-analysis/evidence/
 
-**Plans:** TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 08.5-01-PLAN.md — Wave 0: RED scaffold (REQUIREMENTS SESS-01..04 + ruamel.yaml dep + 3 RED test files + synthetic-data fixtures) [autonomous]
+- [ ] 08.5-02-PLAN.md — Wave 1: temporal_analysis.py core (session masks, bucketing, trade-source dispatcher) + run_temporal_analysis.py CLI driver (SESS-01) [autonomous]
+- [ ] 08.5-03-PLAN.md — Wave 2: Heatmap rendering (HoD/DoW/DoM/DoY with diverging colormap + insufficient_evidence masking) (SESS-02) [autonomous]
+- [ ] 08.5-04-PLAN.md — Wave 3: Risk-calendar pipeline (detect/cluster/emit) + ruamel.yaml round-trip + manual-override merge (SESS-03) [autonomous]
+- [ ] 08.5-05-PLAN.md — Wave 4: session_config.py emitter + temporal_filters.py predicates + phase-gate full-corpus run (SESS-04) [checkpoint — operator runs full pipeline + visual verification]
 
 ---
 
@@ -223,7 +230,7 @@ Plans:
 | 7. Backtest Entry Fix + 4yr Validation | 4/4 | Complete | 2011-04-25 |
 | 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2011-04-25 |
 | 8.4. Infrastructure Prereqs (INSERTED) | 4/4 | Complete   | 2011-04-26 |
-| 8.5. Temporal & Session Analysis | 0/? | Not started | — |
+| 8.5. Temporal & Session Analysis | 0/5 | Not started | — |
 | 9. Strategy Router | 0/? | Not started | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
 
