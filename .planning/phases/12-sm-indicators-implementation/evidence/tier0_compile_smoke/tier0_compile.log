@@ -1,0 +1,35 @@
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.compile.log — Wine instability suspected
+
+=== Tier tier0 batch summary ===
+OK:    6
+FAIL:  0
+SKIP:  0

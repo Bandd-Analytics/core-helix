@@ -207,3 +207,31 @@ The following items can each be resolved in seconds by an operator who can run t
 - **Spec template:** 12-section locked (Header / Purpose / Inputs / Outputs / Calculation logic / Pseudocode / Visual elements / Dependencies / Edge cases / Test cases / Port notes / Uncertainty log) — see [11-CONTEXT.md](../../../../.planning/phases/11-sm-indicators-full-spec-documentation/11-CONTEXT.md) §Per-Indicator Template
 - **Validation rubric:** see [11-VALIDATION.md](../../../../.planning/phases/11-sm-indicators-full-spec-documentation/11-VALIDATION.md)
 - **Reconstruction methodology:** The `.ex4` binaries are compiled MQL4 and are not decompilable with any public tool. All specs are best-effort reconstructions from indicator names, MMM source docs, community knowledge, and binary size analysis. Every claim not directly sourced from a primary document is tagged `[INFER]` (medium confidence) or `[INFER:guess]` (low confidence). These tags are the primary review targets for any operator who gains MT4 access to the live indicator suite.
+
+---
+
+## Implementation matrix (Phase 12)
+
+Per D-14, this section is updated at the end of each Phase 12 tier with
+the per-spec implementation status. Each row's "Status" cell summarizes
+the per-target footer added to the linked spec.
+
+### Tier 0 — helpers (Plan 12-01)
+
+| # | Spec | MQ4 | MQ5 | Python | Confidence | Footer link |
+|---|------|-----|-----|--------|------------|-------------|
+| 1 | [sm_gmtoffset](./helpers/sm_gmtoffset.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_gmtoffset.md#implementation-status-phase-12) |
+| 2 | [sm_WorkTime](./helpers/sm_WorkTime.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_WorkTime.md#implementation-status-phase-12) |
+| 3 | [sm_WorkTime_no_autogmt](./helpers/sm_WorkTime_no_autogmt.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_WorkTime_no_autogmt.md#implementation-status-phase-12) |
+
+Tier 0 review: approved YYYY-MM-DD (operator).
+
+### Tier 1 — atomic indicators (Plan 12-02)
+
+*Pending — populated when Plan 12-02 lands.*
+
+### Tier 2 — composite indicators (Plan 12-03)
+
+*Pending — populated when Plan 12-03 lands.*
+
+Status legend: ✅ Built (high/medium confidence) · ⚠ Built (low confidence per D-17) · ❌ Skipped (not applicable per D-18)

@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2
+configfile: pyproject.toml
+plugins: cov-7.0.0, asyncio-1.3.0, mock-3.15.1, respx-0.21.1, anyio-3.7.1, langsmith-0.6.4
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 15 items
+
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_zero_when_broker_ts_none PASSED [  6%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_manual_when_auto_detect_false PASSED [ 13%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_int_hours_from_broker_delta PASSED [ 20%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_negative_offset_supported PASSED [ 26%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_int_type PASSED [ 33%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_returns_session_label_column PASSED [ 40%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_london_open PASSED [ 46%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_asia_session PASSED [ 53%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_us_session PASSED [ 60%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_offhours_label_outside_sessions PASSED [ 66%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_returns_dataframe_not_mutated_input PASSED [ 73%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_accepts_broker_gmt_input PASSED [ 80%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_no_sm_gmtoffset_dependency PASSED [ 86%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_same_shape_as_auto_variant PASSED [ 93%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_returns_dataframe_not_mutated_input PASSED [100%]
+
+=============================== warnings summary ===============================
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_mathtext.py:45
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 15 passed, 13 warnings in 2.49s ========================
