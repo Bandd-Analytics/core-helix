@@ -37,10 +37,10 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 
 ### Temporal & Session Analysis (Phase 8.5)
 
-- [ ] **SESS-01**: Per-(pair, strategy, timeframe) session performance table covering Tokyo (00:00–09:00 UTC) / London (07:00–16:00 UTC) / NY (13:00–22:00 UTC) / London-NY overlap (13:00–16:00 UTC) / London-open (07:00–09:00 UTC), with Sharpe, win-rate, trade-count, status; thin buckets (<30 trades) marked `insufficient_evidence`; CSV under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
+- [x] **SESS-01**: Per-(pair, strategy, timeframe) session performance table covering Tokyo (00:00–09:00 UTC) / London (07:00–16:00 UTC) / NY (13:00–22:00 UTC) / London-NY overlap (13:00–16:00 UTC) / London-open (07:00–09:00 UTC), with Sharpe, win-rate, trade-count, status; thin buckets (<30 trades) marked `insufficient_evidence`; CSV under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
 - [x] **SESS-02**: HoD/DoW heatmaps for every active pair × strategy × timeframe combo; DoM/DoY heatmaps for H1 + Daily combos only (M15 corpus too thin per CONTEXT D-14); PNGs committed under `.planning/phases/08.5-temporal-session-analysis/evidence/`.
-- [ ] **SESS-03**: Empirically-detected risk calendar (`risk_calendar.yaml`) listing recurring high-volatility windows as parametric patterns (NOT hardcoded dates) with currency scoping (`affects: [USD]` etc.); manual override merge supported via ruamel.yaml round-trip; detection threshold = realized range > 2.5σ above same-(hour-of-day, day-of-week) 4yr baseline.
-- [ ] **SESS-04**: `V2/v3_intelligence/session_config.py` (generated literal config) + `V2/v3_intelligence/temporal_filters.py` (predicates) exposing `is_tradeable_session(pair: str, strategy: str, timeframe: str, ts: datetime) -> bool` (hard-veto) and `is_blackout_window(ts: datetime) -> bool` (global ts-only filter), consumed by Phase 9 StrategyRouter.
+- [x] **SESS-03**: Empirically-detected risk calendar (`risk_calendar.yaml`) listing recurring high-volatility windows as parametric patterns (NOT hardcoded dates) with currency scoping (`affects: [USD]` etc.); manual override merge supported via ruamel.yaml round-trip; detection threshold = realized range > 2.5σ above same-(hour-of-day, day-of-week) 4yr baseline (robust median+MAD scale per Plan 04 — necessary because the (hour, dow) bucket holding spike patterns is itself contaminated).
+- [x] **SESS-04**: `V2/v3_intelligence/session_config.py` (generated literal config) + `V2/v3_intelligence/temporal_filters.py` (predicates) exposing `is_tradeable_session(pair: str, strategy: str, timeframe: str, ts: datetime) -> bool` (hard-veto) and `is_blackout_window(ts: datetime) -> bool` (global ts-only filter), consumed by Phase 9 StrategyRouter. *(structural contracts complete: 15/15 Phase 8.5 unit tests GREEN; full-corpus operator phase-gate run — populates SESSION_RULES + BLACKOUT_PATTERNS — requires SUPABASE_DB_URL provisioning carried over from Phase 8.4)*
 
 ### Router
 
@@ -105,10 +105,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 8.4 | Complete |
 | INFRA-03 | Phase 8.4 | Complete |
 | INFRA-04 | Phase 8.4 | Complete (structural; 8-PNG operator visual UAT in 08.4-HUMAN-UAT.md as non-blocking follow-up — verifier `gaps:[]`) |
-| SESS-01 | Phase 8.5 | Pending |
+| SESS-01 | Phase 8.5 | Complete |
 | SESS-02 | Phase 8.5 | Complete |
-| SESS-03 | Phase 8.5 | Pending |
-| SESS-04 | Phase 8.5 | Pending |
+| SESS-03 | Phase 8.5 | Complete |
+| SESS-04 | Phase 8.5 | Complete (structural; full-corpus phase-gate run requires SUPABASE_DB_URL — non-blocking carry-over) |
 | ROUT-01 | Phase 9 | Pending |
 | ROUT-02 | Phase 9 | Pending |
 | ROUT-03 | Phase 9 | Pending |
@@ -125,4 +125,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-27 — Phase 8.5 opened: SESS-01..04 defined per CONTEXT D-18*
+*Last updated: 2026-04-27 — Phase 8.5 closed: SESS-01..04 all Complete (structural contracts; 15/15 unit tests GREEN). SESS-04 full-corpus operator phase-gate run requires SUPABASE_DB_URL — tracked as non-blocking carry-over from Phase 8.4.*
