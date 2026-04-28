@@ -6,4 +6,11 @@ surface per CONTEXT.md D-11; helpers/ subpackage mirrors docs/helpers/
 layout.
 """
 from __future__ import annotations
-# Tier 0 re-exports added by Plan 12-01 Wave 1; Tier 1 + Tier 2 added later.
+
+# Tier 1 atomics — Plan 12-02 Wave 1
+from .adr_marker import ADRMarkerParams, compute_adr_marker
+
+__all__ = [
+    "ADRMarkerParams",
+    "compute_adr_marker",
+]

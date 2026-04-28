@@ -75,4 +75,5 @@ def test_manual_adr_override(synthetic_ohlc_uptrend: pd.DataFrame) -> None:
     params = ADRMarkerParams(use_manual_adr=True, manual_adr_value_pips=100)
     out = compute_adr_marker(synthetic_ohlc_uptrend, params)
     # 100 pips = 0.01 in price for 5-digit majors
-    assert (out["adr"] == pytest.approx(0.01)).all()
+    assert out["adr"].iloc[0] == pytest.approx(0.01)
+    assert (out["adr"] - 0.01).abs().max() < 1e-9

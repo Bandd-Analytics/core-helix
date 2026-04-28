@@ -281,3 +281,17 @@ This pattern is consistent with the v1.0 daily Z-score mean-reversion logic alre
 See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §3 for the full audit.
 
 **Confidence:** stays **High**. Spec's Inputs section needs to be regenerated to add the new fields (TimeZoneOfData/Session, UseManualADR, ManualADRValuePips, LineStyle/Thickness pairs, BarForLabels, DebugLogger, showtext) and the ATR period correction. Test cases need regeneration with ATR=14 instead of 20.
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Version | Date | Notes |
+|--------|--------|------|---------|------|-------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_ADR_Marker.mq4` | v1.00 | 2026-04-XX | Verified Updates 2026-04-27 — ATRPeriod=14; iATR direct double return (MQ4 idiom per D-20) |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_ADR_Marker.mq5` | v1.00 | 2026-04-XX | Verified Updates 2026-04-27 — ATRPeriod=14; iATR handle + CopyBuffer (D-19); ADR_Levels.mq5 precedent (Phase 8.4 INFRA-04); optional `#define DUMP_PARITY_CSV` per RESEARCH advisory parity |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/adr_marker.py` | v1.00 | 2026-04-XX | Wilder ATR via `ewm(alpha=1/period)` (Pitfall 4); D-11 function-first surface |
+| Tests | 5 GREEN | `V2/tests/v3_intelligence/sm_indicators/test_adr_marker.py` | — | 2026-04-XX | Verified Updates gate: `atr_period == 14` |
+| Parity | Advisory | `scripts/parity_check_adr_marker.py` | v1.00 | 2026-04-XX | Validation point for RESEARCH Open Question #3 (1e-4 price tolerance) |
+
+Confidence: **High** (formula doubly confirmed: MMM Book p. 41 + ADR_Levels.mq5 precedent + Verified Updates 2026-04-27).
