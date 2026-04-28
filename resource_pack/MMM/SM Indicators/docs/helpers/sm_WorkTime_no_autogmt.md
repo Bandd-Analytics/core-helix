@@ -249,9 +249,9 @@ Identical to `sm_WorkTime` — purely visual, no backtester role. The same sessi
 
 | Target | Status | File | Version | Commit | Date |
 |--------|--------|------|---------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime_no_autogmt.py` | v2.00 | `<TBD>` | 2026-04-XX |
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4` | v2.00 | `<TBD>` | 2026-04-28 |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5` | v2.00 | `<TBD>` | 2026-04-28 |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime_no_autogmt.py` | v2.00 | `<TBD>` | 2026-04-28 |
 
 Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py` (6 tests GREEN — 4 v1 + 2 v2.00)
 Confidence: High (v2.00 visual parity with sm_WorkTime confirmed; D-19 grep gate still passing).

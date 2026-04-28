@@ -252,9 +252,9 @@ sm_WorkTime is **purely visual** and has no backtester role — the session boxe
 
 | Target | Status | File | Version | Commit | Date |
 |--------|--------|------|---------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime.py` | v2.00 | `<TBD>` | 2026-04-XX |
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4` | v2.00 | `<TBD>` | 2026-04-28 |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5` | v2.00 | `<TBD>` | 2026-04-28 |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime.py` | v2.00 | `<TBD>` | 2026-04-28 |
 
 Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py` (10 tests GREEN — 5 v1 + 5 v2.00)
 Confidence: High (v2.00 visual contract verified against operator BandD_WorktimeRibbon screenshot 2026-04-28).

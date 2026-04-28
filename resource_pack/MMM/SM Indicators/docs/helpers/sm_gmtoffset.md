@@ -197,9 +197,9 @@ The Helix V2 backtester reads OHLCV data from CSV files that have already been t
 
 | Target | Status | File | Version | Commit | Date |
 |--------|--------|------|---------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_gmtoffset.py` | v1.00 | `<TBD>` | 2026-04-XX |
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4` | v2.00 | `<TBD>` | 2026-04-28 |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5` | v2.00 | `<TBD>` | 2026-04-28 |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_gmtoffset.py` | v1.00 | `<TBD>` | 2026-04-28 |
 
 Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py` (5 tests GREEN)
 Confidence: High (v2.00 corner label confirmed visible during operator smoke-test 2026-04-28).
