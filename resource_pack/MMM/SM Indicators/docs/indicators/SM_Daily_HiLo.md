@@ -237,3 +237,17 @@ Helix's daily Z-score mean-reversion strategy already operates on D1 bars; PHOD/
 - [INFER] Whether alerts fire on price-cross of PHOD or PLOD
 - [INFER] Whether lines extend to the right only (ray) or span the full chart width (both directions)
 - [INFER] Whether `sm_gmtoffset` GlobalVariable is consumed for accurate D1 boundary detection
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Version | Date | Notes |
+|--------|--------|------|---------|------|-------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Daily_HiLo.mq4` | v1.00 | 2026-04-XX | iHigh/iLow(D1, DaysBack) — bar 1 = last completed (Pitfall 5) |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_Daily_HiLo.mq5` | v1.00 | 2026-04-XX | D-19 idiomatic; OBJ_HLINE + OBJ_TEXT labels; optional `#define DUMP_PARITY_CSV` |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/daily_hilo.py` | v1.00 | 2026-04-XX | `.shift(lookback_bars)` Pitfall 5 lookahead-bias guard; D-11 function-first |
+| Tests | 5 GREEN | `V2/tests/v3_intelligence/sm_indicators/test_daily_hilo.py` | — | 2026-04-XX | PHOD/PLOD = prior-bar High/Low invariants |
+| Parity | Advisory | `scripts/parity_check_daily_hilo.py` | v1.00 | 2026-04-XX | High-confidence atomic per D-15 |
+
+Confidence: **High** (purpose + algorithm doubly confirmed: MMM Book p. 41 + indicator-name semantic).

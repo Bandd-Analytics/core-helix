@@ -9,8 +9,11 @@ from __future__ import annotations
 
 # Tier 1 atomics — Plan 12-02 Wave 1
 from .adr_marker import ADRMarkerParams, compute_adr_marker
+from .daily_hilo import DailyHiLoParams, compute_daily_hilo
 
 __all__ = [
     "ADRMarkerParams",
     "compute_adr_marker",
+    "DailyHiLoParams",
+    "compute_daily_hilo",
 ]
