@@ -11,6 +11,10 @@ from __future__ import annotations
 from .adr_marker import ADRMarkerParams, compute_adr_marker
 from .bpct import BPCTParams, compute_bpct
 from .daily_hilo import DailyHiLoParams, compute_daily_hilo
+from .ilsley_psych_levels import (
+    IlsleyPsychLevelsParams,
+    compute_ilsley_psych_levels,
+)
 
 __all__ = [
     "ADRMarkerParams",
@@ -19,4 +23,6 @@ __all__ = [
     "compute_bpct",
     "DailyHiLoParams",
     "compute_daily_hilo",
+    "IlsleyPsychLevelsParams",
+    "compute_ilsley_psych_levels",
 ]

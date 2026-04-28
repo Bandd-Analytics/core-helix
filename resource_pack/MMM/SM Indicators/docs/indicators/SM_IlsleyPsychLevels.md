@@ -245,3 +245,17 @@ Helix does not currently use psychological levels as a strategy gate, but they a
 - [INFER] Whether index-symbol auto-adaptation (beyond AdaptForJPY) exists — likely not given the small binary size; manual LevelInterval override would be required for CFD indices
 - [INFER] Whether the recompute is triggered on tick crossing vs. price-distance threshold — the exact trigger condition is unverifiable
 - [INFER] Whether labels at the price level values are displayed or omitted by default
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Version | Date | Notes |
+|--------|--------|------|---------|------|-------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_IlsleyPsychLevels.mq4` | v1.00 | 2026-04-XX | JPY/3-digit detection via `MarketInfo(_Symbol, MODE_DIGITS)`; OBJ_HLINE grid (5 above + 5 below); major/minor distinction at every 100 pips |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_IlsleyPsychLevels.mq5` | v1.00 | 2026-04-XX | D-19 idiomatic; `SymbolInfoInteger(SYMBOL_DIGITS)` for pip detect; optional `#define DUMP_PARITY_CSV` |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/ilsley_psych_levels.py` | v1.00 | 2026-04-XX | `is_jpy` flag for 3-digit pip math; returns immediate above/below envelope |
+| Tests | 5 GREEN | `V2/tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py` | — | 2026-04-XX | JPY pair test + 50-pip multiple invariant |
+| Parity | Advisory | `scripts/parity_check_ilsley_psych_levels.py` | v1.00 | 2026-04-XX | High-confidence atomic per D-15 |
+
+Confidence: **Medium** (formula HIGH-confidence industry-standard pattern; Ilsley-specific cosmetic defaults [INFER]).
