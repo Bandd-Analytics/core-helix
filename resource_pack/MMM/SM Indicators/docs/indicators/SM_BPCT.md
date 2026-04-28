@@ -264,3 +264,17 @@ Operator-captured screenshots of `!SM_BPCT.ex4` running in live MT4 confirm the 
 | Pips_To_HOD_LOD_For_Alert | 5.0 | alert-trigger distance |
 
 **Confidence elevation:** Low → **Medium** for inputs/UX. Algorithm internals (rolling HOD/LOD computation, exact extreme-detection threshold) remain inferred. The acronym BPCT is still unresolved verbally but its **function** is now confirmed: a Bid-Price/Corner Tracker style HUD. Phase 12 implementation should use these confirmed input names and defaults verbatim.
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Version | Date | Notes |
+|--------|--------|------|---------|------|-------|
+| MQ4 | Built ⚠ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_BPCT.mq4` | v1.00 | 2026-04-XX | D-17 Low confidence; mini-HUD per Verified Updates 2026-04-27 (NOT pressure-tracker — Pitfall 10); `// [INFER]` on guessed branches |
+| MQ5 | Built ⚠ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_BPCT.mq5` | v1.00 | 2026-04-XX | D-17 Low confidence; OBJ_LABEL HUD with corner placement; 1s timer; per-extreme color; opt-in alert with 60s debounce; `// [INFER]` on guessed branches |
+| Python | Built ⚠ | `V2/v3_intelligence/sm_indicators/bpct.py` | v1.00 | 2026-04-XX | D-17 Low confidence; mini-HUD shape: `hod / lod / hod_distance_pips / lod_distance_pips / spread_pips / alert_signal`; D-12 log-only alerts; `# [INFER]` on guessed branches |
+| Tests | 6 GREEN | `V2/tests/v3_intelligence/sm_indicators/test_bpct.py` | — | 2026-04-XX | Verified Updates gates: `distance_from_extreme == 12.0`, `hod_lod_alert is False`, `pips_to_hod_lod_for_alert == 5.0`, `corner == "RIGHT_TOP"` |
+| Parity | Skipped | — | — | — | Per D-16: parity NOT tested for low-confidence indicators |
+
+Confidence: **Low (D-17)**. Verified Updates 2026-04-27 lifted display/UX inputs to Medium; algorithm internals (rolling HOD/LOD window, exact threshold check) remain `[INFER]`. Reviewer should smoke-load on a chart and compare HUD layout against operator's working setup.
