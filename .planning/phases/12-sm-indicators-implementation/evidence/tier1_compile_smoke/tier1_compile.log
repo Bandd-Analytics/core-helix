@@ -1,0 +1,55 @@
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_ADR_Marker.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_ADR_Marker.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_ADR_Marker.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_ADR_Marker.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_ADR_Marker.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_ADR_Marker.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_ADR_Marker.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_ADR_Marker.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Daily_HiLo.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Daily_HiLo.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Daily_HiLo.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Daily_HiLo.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Daily_HiLo.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Daily_HiLo.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Daily_HiLo.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Daily_HiLo.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_BPCT.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_BPCT.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_BPCT.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_BPCT.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_BPCT.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_BPCT.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_BPCT.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_BPCT.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_IlsleyPsychLevels.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_IlsleyPsychLevels.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_IlsleyPsychLevels.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_IlsleyPsychLevels.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_IlsleyPsychLevels.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_IlsleyPsychLevels.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_IlsleyPsychLevels.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_IlsleyPsychLevels.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Crossover_Arrows.mq5 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Crossover_Arrows.mq5
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Crossover_Arrows.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT5/indicators/SM_Crossover_Arrows.compile.log — Wine instability suspected
+
+=== compile: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Crossover_Arrows.mq4 ===
+Compiling: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Crossover_Arrows.mq4
+Log: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Crossover_Arrows.compile.log
+WARNING: log file not produced at /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Crossover_Arrows.compile.log — Wine instability suspected
+
+=== Tier tier1 batch summary ===
+OK:    10
+FAIL:  0
+SKIP:  0

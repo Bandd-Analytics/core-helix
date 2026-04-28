@@ -228,7 +228,15 @@ Tier 0 review: approved 2026-04-28 (operator). v2.00 visual contract verified ag
 
 ### Tier 1 — atomic indicators (Plan 12-02)
 
-*Pending — populated when Plan 12-02 lands.*
+| # | Spec | MQ4 | MQ5 | Python | Confidence | Footer link |
+|---|------|-----|-----|--------|------------|-------------|
+| 4 | [SM_ADR_Marker](./indicators/SM_ADR_Marker.md) | ✅ | ✅ | ✅ | High | [#implementation-status-phase-12](./indicators/SM_ADR_Marker.md#implementation-status-phase-12) |
+| 5 | [SM_Daily_HiLo](./indicators/SM_Daily_HiLo.md) | ✅ | ✅ | ✅ | High | [#implementation-status-phase-12](./indicators/SM_Daily_HiLo.md#implementation-status-phase-12) |
+| 6 | [SM_BPCT](./indicators/SM_BPCT.md) | ⚠ | ⚠ | ⚠ | Low (D-17) | [#implementation-status-phase-12](./indicators/SM_BPCT.md#implementation-status-phase-12) |
+| 7 | [SM_IlsleyPsychLevels](./indicators/SM_IlsleyPsychLevels.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./indicators/SM_IlsleyPsychLevels.md#implementation-status-phase-12) |
+| 8 | [SM_Crossover_Arrows](./indicators/SM_Crossover_Arrows.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./indicators/SM_Crossover_Arrows.md#implementation-status-phase-12) |
+
+Tier 1 review: approved YYYY-MM-DD (operator).
 
 ### Tier 2 — composite indicators (Plan 12-03)
 
