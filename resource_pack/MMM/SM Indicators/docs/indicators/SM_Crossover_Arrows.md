@@ -264,3 +264,17 @@ The H1 momentum strategy validated in Phase 7 Plan 03 (BKTS-04 GREEN, Sharpe 2.0
 - [INFER] Whether the binary uses ObjectCreate-based arrows or buffer-based DRAW_ARROW — buffer approach is cleaner but ObjectCreate was more common in 2019-era MQL4 code
 - [INFER] Whether secondary EMA pairs (e.g., EMA 50/200 for trend-shift signals) are supported via additional inputs or require a separate indicator instance
 - [INFER] Wait-for-bar-close logic — whether the indicator has an explicit `AlertOnClose` flag or simply fires on bar 1 by design
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | File | Version | Date | Notes |
+|--------|--------|------|---------|------|-------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Crossover_Arrows.mq4` | v1.00 | 2026-04-XX | 2 buffers (Pitfall 7); iMA direct double return (D-20); bar i vs bar i+1 cross (MQL4 series-indexing); alert on bar 1 |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_Crossover_Arrows.mq5` | v1.00 | 2026-04-XX | `#property indicator_buffers 2` (Pitfall 7); iMA handle + CopyBuffer (D-19); OBJ_ARROW_BUY/OBJ_ARROW_SELL; bar i vs bar i-1 cross (rates_total - 2 alert anchor — never bar 0) |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/crossover_arrows.py` | v1.00 | 2026-04-XX | `ewm(adjust=False)` matches iMA(MODE_EMA); `.shift(1)` Pitfall 5 lookahead-bias guard; cross_signal in {'BUY', 'SELL', 'NONE'} |
+| Tests | 5 GREEN | `V2/tests/v3_intelligence/sm_indicators/test_crossover_arrows.py` | — | 2026-04-XX | MMM 5/13 default gate; bullish-cross-in-uptrend; doji consolidation no-cross |
+| Parity | Skipped | — | — | — | Per D-16: parity not tested for medium-confidence indicators (visual arrow placement is non-deterministic across targets) |
+
+Confidence: **Medium** (EMA 5/13 HIGH-confidence per MMM Book p. 47; arrow style + alert config [INFER]).
