@@ -25,9 +25,9 @@ def test_returns_session_label_column(synthetic_ohlc_uptrend: pd.DataFrame) -> N
 
 
 def test_classifies_london_open() -> None:
-    """Spec Section 5: 07:30 GMT = London session start.
-
-    Build a 1-row DataFrame at 07:30 GMT and assert label == 'LONDON'.
+    """v2.00: 07:30 GMT falls inside LONDON_GAP (07:00-08:00) which wins
+    over LONDON at the changeover overlap. With show_gaps=False, falls
+    through to LONDON.
     """
     idx = pd.DatetimeIndex(["2024-06-03 07:30:00"])  # Mon at 07:30 GMT
     df = pd.DataFrame(
@@ -35,7 +35,61 @@ def test_classifies_london_open() -> None:
         index=idx,
     )
     out = compute_sm_worktime(df)
-    assert out["session_label"].iloc[0] == "LONDON"
+    assert out["session_label"].iloc[0] == "LONDON_GAP"
+
+    out_no_gaps = compute_sm_worktime(
+        df, SMWorkTimeParams(show_gaps=False)
+    )
+    assert out_no_gaps["session_label"].iloc[0] == "LONDON"
+
+
+def test_classifies_london_gap_zone() -> None:
+    """v2.00: LONDON_GAP covers 07:00-08:00 GMT (±30m around London open)."""
+    idx = pd.DatetimeIndex(
+        ["2024-06-03 07:00:00", "2024-06-03 07:45:00", "2024-06-03 08:00:00"]
+    )
+    df = pd.DataFrame(
+        {"Open": [1.1] * 3, "High": [1.1] * 3, "Low": [1.1] * 3, "Close": [1.1] * 3},
+        index=idx,
+    )
+    out = compute_sm_worktime(df)
+    assert list(out["session_label"]) == ["LONDON_GAP", "LONDON_GAP", "LONDON"]
+
+
+def test_classifies_ny_gap_zone() -> None:
+    """v2.00: NY_GAP covers 13:00-14:00 GMT (±30m around US open)."""
+    idx = pd.DatetimeIndex(
+        ["2024-06-03 13:00:00", "2024-06-03 13:45:00", "2024-06-03 14:00:00"]
+    )
+    df = pd.DataFrame(
+        {"Open": [1.1] * 3, "High": [1.1] * 3, "Low": [1.1] * 3, "Close": [1.1] * 3},
+        index=idx,
+    )
+    out = compute_sm_worktime(df)
+    assert list(out["session_label"]) == ["NY_GAP", "NY_GAP", "US"]
+
+
+def test_asia_range_optional_columns() -> None:
+    """v2.00: show_asia_range=True attaches per-day asia_range_high/low/pips."""
+    idx = pd.DatetimeIndex([
+        "2024-06-03 02:00:00",  # Asia
+        "2024-06-03 04:00:00",  # Asia
+        "2024-06-03 09:00:00",  # London
+    ])
+    df = pd.DataFrame(
+        {
+            "open": [1.10, 1.12, 1.13],
+            "high": [1.11, 1.15, 1.14],
+            "low":  [1.09, 1.10, 1.12],
+            "close":[1.105, 1.13, 1.135],
+        },
+        index=idx,
+    )
+    out = compute_sm_worktime(df, SMWorkTimeParams(show_asia_range=True))
+    assert "asia_range_high" in out.columns
+    assert "asia_range_low" in out.columns
+    assert out["asia_range_high"].iloc[0] == pytest.approx(1.15)
+    assert out["asia_range_low"].iloc[0] == pytest.approx(1.09)
 
 
 def test_classifies_asia_session() -> None:

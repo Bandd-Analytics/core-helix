@@ -79,3 +79,40 @@ def test_returns_dataframe_not_mutated_input(synthetic_ohlc_uptrend: pd.DataFram
     cols_before = list(synthetic_ohlc_uptrend.columns)
     _ = compute_sm_worktime_no_autogmt(synthetic_ohlc_uptrend)
     assert list(synthetic_ohlc_uptrend.columns) == cols_before
+
+
+def test_classifies_gap_zones_with_zero_offset() -> None:
+    """v2.00: with broker_gmt=0 the gap defaults match sm_WorkTime exactly."""
+    idx = pd.DatetimeIndex(
+        ["2024-06-03 07:15:00", "2024-06-03 13:45:00", "2024-06-03 11:00:00"]
+    )
+    df = pd.DataFrame(
+        {"Open": [1.1] * 3, "High": [1.1] * 3, "Low": [1.1] * 3, "Close": [1.1] * 3},
+        index=idx,
+    )
+    out = compute_sm_worktime_no_autogmt(
+        df, SMWorkTimeNoAutoGmtParams(broker_gmt=0)
+    )
+    assert list(out["session_label"]) == ["LONDON_GAP", "NY_GAP", "LONDON"]
+
+
+def test_show_gaps_off_disables_gap_labels() -> None:
+    """v2.00: show_gaps=False reverts to bare ASIA/LONDON/US classification.
+
+    07:15 GMT falls inside Asia 00:30-07:30 (last 15 min of Asia). With
+    show_gaps=True it would be LONDON_GAP (07:00-08:00 wins); without
+    gaps it stays ASIA.
+    """
+    idx = pd.DatetimeIndex(["2024-06-03 07:15:00"])
+    df = pd.DataFrame(
+        {"Open": [1.1], "High": [1.1], "Low": [1.1], "Close": [1.1]},
+        index=idx,
+    )
+    with_gaps = compute_sm_worktime_no_autogmt(
+        df, SMWorkTimeNoAutoGmtParams(broker_gmt=0, show_gaps=True)
+    )
+    without_gaps = compute_sm_worktime_no_autogmt(
+        df, SMWorkTimeNoAutoGmtParams(broker_gmt=0, show_gaps=False)
+    )
+    assert with_gaps["session_label"].iloc[0] == "LONDON_GAP"
+    assert without_gaps["session_label"].iloc[0] == "ASIA"

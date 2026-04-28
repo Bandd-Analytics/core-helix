@@ -21,9 +21,16 @@ input bool   InpAutoDetect    = true;          // Auto-detect via TimeCurrent-Ti
 input int    InpManualGMT     = 0;             // Fallback offset when AutoDetect=false
 input bool   InpDSTAdjust     = true;          // Strip broker DST from raw delta
 input string InpGlobalVarName = "sm_GMTOffset"; // GlobalVariable name (downstream contract)
+input bool   InpShowLabel     = true;           // Draw persistent corner label
+input color  InpLabelColor    = clrLightGreen;  // Label text color
+input int    InpLabelFontSize = 11;
+input ENUM_BASE_CORNER InpLabelCorner = CORNER_RIGHT_UPPER; // Label anchor corner
+input int    InpLabelXOffset  = 8;
+input int    InpLabelYOffset  = 22;
 
 //--- Module state
 int g_offset_hours = 0;
+string g_label_name = "";
 
 //+------------------------------------------------------------------+
 int ComputeOffset()
@@ -50,16 +57,44 @@ int ComputeOffset()
   }
 
 //+------------------------------------------------------------------+
+void DrawLabel()
+  {
+   if(!InpShowLabel) return;
+   string sign = (g_offset_hours >= 0) ? "+" : "";
+   string text = StringFormat("sm_GMTOffset: %s%d h", sign, g_offset_hours);
+
+   if(ObjectFind(0, g_label_name) < 0)
+      ObjectCreate(0, g_label_name, OBJ_LABEL, 0, 0, 0);
+
+   ObjectSetString (0, g_label_name, OBJPROP_TEXT,         text);
+   ObjectSetInteger(0, g_label_name, OBJPROP_CORNER,       InpLabelCorner);
+   ObjectSetInteger(0, g_label_name, OBJPROP_XDISTANCE,    InpLabelXOffset);
+   ObjectSetInteger(0, g_label_name, OBJPROP_YDISTANCE,    InpLabelYOffset);
+   ObjectSetInteger(0, g_label_name, OBJPROP_COLOR,        InpLabelColor);
+   ObjectSetInteger(0, g_label_name, OBJPROP_FONTSIZE,     InpLabelFontSize);
+   ObjectSetString (0, g_label_name, OBJPROP_FONT,         "Arial");
+   ObjectSetInteger(0, g_label_name, OBJPROP_ANCHOR,
+                    (InpLabelCorner == CORNER_RIGHT_UPPER || InpLabelCorner == CORNER_RIGHT_LOWER)
+                       ? ANCHOR_RIGHT_UPPER : ANCHOR_LEFT_UPPER);
+   ObjectSetInteger(0, g_label_name, OBJPROP_BACK,         false);
+   ObjectSetInteger(0, g_label_name, OBJPROP_HIDDEN,       true);
+   ObjectSetInteger(0, g_label_name, OBJPROP_SELECTABLE,   false);
+   ChartRedraw(0);
+  }
+
+//+------------------------------------------------------------------+
 void Publish()
   {
    g_offset_hours = ComputeOffset();
    GlobalVariableSet(InpGlobalVarName, (double)g_offset_hours);
    Comment("GMT Offset detected: ", IntegerToString(g_offset_hours));
+   DrawLabel();
   }
 
 //+------------------------------------------------------------------+
 int OnInit()
   {
+   g_label_name = "smGMT_" + IntegerToString(ChartID());
    Publish();
    //--- Hourly refresh per spec Section 5 step 3 (cleaner MQ5 idiom — see
    //--- Section 11 MQ4→MQ5 deltas)
@@ -78,6 +113,9 @@ void OnDeinit(const int reason)
   {
    EventKillTimer();
    Comment("");
+   if(StringLen(g_label_name) > 0 && ObjectFind(0, g_label_name) >= 0)
+      ObjectDelete(0, g_label_name);
+   ChartRedraw(0);
    //--- Spec Section 5 step 4: deliberately do NOT delete the GlobalVariable
    //--- — downstream indicators rely on the cached offset surviving sm_gmtoffset
    //--- chart removal.

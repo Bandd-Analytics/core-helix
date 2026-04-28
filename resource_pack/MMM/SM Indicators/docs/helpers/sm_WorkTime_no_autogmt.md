@@ -247,12 +247,24 @@ Identical to `sm_WorkTime` — purely visual, no backtester role. The same sessi
 
 ## Implementation status (Phase 12)
 
-| Target | Status | File | Commit | Date |
-|--------|--------|------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4` | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5` | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime_no_autogmt.py` | `<TBD>` | 2026-04-XX |
+| Target | Status | File | Version | Commit | Date |
+|--------|--------|------|---------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime_no_autogmt.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime_no_autogmt.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime_no_autogmt.py` | v2.00 | `<TBD>` | 2026-04-XX |
 
-Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py` (4 tests GREEN)
-Confidence: Medium (matches Phase 11 spec).
+Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py` (6 tests GREEN — 4 v1 + 2 v2.00)
+Confidence: High (v2.00 visual parity with sm_WorkTime confirmed; D-19 grep gate still passing).
 Notes: explicitly NO `sm_gmtoffset` dependency by design (D-19 architectural distinction). Verified by grep gate (`test_no_sm_gmtoffset_dependency`) on the Python module and absence of `GlobalVariableGet("sm_GMTOffset")` from the MQ5/MQ4 sources. Object prefix is `smWTnoauto_` to avoid collision with the auto-variant's `smWT_` prefix when both are loaded on the same chart.
+
+### v2.00 changes (Phase 12 Plan 01 gap-closure, 2026-04-28)
+
+Visual behavior is now **identical** to `sm_WorkTime` v2.00. The only difference between the two variants is the broker GMT offset source:
+
+| | `sm_WorkTime` | `sm_WorkTime_no_autogmt` |
+|---|---|---|
+| Offset source | `sm_GMTOffset` GlobalVariable (auto, published by `sm_gmtoffset`) | `InpBrokerGMT` input + `InpBrokerDSTAdjust` |
+| Depends on `sm_gmtoffset`? | Yes | No (D-19) |
+| All other behavior | Same | Same |
+
+See `sm_WorkTime.md` §"v2.00 changes" for the full v2.00 visual contract: session-H/L bounding, light colors, gap boxes (London/NY changeover), AR Line, pip labels, HH:MM string inputs, weekend skip, 500 ms timer, per-chart prefix.

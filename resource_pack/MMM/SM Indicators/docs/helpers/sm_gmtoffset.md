@@ -195,11 +195,24 @@ The Helix V2 backtester reads OHLCV data from CSV files that have already been t
 
 ## Implementation status (Phase 12)
 
-| Target | Status | File | Commit | Date |
-|--------|--------|------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4` | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5` | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_gmtoffset.py` | `<TBD>` | 2026-04-XX |
+| Target | Status | File | Version | Commit | Date |
+|--------|--------|------|---------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_gmtoffset.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_gmtoffset.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_gmtoffset.py` | v1.00 | `<TBD>` | 2026-04-XX |
 
 Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py` (5 tests GREEN)
-Confidence: Medium (matches Phase 11 spec).
+Confidence: High (v2.00 corner label confirmed visible during operator smoke-test 2026-04-28).
+
+### v2.00 changes (Phase 12 Plan 01 gap-closure, 2026-04-28)
+
+The original spec stated the indicator "renders nothing visible on the chart" beyond an optional `Comment()` call. Operator smoke-test on 2026-04-28 found that the `Comment()` text in the upper-left corner gets buried by other indicators that call `Comment()` later, leaving sm_gmtoffset apparently invisible.
+
+v2.00 adds a **persistent corner label** (`OBJ_LABEL`) that survives across other indicators' `Comment()` calls:
+
+- New inputs: `InpShowLabel`, `InpLabelColor` (default `clrLightGreen`), `InpLabelFontSize`, `InpLabelCorner` (default upper-right), `InpLabelXOffset`, `InpLabelYOffset`
+- The label text reads `"sm_GMTOffset: +X h"` and refreshes hourly along with the underlying offset value
+- Object name is `smGMT_<ChartID>` to support multi-chart use
+- Removed cleanly on `OnDeinit`
+
+**Python port unchanged** — the helper still returns an integer; the corner-label semantics are MQ4/MQ5-only (Python doesn't draw).

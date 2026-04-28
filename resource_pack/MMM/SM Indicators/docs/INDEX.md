@@ -218,13 +218,13 @@ the per-target footer added to the linked spec.
 
 ### Tier 0 — helpers (Plan 12-01)
 
-| # | Spec | MQ4 | MQ5 | Python | Confidence | Footer link |
-|---|------|-----|-----|--------|------------|-------------|
-| 1 | [sm_gmtoffset](./helpers/sm_gmtoffset.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_gmtoffset.md#implementation-status-phase-12) |
-| 2 | [sm_WorkTime](./helpers/sm_WorkTime.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_WorkTime.md#implementation-status-phase-12) |
-| 3 | [sm_WorkTime_no_autogmt](./helpers/sm_WorkTime_no_autogmt.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./helpers/sm_WorkTime_no_autogmt.md#implementation-status-phase-12) |
+| # | Spec | MQ4 | MQ5 | Python | Version | Confidence | Footer link |
+|---|------|-----|-----|--------|---------|------------|-------------|
+| 1 | [sm_gmtoffset](./helpers/sm_gmtoffset.md) | ✅ | ✅ | ✅ | v2.00 (MQ4/MQ5) / v1.00 (Py) | High | [#implementation-status-phase-12](./helpers/sm_gmtoffset.md#implementation-status-phase-12) |
+| 2 | [sm_WorkTime](./helpers/sm_WorkTime.md) | ✅ | ✅ | ✅ | v2.00 | High | [#implementation-status-phase-12](./helpers/sm_WorkTime.md#implementation-status-phase-12) |
+| 3 | [sm_WorkTime_no_autogmt](./helpers/sm_WorkTime_no_autogmt.md) | ✅ | ✅ | ✅ | v2.00 | High | [#implementation-status-phase-12](./helpers/sm_WorkTime_no_autogmt.md#implementation-status-phase-12) |
 
-Tier 0 review: approved YYYY-MM-DD (operator).
+Tier 0 review: approved YYYY-MM-DD (operator). v2.00 visual contract verified against `V2/indicators/BandD_WorktimeRibbon.mq5` reference (operator smoke-test 2026-04-28). See per-spec "v2.00 changes" section for the full delta from the 2011-era binary spec.
 
 ### Tier 1 — atomic indicators (Plan 12-02)
 

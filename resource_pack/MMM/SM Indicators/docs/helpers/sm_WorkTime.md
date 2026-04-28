@@ -250,12 +250,28 @@ sm_WorkTime is **purely visual** and has no backtester role — the session boxe
 
 ## Implementation status (Phase 12)
 
-| Target | Status | File | Commit | Date |
-|--------|--------|------|--------|------|
-| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4` | `<TBD>` | 2026-04-XX |
-| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5` | `<TBD>` | 2026-04-XX |
-| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime.py` | `<TBD>` | 2026-04-XX |
+| Target | Status | File | Version | Commit | Date |
+|--------|--------|------|---------|--------|------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/helpers/sm_WorkTime.mq4` | v2.00 | `<TBD>` | 2026-04-XX |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/helpers/sm_WorkTime.mq5` | v2.00 | `<TBD>` | 2026-04-XX |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/helpers/sm_worktime.py` | v2.00 | `<TBD>` | 2026-04-XX |
 
-Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py` (6 tests GREEN)
-Confidence: Medium (matches Phase 11 spec).
+Tests: `V2/tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py` (10 tests GREEN — 5 v1 + 5 v2.00)
+Confidence: High (v2.00 visual contract verified against operator BandD_WorktimeRibbon screenshot 2026-04-28).
 Notes: depends on `sm_gmtoffset` (Python `compute_sm_gmtoffset`; MQ5/MQ4 GlobalVariable `sm_GMTOffset`). Session boundaries follow MMM Book p. 8 (00:30 / 07:30 / 13:30 GMT) and p. 40 NY-reversal sub-box (13:30–16:30 GMT, ~3 h).
+
+### v2.00 changes (Phase 12 Plan 01 gap-closure, 2026-04-28)
+
+The original spec sections above describe the 2011-era binary's behavior. Operator smoke-test on 2026-04-28 confirmed `V2/indicators/BandD_WorktimeRibbon.mq5` is the authoritative visual contract. The v2.00 implementation replaces the dark full-chart-band model with the BandD reference behavior:
+
+- **Box height = session H/L** (from `CopyRates` / `iHigh`+`iLow`), not full chart vertical range
+- **Light colors:** `clrLightBlue` (Asia), `clrLightGray` (London Gap, London, NY Gap), `clrBrown` (NY) — replacing 2011-era `C'40,40,40'`/`C'0,40,80'`/`C'0,80,40'` dark fills
+- **ColorToARGB opacity** (MQ5) — default `InpAsiaOpacity = 20` = 20% fill. MQ4 has no native alpha; accepts solid-color trade-off
+- **Changeover gap boxes** (new): `London Gap` (default `09:00→10:00`) and `NY Gap` (`15:00→16:00`) — span the last 30 min before + first 30 min after each session open. MMM-theory rationale: stop hunts, traps, and trend reversals concentrate at session changeovers (operator-observed pattern, 2026-04-28)
+- **Optional Asian Range (AR Line)** — horizontal high/low extending past Asia close, configurable hours (default 6). MQ5/MQ4 draw `OBJ_TREND` lines; Python attaches `asia_range_high` / `asia_range_low` / `asia_range_pips` columns when `show_asia_range=True`
+- **Pip-range labels** — "R=92.4" `OBJ_TEXT` near lower-left of Asia and NY boxes
+- **HH:MM string inputs** (MQ5/MQ4) replace integer-hour + minute pairs; defaults are broker server time. Set `InpUseGMTOffset=true` to interpret inputs as GMT and shift by `sm_GMTOffset`
+- **Skip weekends** — `dow == 0 || dow == 6` filter
+- **500 ms millisecond timer** — current session updates live as bars print
+- **Per-chart object prefix** — `smWT_<ChartID>_` to support multi-chart use
+- **Python label set extended** — `LONDON_GAP` and `NY_GAP` labels; gap labels overwrite session labels at overlap. `show_gaps=True` is the new default; `show_gaps=False` reverts to v1 four-label classification.
