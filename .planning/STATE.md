@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: unknown
-stopped_at: Plan 12-01 paused at Task 5 (Tier 0 review checkpoint) — 5/6 tasks complete, awaiting operator approval
-last_updated: "2026-04-27T18:00:56.370Z"
+status: in_progress
+stopped_at: Phase 8.5 closed 2026-04-27; Phase 11 closed 2026-04-27; autonomous run advancing to Phase 9 (Strategy Router)
+last_updated: "2026-04-28T00:00:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 6
-  total_plans: 29
-  completed_plans: 26
+  completed_phases: 7
+  total_plans: 30
+  completed_plans: 30
 ---
 
 # STATE: MarketMind Helix
@@ -29,22 +29,24 @@ progress:
 
 ## Current Position
 
-Phase: 12 (sm-indicators-implementation) — EXECUTING
-Plan: 1 of 3
+Phase: 9 (strategy-router) — STARTING
+Plan: 0 of TBD (autonomous discovery → discuss → plan → execute)
 
 ### Progress Bar
 
 ```
 Phase 6  [##########] 100% ZMQ Bridge Port — COMPLETE (BRDG-01/02/03/04)
 Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKTS-01/02/03/04)
-Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — Plans 01-04 complete (REGM-01/02/03/04 satisfied; awaiting /gsd:verify-work 08)
-Phase 8.4[##########] 100% Infrastructure Prereqs (Cache/RAG/GBPNZD/Replay) — CLOSED 2026-04-27. INFRA-01/02/03/04 all Complete. INFRA-04 closed on structural contracts; 8-PNG operator visual UAT persists in 08.4-HUMAN-UAT.md as non-blocking follow-up (verifier gaps:[]).
-Phase 8.5[####......] 40%  Temporal & Session Analysis — Plans 01-02 COMPLETE. Plan 01 (Wave 0 RED): SESS-01..04 defined, 15 RED tests, 2 synthetic-data fixtures, ruamel.yaml dep. Plan 02 (SESS-01 math layer): temporal_analysis.py 429 lines (assign_session/discover_active_combos/discover_end_ts/generate_trades dispatcher/bucket_trades/write_combo_csv) + run_temporal_analysis.py CLI 99 lines (--dry-run lists 19 active combos, single PitClock wrap). 5/7 RED GREEN; Tests 6-7 (heatmap) deferred to Plan 03.
-Phase 9  [..........] 0%   Strategy Router
-Phase 10 [..........] 0%   Live Execution + Paper Trade Gate
+Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — COMPLETE (REGM-01/02/03/04)
+Phase 8.4[##########] 100% Infrastructure Prereqs — CLOSED 2026-04-27 (INFRA-01..04 all Complete)
+Phase 8.5[##########] 100% Temporal & Session Analysis — CLOSED 2026-04-27 (SESS-01..04 all Complete; structural contracts; full-corpus UAT non-blocking carry-over)
+Phase 9  [..........] 0%   Strategy Router — STARTING (ROUT-01..04 pending)
+Phase 10 [..........] 0%   Live Execution + Paper Trade Gate (LIVE-01..04 pending)
+Phase 11 [##########] 100% SM Indicators full-spec docs — CLOSED 2026-04-27 (verifier passed; 14 specs landed)
+Phase 12 [...#......] 10%  SM Indicators implementation — CONTEXT + 3 plans landed; awaiting execution
 ```
 
-**Overall milestone:** 16/28 requirements complete (BRDG-01/02/04, BKTS-01..04, REGM-01..04, INFRA-01/02/03/04; INFRA-04 closed structurally with non-blocking visual UAT in 08.4-HUMAN-UAT.md). SESS-01..04 defined and scaffolded by Plan 08.5-01 (Pending — Plans 02-05 close them). ROUT-01..04 + LIVE-01..04 + BRDG-03 still Pending.
+**Overall milestone:** 20/28 v2.0 requirements complete (BRDG-01/02/04, BKTS-01..04, REGM-01..04, INFRA-01..04, SESS-01..04). ROUT-01..04 + LIVE-01..04 + BRDG-03 still Pending.
 
 ---
 

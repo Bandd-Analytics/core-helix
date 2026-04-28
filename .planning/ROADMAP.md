@@ -13,9 +13,11 @@
 - [x] **Phase 7: Backtest Entry Fix + 4yr Validation** — Fix entry bias in the backtest harness, then generate trusted H1 scalp and Momentum routing matrix entries over 4yr data (completed 2011-04-24)
 - [x] **Phase 8: HMM-GARCH Regime + PiT Port** — Port and harden the regime classifier and point-in-time manager so downstream router and live paths consume a single, leakage-free regime series (completed 2011-04-25)
 - [x] **Phase 8.4: Infrastructure Prereqs** *(INSERTED 2011-04-25)* — OHLCV cache layer (Supabase, incremental delta fetch), close the RAG learning loop (auto-flow trade closes → SQLite + Chroma + decision_log), GBPNZD H1 4yr data parity, ADR helper, MQ5 trade-replay indicator, and mempalace/claude-mem reconciliation — unblocks Phase 8.5's heavy temporal analysis on a stable data and observability foundation (completed 2011-04-26)
-- [ ] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9
+- [x] **Phase 8.5: Temporal & Session Analysis** — Full statistical analysis of when each pair and strategy performs best: session windows, hour-of-day/day-of-week/month/year heatmaps, entry/exit timing distributions, and risk calendar — produces session_config.py and temporal_filters.py consumed by Phase 9 (completed 2026-04-27 — SESS-01..04 Complete; structural contracts; full-corpus phase-gate run carries over as non-blocking SUPABASE_DB_URL operator UAT in 08.5-HUMAN-UAT.md)
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
+- [x] **Phase 11: SM Indicators full-spec documentation** — Reconstruct all 14 `!SM_*` / `!sm_*` MT4 indicators (3 helpers + 11 indicators) into a 15-file markdown reference set under `resource_pack/MMM/SM Indicators/docs/` (off critical path; independent of router/live work) (completed 2026-04-27)
+- [ ] **Phase 12: SM Indicators implementation** — Build runnable MQ4 + MQ5 + Python implementations from the 14 Phase 11 specs (off critical path; CONTEXT and 3 tier-mirrored plans landed 2026-04-27)
 
 ---
 
@@ -200,7 +202,9 @@ Plans:
 3. The router returns None when an existing position on the pair is open in the opposite direction — no counter-position orders are published
 4. A 4yr portfolio simulation using the router dispatch log shows aggregate Sharpe >= (best single-strategy Sharpe across the matrix + 0.2), confirming that adaptive dispatch adds measurable value over picking one strategy
 
-**Plans:** TBD
+**Plans:**
+
+- [ ] 09-XX-PLAN.md — TBD (run /gsd:plan-phase 9 to break down)
 
 ---
 
@@ -218,7 +222,9 @@ Plans:
 3. CCircuitBreaker reads its equity baseline from AccountInfoDouble(ACCOUNT_EQUITY) on OnInit — the hard-coded 1000.0 constant is removed and the EA compiles and initialises with a live account value
 4. After 7 consecutive trading days on the IC Markets demo account, the live trade count is within ±20% of the count projected by the router backtest for that period — go/no-go gate cleared for live capital deployment
 
-**Plans:** TBD
+**Plans:**
+
+- [ ] 10-XX-PLAN.md — TBD (run /gsd:plan-phase 10 to break down)
 
 ---
 
