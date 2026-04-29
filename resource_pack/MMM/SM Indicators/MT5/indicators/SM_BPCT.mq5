@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|  SM_BPCT.mq5                                                      |
-//|  Phase 12 Plan 02 — Tier 1 atomic indicator                       |
+//|  Phase 12 Plan 02 — Tier 1 atomic indicator (v2.00)               |
 //|  Spec: resource_pack/MMM/SM Indicators/docs/indicators/SM_BPCT.md |
 //|                                                                   |
 //|  D-17 Built ⚠ Low confidence — implementation per Verified Updates|
@@ -8,11 +8,17 @@
 //|  tracker hypothesis (Pitfall 10). Every guessed branch carries    |
 //|  // [INFER] (D-17).                                                |
 //|                                                                   |
-//|  Mini-HUD: corner-positioned OBJ_LABEL displaying real-time price |
-//|  + spread + HOD/LOD distance + proximity alert.                    |
+//|  v2.00 (operator-tuned 2026-04-28) — adds open-trade tracking:    |
+//|     - Weekly first-4hr H/L (psych S/R per IlsleyPsychLevels v2.00)|
+//|     - PHOD / PLOD (yesterday's D1 high/low)                        |
+//|     - Per open position on current symbol: distance from each of  |
+//|       the four key levels in pips, signed                          |
+//|                                                                   |
+//|  Mini-HUD: corner-positioned OBJ_LABEL stack displaying real-time |
+//|  price + spread + HOD/LOD + weekly + PHOD/PLOD + per-trade rows.  |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_BPCT.ex4 (mini-HUD per Verified Updates)"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
@@ -37,6 +43,20 @@ input color            InpPriceAtExtremeColor  = clrDarkGreen; // C'0,100,0' equ
 input double           InpDistanceFromExtreme  = 12.0;     // VERIFIED pip threshold
 input bool             InpHODLODAlert          = false;
 input double           InpPipsToHODLODForAlert = 5.0;      // VERIFIED
+
+//--- v2.00 inputs (operator-tuned 2026-04-28)
+input bool             InpShowWeekLevels       = true;       // Weekly first-4hr H/L
+input bool             InpShowPHODPLOD         = true;       // Yesterday's D1 H/L
+input bool             InpShowOpenTrades       = true;       // Per-position rows
+input int              InpWeekStartDOW         = 1;          // 0=Sun 1=Mon
+input int              InpWeekFirstHours       = 4;
+input int              InpMaxTradesShown       = 6;
+input color            InpWeekHiColor          = clrDeepSkyBlue;
+input color            InpWeekLoColor          = clrOrange;
+input color            InpPHODColor            = clrRed;
+input color            InpPLODColor            = clrLimeGreen;
+input color            InpTradeBuyColor        = clrLime;
+input color            InpTradeSellColor       = clrCrimson;
 
 const string InpObjectPrefix = "smBPCT_";
 
@@ -84,29 +104,39 @@ int OnCalculate(const int rates_total, const int prev_calculated,
   }
 
 //+------------------------------------------------------------------+
+//  v2.00 — labels now created lazily as needed, since the row count
+//  depends on the number of open positions. EnsureLabel idempotently
+//  creates and positions a row at the given vertical slot.
+//+------------------------------------------------------------------+
+void EnsureLabel(string suffix, int row_index)
+  {
+   string name = InpObjectPrefix + suffix;
+   if(ObjectFind(0, name) < 0)
+      ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
+
+   ObjectSetInteger(0, name, OBJPROP_CORNER,    InpCornerOfChart);
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, 8 + InpAdjustSideToSide);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE,
+                    20 + InpShiftUpDn + row_index * 16);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE,
+                    InpShowSmallerSize ? 9 : 11);
+   ObjectSetString (0, name, OBJPROP_FONT, "Arial");
+   ObjectSetInteger(0, name, OBJPROP_ANCHOR,
+                    (InpCornerOfChart == CORNER_RIGHT_UPPER ||
+                     InpCornerOfChart == CORNER_RIGHT_LOWER)
+                       ? ANCHOR_RIGHT_UPPER : ANCHOR_LEFT_UPPER);
+   ObjectSetInteger(0, name, OBJPROP_HIDDEN,    true);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE,false);
+  }
+
+//+------------------------------------------------------------------+
 void CreateLabels()
   {
-   // [INFER] One stacked label per HUD row. Y offsets [INFER].
-   string rows[] = {"price", "spread", "hod", "lod", "alert"};
-   for(int i = 0; i < ArraySize(rows); i++)
-     {
-      string name = InpObjectPrefix + rows[i];
-      if(ObjectFind(0, name) < 0)
-         ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
-
-      ObjectSetInteger(0, name, OBJPROP_CORNER,    InpCornerOfChart);
-      ObjectSetInteger(0, name, OBJPROP_XDISTANCE, 8 + InpAdjustSideToSide);
-      ObjectSetInteger(0, name, OBJPROP_YDISTANCE,
-                       20 + InpShiftUpDn + i * 16);
-      ObjectSetInteger(0, name, OBJPROP_FONTSIZE,
-                       InpShowSmallerSize ? 9 : 11);
-      ObjectSetString (0, name, OBJPROP_FONT, "Arial");
-      ObjectSetInteger(0, name, OBJPROP_ANCHOR,
-                       (InpCornerOfChart == CORNER_RIGHT_UPPER ||
-                        InpCornerOfChart == CORNER_RIGHT_LOWER)
-                          ? ANCHOR_RIGHT_UPPER : ANCHOR_LEFT_UPPER);
-      ObjectSetInteger(0, name, OBJPROP_HIDDEN,    true);
-     }
+   // Pre-create the fixed-row labels. Trade rows are created in Recompute().
+   string fixed_rows[] = {"price", "spread", "hod", "lod",
+                          "wkhi", "wklo", "phod", "plod", "alert"};
+   for(int i = 0; i < ArraySize(fixed_rows); i++)
+      EnsureLabel(fixed_rows[i], i);
   }
 
 //+------------------------------------------------------------------+
@@ -117,14 +147,20 @@ void Recompute()
    if(bid <= 0.0 || ask <= 0.0 || g_pip <= 0.0)
       return;
 
-   // [INFER] HOD/LOD = current Daily bar high/low.
    double hod = iHigh(_Symbol, PERIOD_D1, 0);
    double lod = iLow (_Symbol, PERIOD_D1, 0);
    double spread_pips = (ask - bid) / g_pip;
    double hod_dist    = (hod - bid) / g_pip;
    double lod_dist    = (bid - lod) / g_pip;
 
-   // [INFER] At-extreme color when distance < InpDistanceFromExtreme.
+   //--- v2.00 — yesterday's D1 H/L (PHOD/PLOD)
+   double phod = iHigh(_Symbol, PERIOD_D1, 1);
+   double plod = iLow (_Symbol, PERIOD_D1, 1);
+
+   //--- v2.00 — current week's first-4hr H/L
+   double wk_hi = 0.0, wk_lo = 0.0;
+   bool   wk_ok = ComputeWeekFirst4hr(wk_hi, wk_lo);
+
    color price_color = InpLabelColor;
    if(InpShowPrice)
      {
@@ -153,8 +189,93 @@ void Recompute()
                StringFormat("LOD: %.5f (+%.1f pips)", lod, lod_dist),
                InpLabelColor);
      }
+   else
+     {
+      SetLabel("hod", "", InpLabelColor);
+      SetLabel("lod", "", InpLabelColor);
+     }
 
-   // [INFER] Alert when within InpPipsToHODLODForAlert of either extreme.
+   //--- v2.00 weekly + PHOD/PLOD rows
+   if(InpShowWeekLevels && wk_ok)
+     {
+      SetLabel("wkhi",
+               StringFormat("WkHi: %.5f (%+.1f p)", wk_hi, (bid - wk_hi) / g_pip),
+               InpWeekHiColor);
+      SetLabel("wklo",
+               StringFormat("WkLo: %.5f (%+.1f p)", wk_lo, (bid - wk_lo) / g_pip),
+               InpWeekLoColor);
+     }
+   else
+     {
+      SetLabel("wkhi", "", InpLabelColor);
+      SetLabel("wklo", "", InpLabelColor);
+     }
+
+   if(InpShowPHODPLOD)
+     {
+      SetLabel("phod",
+               StringFormat("PHOD: %.5f (%+.1f p)", phod, (bid - phod) / g_pip),
+               InpPHODColor);
+      SetLabel("plod",
+               StringFormat("PLOD: %.5f (%+.1f p)", plod, (bid - plod) / g_pip),
+               InpPLODColor);
+     }
+   else
+     {
+      SetLabel("phod", "", InpLabelColor);
+      SetLabel("plod", "", InpLabelColor);
+     }
+
+   //--- v2.00 per-trade rows (after the 9 fixed rows)
+   int next_row = 9;  // 9 fixed rows: price spread hod lod wkhi wklo phod plod alert
+                      // (alert is rendered last after trades — see end of function)
+   int trades_drawn = 0;
+   if(InpShowOpenTrades)
+     {
+      // Trade rows are inserted BEFORE alert. Shift alert down dynamically.
+      next_row = 8;  // start trades at row index 8 (which was "alert")
+      int total = PositionsTotal();
+      for(int idx = 0; idx < total && trades_drawn < InpMaxTradesShown; idx++)
+        {
+         ulong ticket = PositionGetTicket(idx);
+         if(ticket == 0) continue;
+         if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+
+         double entry = PositionGetDouble(POSITION_PRICE_OPEN);
+         long   ptype = PositionGetInteger(POSITION_TYPE);
+         bool   is_buy = (ptype == POSITION_TYPE_BUY);
+         color  c      = is_buy ? InpTradeBuyColor : InpTradeSellColor;
+
+         //--- distances signed from ENTRY price (positive = level above entry)
+         double d_wkhi = wk_ok ? (wk_hi - entry) / g_pip : 0.0;
+         double d_wklo = wk_ok ? (wk_lo - entry) / g_pip : 0.0;
+         double d_phod = (phod - entry) / g_pip;
+         double d_plod = (plod - entry) / g_pip;
+
+         string row_suffix = StringFormat("trade_%d", trades_drawn);
+         EnsureLabel(row_suffix, next_row);
+         SetLabel(row_suffix,
+                  StringFormat("%s %.5f: WkH%+.0f WkL%+.0f PHOD%+.0f PLOD%+.0f",
+                               is_buy ? "L" : "S", entry,
+                               d_wkhi, d_wklo, d_phod, d_plod),
+                  c);
+         trades_drawn++;
+         next_row++;
+        }
+
+      //--- Hide unused trade slots from prior frames
+      for(int t = trades_drawn; t < InpMaxTradesShown; t++)
+        {
+         string row_suffix = StringFormat("trade_%d", t);
+         string nm = InpObjectPrefix + row_suffix;
+         if(ObjectFind(0, nm) >= 0)
+            ObjectSetString(0, nm, OBJPROP_TEXT, "");
+        }
+     }
+
+   //--- Alert row pinned below all dynamic rows
+   EnsureLabel("alert", next_row);
+
    string alert_text = "";
    color  alert_color = InpLabelColor;
    if(InpHODLODAlert)
@@ -173,6 +294,38 @@ void Recompute()
         }
      }
    SetLabel("alert", alert_text, alert_color);
+   ChartRedraw(0);
+  }
+
+//+------------------------------------------------------------------+
+//  v2.00 — current week's first-4hr H/L (matches IlsleyPsychLevels v2)
+//+------------------------------------------------------------------+
+bool ComputeWeekFirst4hr(double &hi, double &lo)
+  {
+   datetime now = TimeCurrent();
+   long s = (long)now;
+   long anchor = (s / 86400) * 86400;
+   datetime day = (datetime)anchor;
+   for(int i = 0; i < 7; i++)
+     {
+      MqlDateTime mdt; TimeToStruct(day, mdt);
+      if(mdt.day_of_week == InpWeekStartDOW) break;
+      day -= 86400;
+     }
+   datetime t1 = day;
+   datetime t2 = t1 + InpWeekFirstHours * 3600;
+
+   MqlRates rates[];
+   ArraySetAsSeries(rates, false);
+   int n = CopyRates(_Symbol, _Period, t1, t2, rates);
+   if(n <= 0) return(false);
+   hi = -DBL_MAX; lo = DBL_MAX;
+   for(int i = 0; i < n; i++)
+     {
+      if(rates[i].high > hi) hi = rates[i].high;
+      if(rates[i].low  < lo) lo = rates[i].low;
+     }
+   return(hi > -DBL_MAX && lo < DBL_MAX);
   }
 
 //+------------------------------------------------------------------+

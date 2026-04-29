@@ -1,17 +1,15 @@
 //+------------------------------------------------------------------+
 //|  SM_Crossover_Arrows.mq5                                          |
-//|  Phase 12 Plan 02 — Tier 1 atomic indicator                       |
+//|  Phase 12 Plan 02 — Tier 1 atomic indicator (v2.00)               |
 //|  Spec: resource_pack/MMM/SM Indicators/docs/indicators/           |
 //|        SM_Crossover_Arrows.md                                      |
 //|                                                                   |
-//|  EMA(5)/EMA(13) crossover arrows. Bar[1] vs bar[2] cross detection|
-//|  (NEVER bar[0] — Pitfall 5 / RESEARCH Anti-Patterns repaint guard).|
+//|  EMA(7)/EMA(13) crossover arrows (operator-tuned 2026-04-28).     |
+//|  Bar[1] vs bar[2] cross detection (NEVER bar[0] — Pitfall 5).     |
 //|  Two indicator buffers per spec Section 4 (Pitfall 7).             |
-//|                                                                   |
-//|  CONTEXT D-06 / D-19 / Pattern 2 indicator-handle composition.    |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_Crossover_Arrows.ex4"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property indicator_buffers 2  // Pitfall 7: must declare buffer count
 #property indicator_plots   2
@@ -19,14 +17,14 @@
 #property indicator_label1   "EMA Fast"
 #property indicator_type1    DRAW_LINE
 #property indicator_color1   clrLime
-#property indicator_width1   1
+#property indicator_width1   2
 #property indicator_label2   "EMA Slow"
 #property indicator_type2    DRAW_LINE
 #property indicator_color2   clrRed
-#property indicator_width2   1
+#property indicator_width2   2
 
-//--- Spec Section 3 inputs (MMM Book p. 47 — EMA 5/13 canonical)
-input int                InpFastPeriod    = 5;
+//--- Spec Section 3 inputs (operator-tuned 2026-04-28: EMA 7/13)
+input int                InpFastPeriod    = 7;
 input int                InpSlowPeriod    = 13;
 input ENUM_MA_METHOD     InpMAMethod      = MODE_EMA;
 input ENUM_APPLIED_PRICE InpAppliedPrice  = PRICE_CLOSE;

@@ -1,31 +1,36 @@
 //+------------------------------------------------------------------+
 //|  SM_Daily_HiLo.mq5                                                |
-//|  Phase 12 Plan 02 — Tier 1 atomic indicator                       |
+//|  Phase 12 Plan 02 — Tier 1 atomic indicator (v2.00)               |
 //|  Spec: resource_pack/MMM/SM Indicators/docs/indicators/           |
 //|        SM_Daily_HiLo.md                                            |
 //|                                                                   |
-//|  Draws two horizontal lines on the main chart:                    |
-//|     PHOD = iHigh(_Symbol, PERIOD_D1, DaysBack)                     |
-//|     PLOD = iLow (_Symbol, PERIOD_D1, DaysBack)                     |
-//|  DaysBack=1 = yesterday's completed D1 bar (Pitfall 5 guard).      |
+//|  v2.00 — trailing N-day snake pattern (operator-tuned 2026-04-28).|
+//|  For each of the last InpDaysBack D1 bars, draws two short        |
+//|  dotted OBJ_TREND segments spanning that day's bar width:         |
+//|    HIGH segment at iHigh(D1, i) — red                             |
+//|    LOW  segment at iLow (D1, i) — lime green                      |
+//|  Together they form a stair-step / zigzag visualization tracking  |
+//|  the recent daily H/L topology like a snake.                      |
 //|                                                                   |
-//|  CONTEXT D-06 / D-19 (MQ5 idiomatic).                             |
+//|  Most recent day (i=1) gets text labels above each line showing   |
+//|  "PHOD <price>" / "PLOD <price>".                                 |
+//|                                                                   |
+//|  Pitfall 5 guard: i=0 is the still-forming D1 bar — start at i=1. |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_Daily_HiLo.ex4"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
 
-// #define DUMP_PARITY_CSV  // Optional advisory parity dump (D-15)
-
-//--- Spec Section 3 inputs ([INFER] defaults — see spec Uncertainty log)
-input int             InpDaysBack    = 1;             // 1 = yesterday's completed bar
-input color           InpHighColor   = clrRed;        // PHOD line color
-input color           InpLowColor    = clrLimeGreen;  // PLOD line color
-input ENUM_LINE_STYLE InpLineStyle   = STYLE_DASH;
-input int             InpLineWidth   = 1;
-input bool            InpShowLabel   = true;          // PHOD / PLOD text labels
+//--- v2.00 inputs
+input int             InpDaysBack    = 14;             // Number of trailing D1 bars
+input color           InpHighColor   = clrRed;         // Daily high segment color
+input color           InpLowColor    = clrLimeGreen;   // Daily low segment color
+input ENUM_LINE_STYLE InpLineStyle   = STYLE_DOT;      // Dotted lines per operator request
+input int             InpLineWidth   = 2;
+input bool            InpShowLabel   = true;           // PHOD/PLOD label on most recent day
+input int             InpLabelFontSize = 9;
 
 const string InpObjectPrefix = "smHL_";
 
@@ -35,7 +40,7 @@ datetime g_last_d1_bar = 0;
 int OnInit()
   {
    IndicatorSetString(INDICATOR_SHORTNAME,
-                      StringFormat("SM_Daily_HiLo(D-%d)", InpDaysBack));
+                      StringFormat("SM_Daily_HiLo(%dd trail)", InpDaysBack));
    Recompute();
    EventSetTimer(60);
    return(INIT_SUCCEEDED);
@@ -49,9 +54,10 @@ void OnDeinit(const int reason)
   }
 
 //+------------------------------------------------------------------+
-void OnTimer()
+void OnTimer()                         { Recompute(); ChartRedraw(0); }
+void OnChartEvent(const int id, const long &lp, const double &dp, const string &sp)
   {
-   Recompute();
+   if(id == CHARTEVENT_CHART_CHANGE) { Recompute(); ChartRedraw(0); }
   }
 
 //+------------------------------------------------------------------+
@@ -73,54 +79,73 @@ int OnCalculate(const int rates_total, const int prev_calculated,
 //+------------------------------------------------------------------+
 void Recompute()
   {
-   // Bar `InpDaysBack` (1 = last completed D1) — Pitfall 5 lookahead guard.
-   double phod = iHigh(_Symbol, PERIOD_D1, InpDaysBack);
-   double plod = iLow (_Symbol, PERIOD_D1, InpDaysBack);
+   CleanupObjects();   // wipe previous frame — simplest correct approach
+                       // for variable-day trail since bars age out
 
-   if(phod <= 0.0 || plod <= 0.0)
-      return;
-
-   DrawHLine(InpObjectPrefix + "phod", phod, InpHighColor);
-   DrawHLine(InpObjectPrefix + "plod", plod, InpLowColor);
-
-   if(InpShowLabel)
+   for(int i = 1; i <= InpDaysBack; i++)
      {
-      DrawLabel(InpObjectPrefix + "phod_lbl", "PHOD", phod, InpHighColor);
-      DrawLabel(InpObjectPrefix + "plod_lbl", "PLOD", plod, InpLowColor);
+      double hi = iHigh(_Symbol, PERIOD_D1, i);
+      double lo = iLow (_Symbol, PERIOD_D1, i);
+      if(hi <= 0.0 || lo <= 0.0) continue;
+
+      datetime t_open = iTime(_Symbol, PERIOD_D1, i);
+      datetime t_end  = (i > 0) ? iTime(_Symbol, PERIOD_D1, i - 1) : (t_open + 86400);
+      if(t_end <= t_open) t_end = t_open + 86400;
+
+      string n_hi = StringFormat("%shi_%d", InpObjectPrefix, (int)t_open);
+      string n_lo = StringFormat("%slo_%d", InpObjectPrefix, (int)t_open);
+
+      DrawSegment(n_hi, t_open, t_end, hi, InpHighColor);
+      DrawSegment(n_lo, t_open, t_end, lo, InpLowColor);
+
+      if(InpShowLabel && i == 1)
+        {
+         string l_hi = InpObjectPrefix + "phod_lbl";
+         string l_lo = InpObjectPrefix + "plod_lbl";
+         DrawLabelAbove(l_hi, t_end, hi,
+                        "PHOD " + DoubleToString(hi, _Digits), InpHighColor);
+         DrawLabelAbove(l_lo, t_end, lo,
+                        "PLOD " + DoubleToString(lo, _Digits), InpLowColor);
+        }
      }
-
-#ifdef DUMP_PARITY_CSV
-   DumpParityRow(phod, plod);
-#endif
   }
 
 //+------------------------------------------------------------------+
-void DrawHLine(string name, double price, color c)
+void DrawSegment(string name, datetime t1, datetime t2, double price, color c)
   {
    if(ObjectFind(0, name) < 0)
-      ObjectCreate(0, name, OBJ_HLINE, 0, 0, price);
-
-   ObjectSetDouble (0, name, OBJPROP_PRICE,  price);
-   ObjectSetInteger(0, name, OBJPROP_COLOR,  c);
-   ObjectSetInteger(0, name, OBJPROP_STYLE,  InpLineStyle);
-   ObjectSetInteger(0, name, OBJPROP_WIDTH,  InpLineWidth);
-   ObjectSetInteger(0, name, OBJPROP_BACK,   true);
-   ObjectSetInteger(0, name, OBJPROP_HIDDEN, true);
+      ObjectCreate(0, name, OBJ_TREND, 0, t1, price, t2, price);
+   ObjectSetInteger(0, name, OBJPROP_TIME,  0, t1);
+   ObjectSetInteger(0, name, OBJPROP_TIME,  1, t2);
+   ObjectSetDouble (0, name, OBJPROP_PRICE, 0, price);
+   ObjectSetDouble (0, name, OBJPROP_PRICE, 1, price);
+   ObjectSetInteger(0, name, OBJPROP_COLOR,      c);
+   ObjectSetInteger(0, name, OBJPROP_STYLE,      InpLineStyle);
+   ObjectSetInteger(0, name, OBJPROP_WIDTH,      InpLineWidth);
+   ObjectSetInteger(0, name, OBJPROP_RAY_RIGHT,  false);
+   ObjectSetInteger(0, name, OBJPROP_BACK,       true);
+   ObjectSetInteger(0, name, OBJPROP_HIDDEN,     true);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
   }
 
 //+------------------------------------------------------------------+
-void DrawLabel(string name, string text, double price, color c)
+//  Label sits ABOVE the line (ANCHOR_LEFT_LOWER -> bottom-left of
+//  text aligns to the anchor point, so text rises above the price).
+//+------------------------------------------------------------------+
+void DrawLabelAbove(string name, datetime t, double price, string text, color c)
   {
-   datetime label_time = iTime(_Symbol, _Period, 0);
    if(ObjectFind(0, name) < 0)
-      ObjectCreate(0, name, OBJ_TEXT, 0, label_time, price);
-   ObjectSetString (0, name, OBJPROP_TEXT,    text);
-   ObjectSetInteger(0, name, OBJPROP_TIME,    label_time);
-   ObjectSetDouble (0, name, OBJPROP_PRICE,   price);
-   ObjectSetInteger(0, name, OBJPROP_COLOR,   c);
-   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, 9);
-   ObjectSetInteger(0, name, OBJPROP_ANCHOR,  ANCHOR_LEFT);
-   ObjectSetInteger(0, name, OBJPROP_HIDDEN,  true);
+      ObjectCreate(0, name, OBJ_TEXT, 0, t, price);
+   ObjectSetString (0, name, OBJPROP_TEXT,     text);
+   ObjectSetInteger(0, name, OBJPROP_TIME,     t);
+   ObjectSetDouble (0, name, OBJPROP_PRICE,    price);
+   ObjectSetInteger(0, name, OBJPROP_COLOR,    c);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpLabelFontSize);
+   ObjectSetInteger(0, name, OBJPROP_ANCHOR,   ANCHOR_LEFT_LOWER);
+   ObjectSetString (0, name, OBJPROP_FONT,     "Arial");
+   ObjectSetInteger(0, name, OBJPROP_BACK,     false);
+   ObjectSetInteger(0, name, OBJPROP_HIDDEN,   true);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
   }
 
 //+------------------------------------------------------------------+
@@ -133,22 +158,4 @@ void CleanupObjects()
          ObjectDelete(0, n);
      }
   }
-
 //+------------------------------------------------------------------+
-#ifdef DUMP_PARITY_CSV
-void DumpParityRow(double phod, double plod)
-  {
-   string fn = StringFormat("parity_SM_Daily_HiLo_%s_%s.csv",
-                            _Symbol, EnumToString(_Period));
-   int handle = FileOpen(fn, FILE_WRITE | FILE_READ | FILE_CSV | FILE_ANSI, ',');
-   if(handle == INVALID_HANDLE)
-      return;
-   if(FileSize(handle) == 0)
-      FileWrite(handle, "ts", "phod", "plod");
-   FileSeek(handle, 0, SEEK_END);
-   FileWrite(handle, TimeToString(iTime(_Symbol, PERIOD_D1, 0), TIME_DATE | TIME_MINUTES),
-             DoubleToString(phod, _Digits),
-             DoubleToString(plod, _Digits));
-   FileClose(handle);
-  }
-#endif

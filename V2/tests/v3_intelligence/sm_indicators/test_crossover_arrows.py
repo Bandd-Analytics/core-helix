@@ -27,10 +27,13 @@ def test_returns_ema_columns_and_signal(
     assert "cross_signal" in out.columns
 
 
-def test_default_periods_5_and_13() -> None:
-    """MMM Book p. 47: EMA 5/13 is the MMM-canonical crossover pair."""
+def test_default_periods_v2() -> None:
+    """v2.00: EMA 7/13 (operator-tuned 2026-04-28). Original MMM Book
+    p. 47 reference is 5/13; the operator's working setup uses the
+    slightly slower 7-period fast EMA to filter intra-bar noise.
+    """
     p = CrossoverArrowsParams()
-    assert p.fast == 5
+    assert p.fast == 7
     assert p.slow == 13
 
 

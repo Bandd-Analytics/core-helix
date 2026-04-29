@@ -8,14 +8,16 @@
 //|  (NEVER bar[0] — Pitfall 5 repaint guard).                        |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_Crossover_Arrows.ex4"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property indicator_buffers 2
 #property indicator_color1  clrLime
 #property indicator_color2  clrRed
+#property indicator_width1  2
+#property indicator_width2  2
 #property strict
 
-extern int    InpFastPeriod    = 5;
+extern int    InpFastPeriod    = 7;   // v2.00 operator-tuned 2026-04-28
 extern int    InpSlowPeriod    = 13;
 extern int    InpMAMethod      = MODE_EMA;
 extern int    InpAppliedPrice  = PRICE_CLOSE;
@@ -34,8 +36,8 @@ int init()
   {
    SetIndexBuffer(0, FastBuf);
    SetIndexBuffer(1, SlowBuf);
-   SetIndexStyle(0, DRAW_LINE, STYLE_SOLID, 1);
-   SetIndexStyle(1, DRAW_LINE, STYLE_SOLID, 1);
+   SetIndexStyle(0, DRAW_LINE, STYLE_SOLID, 2);   // v2.00 width 2
+   SetIndexStyle(1, DRAW_LINE, STYLE_SOLID, 2);
    IndicatorShortName("SM_Crossover_Arrows("
                       + IntegerToString(InpFastPeriod) + "/"
                       + IntegerToString(InpSlowPeriod) + ")");

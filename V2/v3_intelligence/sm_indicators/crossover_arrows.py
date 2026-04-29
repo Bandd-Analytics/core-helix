@@ -19,11 +19,12 @@ import pandas as pd
 class CrossoverArrowsParams:
     """Spec Section 3 inputs.
 
-    Defaults per MMM Book p. 47 (EMA 5/13 — the MMM-canonical short-term
-    crossover pair).
+    v2.00 default: EMA 7/13 (operator-tuned 2026-04-28). The original
+    MMM Book p. 47 reference is EMA 5/13; the operator's working setup
+    runs the slightly slower 7-period fast EMA to filter intra-bar noise.
     """
 
-    fast: int = 5    # MMM Book p. 47
+    fast: int = 7    # v2.00 operator-tuned 2026-04-28 (was 5 per MMM Book p. 47)
     slow: int = 13   # MMM Book p. 47
 
 

@@ -1,20 +1,26 @@
 //+------------------------------------------------------------------+
 //|  SM_ADR_Marker.mq5                                                |
-//|  Phase 12 Plan 02 — Tier 1 atomic indicator                       |
+//|  Phase 12 Plan 02 — Tier 1 atomic indicator (v2.00)               |
 //|  Spec: resource_pack/MMM/SM Indicators/docs/indicators/           |
 //|        SM_ADR_Marker.md                                            |
 //|  Verified Updates 2026-04-27: ATRPeriod=14 (was claimed 20)       |
 //|  Precedent: V2/indicators/ADR_Levels.mq5 (Phase 8.4 INFRA-04)     |
 //|                                                                   |
+//|  v2.00 (operator-tuned 2026-04-28):                                |
+//|    - Fixed disappear/reappear bug on TF/symbol switch:            |
+//|      adds OnChartEvent CHART_CHANGE handler + retry on            |
+//|      CopyBuffer-not-ready (was a one-shot fail-silent path).      |
+//|    - Adds OBJ_TEXT price labels ABOVE each line ("ADR Hi 1.2540") |
+//|    - Confirmed daily-anchored: ADR re-anchors to today_open every |
+//|      D1 bar; the lines do NOT change between intra-day TF switches.|
+//|                                                                   |
 //|  Computes ATR(14) on PERIOD_D1 and draws three OBJ_HLINE markers: |
 //|     adr-high  =  today_open + ADR / 2                              |
 //|     adr-mid   =  today_open                                        |
 //|     adr-low   =  today_open - ADR / 2                              |
-//|                                                                   |
-//|  CONTEXT D-06 (output path) / D-19 (MQ5 idiomatic).               |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_ADR_Marker.ex4"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0   // We draw via ObjectCreate, not buffers.
@@ -37,7 +43,8 @@ input int             InpLineThickness2     = 2;            // Second-line pixel
 input color           InpLineColor2         = clrRed;       // VERIFIED LineColor2
 input int             InpBarForLabels       = -10;          // Label X-anchor (bars from last)
 input bool            InpDebugLogger        = false;        // Verbose logs
-input bool            InpShowtext           = false;        // Draw label text on markers
+input bool            InpShowtext           = true;         // v2.00: price labels above lines (was false)
+input int             InpLabelFontSize      = 9;
 
 const string InpObjectPrefix = "smADR_";
 
@@ -77,6 +84,22 @@ void OnDeinit(const int reason)
 void OnTimer()
   {
    Recompute();
+   ChartRedraw(0);
+  }
+
+//+------------------------------------------------------------------+
+//  v2.00: redraw on chart timeframe / symbol change. Without this,
+//  the iATR handle was reissued by OnInit but CopyBuffer returned 0
+//  (data not yet ready) and the indicator silently returned blank.
+//+------------------------------------------------------------------+
+void OnChartEvent(const int id, const long &lp,
+                  const double &dp, const string &sp)
+  {
+   if(id == CHARTEVENT_CHART_CHANGE)
+     {
+      Recompute();
+      ChartRedraw(0);
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -87,7 +110,11 @@ int OnCalculate(const int rates_total, const int prev_calculated,
                 const long &v[], const int &sp[])
   {
    datetime cur_d1 = iTime(_Symbol, PERIOD_D1, 0);
-   if(cur_d1 != g_last_d1_bar)
+   //--- v2.00: also recompute when our objects are missing (recovery
+   //--- path for ATR-not-ready-on-load case).
+   bool need_redraw = (cur_d1 != g_last_d1_bar) ||
+                      (ObjectFind(0, InpObjectPrefix + "high") < 0);
+   if(need_redraw)
      {
       Recompute();
       g_last_d1_bar = cur_d1;
@@ -140,7 +167,19 @@ void Recompute()
              InpLineColor2, InpLineThickness2);
 
    if(InpShowtext)
-      DrawLabel(adr);
+     {
+      // v2.00: per-line price labels above each line + corner pip total.
+      DrawPriceLabel(InpObjectPrefix + "high_lbl", adr_high,
+                     "ADR Hi " + DoubleToString(adr_high, _Digits),
+                     InpLineColor1);
+      DrawPriceLabel(InpObjectPrefix + "low_lbl", adr_low,
+                     "ADR Lo " + DoubleToString(adr_low, _Digits),
+                     InpLineColor1);
+      DrawPriceLabel(InpObjectPrefix + "mid_lbl", adr_mid,
+                     "Open " + DoubleToString(adr_mid, _Digits),
+                     InpLineColor2);
+      DrawCornerLabel(adr);
+     }
 
 #ifdef DUMP_PARITY_CSV
    DumpParityRow(today_open, adr, adr_high, adr_low);
@@ -166,7 +205,31 @@ void DrawHLine(string name, double price, color c, int thickness)
   }
 
 //+------------------------------------------------------------------+
-void DrawLabel(double adr)
+//  v2.00 — chart-anchored price label sitting ABOVE the line.
+//  ANCHOR_LEFT_LOWER places the bottom-left of text on the price,
+//  so text rises above. Time anchor uses the most recent visible bar.
+//+------------------------------------------------------------------+
+void DrawPriceLabel(string name, double price, string text, color c)
+  {
+   datetime t = iTime(_Symbol, _Period, 0);
+   if(ObjectFind(0, name) < 0)
+      ObjectCreate(0, name, OBJ_TEXT, 0, t, price);
+   ObjectSetString (0, name, OBJPROP_TEXT,     text);
+   ObjectSetInteger(0, name, OBJPROP_TIME,     t);
+   ObjectSetDouble (0, name, OBJPROP_PRICE,    price);
+   ObjectSetInteger(0, name, OBJPROP_COLOR,    c);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpLabelFontSize);
+   ObjectSetString (0, name, OBJPROP_FONT,     "Arial");
+   ObjectSetInteger(0, name, OBJPROP_ANCHOR,   ANCHOR_LEFT_LOWER);
+   ObjectSetInteger(0, name, OBJPROP_BACK,     false);
+   ObjectSetInteger(0, name, OBJPROP_HIDDEN,   true);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
+  }
+
+//+------------------------------------------------------------------+
+//  Corner pip-total summary label (e.g. "ADR(14): 92.3 pips").
+//+------------------------------------------------------------------+
+void DrawCornerLabel(double adr)
   {
    string name = InpObjectPrefix + "lbl";
    int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
