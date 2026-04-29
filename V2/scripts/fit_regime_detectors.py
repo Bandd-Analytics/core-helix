@@ -1,4 +1,10 @@
-"""Offline HMM-GARCH detector fitting for the 5 Phase 8 active pairs (D-10).
+"""Offline HMM-GARCH detector fitting for all active pairs in pair_config.PAIR_CONFIGS.
+
+Phase 8 originally fitted 5 pairs (D-10); Phase 9 D-19 extends to 8 (USDJPY, GBPJPY,
+GBPAUD, GBPUSD, EURGBP, GBPNZD, EURUSD, AUDNZD) so the ROUT-04 simulator has a
+per-pair OnlineRegimeFilter for every active key.
+
+Pitfall #3 closure: ACTIVE_PAIRS sourced from PAIR_CONFIGS.keys(), not hardcoded.
 
 Usage:
     python -m scripts.fit_regime_detectors --pair USDJPY
@@ -29,13 +35,17 @@ from pathlib import Path
 
 import pandas as pd
 
+from v3_intelligence.pair_config import PAIR_CONFIGS
 from v3_intelligence.regime import (
     HMMGARCHRegimeDetector,
     bars_to_log_returns,
     save_detector,
 )
 
-ACTIVE_PAIRS = ["USDJPY", "GBPJPY", "GBPAUD", "GBPUSD", "EURGBP"]   # D-10
+# Source ACTIVE_PAIRS from pair_config.PAIR_CONFIGS — Phase 9 D-19 (Pitfall #3 closure).
+# Auto-adapts when pairs are added/removed. Original Phase 8 hardcoded list (5 pairs)
+# was an artifact of REGM-04 era when only 5 detectors were validated against V1 baseline.
+ACTIVE_PAIRS: list[str] = list(PAIR_CONFIGS.keys())   # Phase 9 D-19 — 8 pairs
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 REGIME_DIR = DATA_DIR / "regime"
 
