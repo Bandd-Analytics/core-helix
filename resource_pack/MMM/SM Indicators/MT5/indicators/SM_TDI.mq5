@@ -14,7 +14,7 @@
 //|  Anti-Patterns: alerts gated on bar[1] transitions ONLY.         |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_TDI.ex4"
-#property version   "1.00"
+#property version   "1.01"
 #property indicator_separate_window
 #property indicator_buffers 5
 #property indicator_plots   5
@@ -31,14 +31,14 @@
 #property indicator_type1   DRAW_LINE
 #property indicator_color1  clrLime
 #property indicator_style1  STYLE_SOLID
-#property indicator_width1  1
+#property indicator_width1  2
 
 //--- Plot 1: Trade Signal Line (Red)
 #property indicator_label2  "TSL"
 #property indicator_type2   DRAW_LINE
 #property indicator_color2  clrRed
 #property indicator_style2  STYLE_SOLID
-#property indicator_width2  1
+#property indicator_width2  2
 
 //--- Plot 2: Market Base Line (Yellow) — slightly thicker
 #property indicator_label3  "MBL"
@@ -52,14 +52,14 @@
 #property indicator_type4   DRAW_LINE
 #property indicator_color4  clrDodgerBlue
 #property indicator_style4  STYLE_SOLID
-#property indicator_width4  1
+#property indicator_width4  2
 
 //--- Plot 4: VB Lower (Blue)
 #property indicator_label5  "VB_Lower"
 #property indicator_type5   DRAW_LINE
 #property indicator_color5  clrDodgerBlue
 #property indicator_style5  STYLE_SOLID
-#property indicator_width5  1
+#property indicator_width5  2
 
 //--- Inputs verbatim from Verified Updates 2026-04-27
 input int                InpRSIPeriod           = 21;       // RSI Period (CORRECTED — was 13)
@@ -130,15 +130,20 @@ int OnInit()
    IndicatorSetString(INDICATOR_SHORTNAME,
                       "SM_TDI(" + IntegerToString(InpRSIPeriod) + ")");
 
-//--- VB_High_Value + VB_Low_Value as fixed HLINE levels in subwindow
-//    (Verified Updates 2026-04-27 NEW inputs — display-only reference lines)
-   IndicatorSetInteger(INDICATOR_LEVELS, 2);
-   IndicatorSetDouble(INDICATOR_LEVELVALUE, 0, InpVBHighValue);
-   IndicatorSetDouble(INDICATOR_LEVELVALUE, 1, InpVBLowValue);
-   IndicatorSetInteger(INDICATOR_LEVELCOLOR, 0, clrSilver);
-   IndicatorSetInteger(INDICATOR_LEVELCOLOR, 1, clrSilver);
-   IndicatorSetInteger(INDICATOR_LEVELSTYLE, 0, STYLE_DOT);
-   IndicatorSetInteger(INDICATOR_LEVELSTYLE, 1, STYLE_DOT);
+//--- 5 fixed reference levels: 68, 63, 50, 37, 32 (DimGray dotted)
+//    68/32 = outer Shark Fin bounds; 63/37 = inner (Verified Updates);
+//    50 = midline; all display-only.
+   IndicatorSetInteger(INDICATOR_LEVELS, 5);
+   IndicatorSetDouble(INDICATOR_LEVELVALUE,  0, 68.0);
+   IndicatorSetDouble(INDICATOR_LEVELVALUE,  1, InpSharkFinUpperLevel); // 63.0
+   IndicatorSetDouble(INDICATOR_LEVELVALUE,  2, 50.0);
+   IndicatorSetDouble(INDICATOR_LEVELVALUE,  3, InpSharkFinLowerLevel); // 37.0
+   IndicatorSetDouble(INDICATOR_LEVELVALUE,  4, 32.0);
+   for(int lvl = 0; lvl < 5; lvl++)
+     {
+      IndicatorSetInteger(INDICATOR_LEVELCOLOR, lvl, clrDimGray);
+      IndicatorSetInteger(INDICATOR_LEVELSTYLE, lvl, STYLE_DOT);
+     }
 
    return(INIT_SUCCEEDED);
   }
