@@ -477,3 +477,15 @@ Operator-captured screenshots of `!SM_NewHUD.ex4` confirm **18+ visible HUD fiel
 See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §4 for the full audit.
 
 **Confidence:** Inputs/visible-fields elevation **Low → Medium**. Internals (whether NewHUD calls other SM indicators via `iCustom` for TDI/Pivots/ADR data, or computes everything itself) **remain `[INFER]`** — needs MetaEditor inspection of the .ex4 source if recovered, or behavioral testing.
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Build date | Notes |
+|--------|--------|------------|-------|
+| MQ5 | Built ⚠ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_NewHUD.mq5`; 18 OBJ_LABEL rows; HYADR (Verified Updates NEW); Av_N EMA handles (RESEARCH Pattern 2); InpAv6=52; [INFER] on internals |
+| MQ4 | Built ⚠ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_NewHUD.mq4`; MQL4 idioms per D-20; iMA returns double directly; same 18-field layout |
+| Python | Built ⚠ | 2026-04-29 | `V2/v3_intelligence/sm_indicators/new_hud.py`; shape-only DataFrame per D-17; HYADR + av_periods=(1,4,13,26,52) per Verified Updates; 4/4 pytest GREEN |
+
+**Confidence:** Low (D-17) — Verified Updates 2026-04-27 confirmed 18+ fields + HYADR + Av_N EMA periods. Formula internals (WADR/MADR/HYADR rolling windows, intra-day HOD/LOD logic, PTO, WH/WL tracking) are all [INFER]. Marked Built ⚠ per D-17.
