@@ -286,3 +286,16 @@ Trendlines are typically discretionary inputs — they require human judgment to
 - [INFER] Whether alerts fire per-trendline or as a single batch when multiple trendlines are touched simultaneously
 - [INFER] Memory handling for `prev_side` and `last_alert_time` maps when trendlines are deleted — stale entries may accumulate without cleanup
 - [INFER] Whether the indicator alerts on trendlines drawn by the user vs. trendlines drawn by other indicators (all OBJ_TREND objects regardless of creator would match the `ObjectsTotal` loop)
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Build date | Notes |
+|--------|--------|------------|-------|
+| MQ5 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_Alerting+TL.mq5`; iterates OBJ_TREND objects; linear projection; 1s timer; per-TL one-shot guard |
+| MQ4 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_Alerting+TL.mq4`; MQL4 idioms; ObjectType/ObjectGet* |
+| Python | Built ✅ | 2026-04-29 | `V2/v3_intelligence/sm_indicators/alerting_tl.py`; `compute_alerting_tl(df, trendlines=[(t1,p1,t2,p2),...])`; linear interpolation; 3/3 pytest GREEN |
+
+**Confidence:** Medium — trendline-touch-alerter pattern well-understood; linear interpolation projection canonical; all parameter defaults [INFER].
+Python port: no live OBJ_TREND access; caller supplies trendlines as explicit tuples.

@@ -25,6 +25,7 @@ from .tdi import TDIParams, compute_tdi
 from .pivot_points import PivotPointsParams, compute_pivot_points
 from .alert_zone_1 import AlertZone1Params, compute_alert_zone
 from .alert_zone_2 import AlertZone2Params
+from .alerting_tl import AlertingTLParams, compute_alerting_tl
 
 __all__ = [
     "ADRMarkerParams",
@@ -45,4 +46,6 @@ __all__ = [
     "AlertZone1Params",
     "compute_alert_zone",
     "AlertZone2Params",
+    "AlertingTLParams",
+    "compute_alerting_tl",
 ]
