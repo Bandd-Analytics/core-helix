@@ -1,0 +1,106 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2
+configfile: pyproject.toml
+plugins: cov-7.0.0, asyncio-1.3.0, mock-3.15.1, respx-0.21.1, anyio-3.7.1, langsmith-0.6.4
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 71 items
+
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_zero_when_broker_ts_none PASSED [  1%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_manual_when_auto_detect_false PASSED [  2%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_int_hours_from_broker_delta PASSED [  4%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_negative_offset_supported PASSED [  5%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_gmtoffset.py::test_returns_int_type PASSED [  7%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_returns_session_label_column PASSED [  8%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_london_open PASSED [  9%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_london_gap_zone PASSED [ 11%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_ny_gap_zone PASSED [ 12%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_asia_range_optional_columns PASSED [ 14%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_asia_session PASSED [ 15%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_classifies_us_session PASSED [ 16%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_offhours_label_outside_sessions PASSED [ 18%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime.py::test_returns_dataframe_not_mutated_input PASSED [ 19%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_accepts_broker_gmt_input PASSED [ 21%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_no_sm_gmtoffset_dependency PASSED [ 22%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_same_shape_as_auto_variant PASSED [ 23%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_returns_dataframe_not_mutated_input PASSED [ 25%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_classifies_gap_zones_with_zero_offset PASSED [ 26%]
+tests/v3_intelligence/sm_indicators/helpers/test_sm_worktime_no_autogmt.py::test_show_gaps_off_disables_gap_labels PASSED [ 28%]
+tests/v3_intelligence/sm_indicators/test_adr_marker.py::test_returns_required_columns PASSED [ 29%]
+tests/v3_intelligence/sm_indicators/test_adr_marker.py::test_uses_verified_atr_period_14 PASSED [ 30%]
+tests/v3_intelligence/sm_indicators/test_adr_marker.py::test_marker_high_minus_marker_low_equals_adr PASSED [ 32%]
+tests/v3_intelligence/sm_indicators/test_adr_marker.py::test_handles_jpy_pip_format PASSED [ 33%]
+tests/v3_intelligence/sm_indicators/test_adr_marker.py::test_manual_adr_override PASSED [ 35%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_1.py::test_zone_type_default_lower PASSED [ 36%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_1.py::test_returns_alert_columns PASSED [ 38%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_1.py::test_near_zone_alert_fires_when_price_in_zone PASSED [ 39%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_2.py::test_zone_type_default_upper PASSED [ 40%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_2.py::test_shared_module_import PASSED [ 42%]
+tests/v3_intelligence/sm_indicators/test_alert_zone_2.py::test_near_zone_alert_fires_when_price_in_upper_zone PASSED [ 43%]
+tests/v3_intelligence/sm_indicators/test_alerting_tl.py::test_returns_alert_column PASSED [ 45%]
+tests/v3_intelligence/sm_indicators/test_alerting_tl.py::test_detects_trendline_touch_within_tolerance PASSED [ 46%]
+tests/v3_intelligence/sm_indicators/test_alerting_tl.py::test_no_alert_when_far_from_line PASSED [ 47%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_returns_mini_hud_columns PASSED [ 49%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_distance_from_extreme_default_12_pips PASSED [ 50%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_hod_lod_alert_default_false PASSED [ 52%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_pips_to_hod_lod_for_alert_default_5 PASSED [ 53%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_corner_default_right_top PASSED [ 54%]
+tests/v3_intelligence/sm_indicators/test_bpct.py::test_alert_signal_column_when_alert_enabled PASSED [ 56%]
+tests/v3_intelligence/sm_indicators/test_crossover_arrows.py::test_returns_ema_columns_and_signal PASSED [ 57%]
+tests/v3_intelligence/sm_indicators/test_crossover_arrows.py::test_default_periods_v2 PASSED [ 59%]
+tests/v3_intelligence/sm_indicators/test_crossover_arrows.py::test_bullish_cross_in_uptrend PASSED [ 60%]
+tests/v3_intelligence/sm_indicators/test_crossover_arrows.py::test_no_cross_in_doji_consolidation PASSED [ 61%]
+tests/v3_intelligence/sm_indicators/test_crossover_arrows.py::test_cross_signal_values_constrained PASSED [ 63%]
+tests/v3_intelligence/sm_indicators/test_daily_hilo.py::test_returns_phod_plod_columns PASSED [ 64%]
+tests/v3_intelligence/sm_indicators/test_daily_hilo.py::test_phod_equals_prior_bar_high PASSED [ 66%]
+tests/v3_intelligence/sm_indicators/test_daily_hilo.py::test_plod_equals_prior_bar_low PASSED [ 67%]
+tests/v3_intelligence/sm_indicators/test_daily_hilo.py::test_first_n_bars_are_nan PASSED [ 69%]
+tests/v3_intelligence/sm_indicators/test_daily_hilo.py::test_days_back_2 PASSED [ 70%]
+tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py::test_returns_psych_level_columns PASSED [ 71%]
+tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py::test_psych_levels_are_50_pip_multiples PASSED [ 73%]
+tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py::test_above_minus_below_equals_step PASSED [ 74%]
+tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py::test_jpy_pair_uses_3digit_pip PASSED [ 76%]
+tests/v3_intelligence/sm_indicators/test_ilsley_psych_levels.py::test_default_levels_above_below PASSED [ 77%]
+tests/v3_intelligence/sm_indicators/test_new_hud.py::test_returns_18_field_columns PASSED [ 78%]
+tests/v3_intelligence/sm_indicators/test_new_hud.py::test_hyadr_present_per_verified_updates PASSED [ 80%]
+tests/v3_intelligence/sm_indicators/test_new_hud.py::test_av_periods_default_1_4_13_26_52 PASSED [ 81%]
+tests/v3_intelligence/sm_indicators/test_new_hud.py::test_max_spread_default_1_75 PASSED [ 83%]
+tests/v3_intelligence/sm_indicators/test_pivot_points.py::test_returns_pivot_columns PASSED [ 84%]
+tests/v3_intelligence/sm_indicators/test_pivot_points.py::test_pivot_invariant_pp_equals_h_l_c_div_3 PASSED [ 85%]
+tests/v3_intelligence/sm_indicators/test_pivot_points.py::test_r1_invariant PASSED [ 87%]
+tests/v3_intelligence/sm_indicators/test_pivot_points.py::test_m_pivots_are_midpoints PASSED [ 88%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_uses_verified_rsi_period_21 PASSED [ 90%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_uses_verified_shark_fin_levels_63_37 PASSED [ 91%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_vb_threshold_inputs_defaults PASSED [ 92%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_returns_required_columns PASSED [ 94%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_warmup_bars_are_nan PASSED [ 95%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_signal_cross_bullish_fires PASSED [ 97%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_mbl_cross_bullish_fires PASSED [ 98%]
+tests/v3_intelligence/sm_indicators/test_tdi.py::test_no_lookahead_in_alerts PASSED [100%]
+
+=============================== warnings summary ===============================
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:88: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_fontconfig_pattern.py:92: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../../../../../.local/lib/python3.10/site-packages/matplotlib/_mathtext.py:45
+  /home/user/.local/lib/python3.10/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 71 passed, 13 warnings in 4.58s ========================

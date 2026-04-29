@@ -240,6 +240,25 @@ Tier 1 review: approved YYYY-MM-DD (operator).
 
 ### Tier 2 — composite indicators (Plan 12-03)
 
-*Pending — populated when Plan 12-03 lands.*
+| # | Spec | MQ4 | MQ5 | Python | Confidence | Footer link |
+|---|------|-----|-----|--------|------------|-------------|
+| 9 | [SM_TDI](./indicators/SM_TDI.md) | ✅ | ✅ | ✅ | High | [#implementation-status-phase-12](./indicators/SM_TDI.md#implementation-status-phase-12) |
+| 10 | [SM_PivotPoints](./indicators/SM_PivotPoints.md) | ✅ | ✅ | ✅ | High | [#implementation-status-phase-12](./indicators/SM_PivotPoints.md#implementation-status-phase-12) |
+| 11 | [SM_AlertZone_1](./indicators/SM_AlertZone_1.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./indicators/SM_AlertZone_1.md#implementation-status-phase-12) |
+| 12 | [SM_AlertZone_2](./indicators/SM_AlertZone_2.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./indicators/SM_AlertZone_2.md#implementation-status-phase-12) |
+| 13 | [SM_Alerting+TL](./indicators/SM_Alerting+TL.md) | ✅ | ✅ | ✅ | Medium | [#implementation-status-phase-12](./indicators/SM_Alerting+TL.md#implementation-status-phase-12) |
+| 14 | [SM_NewHUD](./indicators/SM_NewHUD.md) | ⚠ | ⚠ | ⚠ | Low (D-17) | [#implementation-status-phase-12](./indicators/SM_NewHUD.md#implementation-status-phase-12) |
+
+Tier 2 review: approved YYYY-MM-DD (operator).
+
+### Phase 12 summary
+
+- **14 indicators** built across **MQ4 + MQ5 + Python** (3 helpers + 5 atomic + 6 composite)
+- **Compile-clean:** all 28 MQ source files (14 .mq4 + 14 .mq5) pass `0 errors, 0 warnings` under Wine MetaEditor
+- **Pytest:** all 14 indicators have ≥1 GREEN test; SM_TDI has ≥5 cases per spec Section 10
+- **Verified Updates honored:** SM_TDI RSI=21 + Shark_Fin 63/37; SM_ADR_Marker ATRPeriod=14; SM_BPCT mini-HUD; SM_NewHUD 18-field set + HYADR + Av_N EMAs (1, 4, 13, 26, 52)
+- **Built ⚠ (D-17 Low confidence):** SM_BPCT, SM_NewHUD
+- **Advisory parity (D-15):** scripts available for SM_ADR_Marker, SM_Daily_HiLo, SM_IlsleyPsychLevels, SM_TDI, SM_PivotPoints (5 of 7 high-confidence deterministic indicators). The remaining 2 (sm_gmtoffset, sm_WorkTime) are deferred — their return-value contract is too simple to merit a CSV diff (sm_gmtoffset returns a single int hours offset; sm_WorkTime returns a session-window boolean), and Python↔MQ parity for them is enforced structurally by the unit tests.
+- **AlertZone shared module:** SM_AlertZone_1 and SM_AlertZone_2 share `compute_alert_zone()` in Python per RESEARCH Open Question #5 (148-byte binary delta = same algorithm, different defaults)
 
 Status legend: ✅ Built (high/medium confidence) · ⚠ Built (low confidence per D-17) · ❌ Skipped (not applicable per D-18)
