@@ -44,9 +44,9 @@ Requirements for V3 Adaptive Strategy Dispatch System.
 
 ### Router
 
-- [ ] **ROUT-01**: StrategyRouter.route(pair, timestamp, market_data) → {strategy, direction, confidence, size_mult} or None, using regime gate → matrix check → RAG score
-- [ ] **ROUT-02**: Router implements swing-first priority — daily swing fires whenever conditions met; intraday strategies only when no swing position open on that pair
-- [ ] **ROUT-03**: Router rejects any strategy if an opposite-direction position is already open on the same pair
+- [x] **ROUT-01**: StrategyRouter.route(pair, timestamp, market_data) → {strategy, direction, confidence, size_mult} or None, using regime gate → matrix check → RAG score
+- [x] **ROUT-02**: Router implements swing-first priority — daily swing fires whenever conditions met; intraday strategies only when no swing position open on that pair
+- [x] **ROUT-03**: Router rejects any strategy if an opposite-direction position is already open on the same pair
 - [ ] **ROUT-04**: Router 4yr simulation: aggregate portfolio Sharpe ≥ max individual strategy Sharpe + 0.2
 
 ### Live Execution
@@ -109,9 +109,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-02 | Phase 8.5 | Complete |
 | SESS-03 | Phase 8.5 | Complete |
 | SESS-04 | Phase 8.5 | Complete (structural; full-corpus phase-gate run requires SUPABASE_DB_URL — non-blocking carry-over) |
-| ROUT-01 | Phase 9 | Pending |
-| ROUT-02 | Phase 9 | Pending |
-| ROUT-03 | Phase 9 | Pending |
+| ROUT-01 | Phase 9 | Complete |
+| ROUT-02 | Phase 9 | Complete |
+| ROUT-03 | Phase 9 | Complete |
 | ROUT-04 | Phase 9 | Pending |
 | LIVE-01 | Phase 10 | Pending |
 | LIVE-02 | Phase 10 | Pending |
