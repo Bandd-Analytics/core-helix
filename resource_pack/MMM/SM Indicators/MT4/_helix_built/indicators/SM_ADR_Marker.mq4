@@ -7,9 +7,16 @@
 //|                                                                   |
 //|  MQL4 idiom: iATR returns double directly (no handle); ObjectCreate|
 //|  uses MQL4 5-arg signature (no chart_id).                          |
+//|                                                                   |
+//|  v2.00 (operator-tuned 2026-04-28):                                |
+//|    - Fixed disappear/reappear bug on TF/symbol switch:            |
+//|      MQ4: no CHART_CHANGE — redraw on every 5-second timer tick.  |
+//|    - Adds OBJ_TEXT price labels ABOVE each line ("ADR Hi 1.2540") |
+//|    - Confirmed daily-anchored: ADR re-anchors to today_open every |
+//|      D1 bar; the lines do NOT change between intra-day TF switches.|
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_ADR_Marker.ex4"
-#property version   "1.00"
+#property version   "2.00"
 #property indicator_chart_window
 #property strict
 
@@ -26,17 +33,20 @@ extern int    InpLineThickness2     = 2;
 extern color  InpLineColor2         = clrRed;
 extern int    InpBarForLabels       = -10;
 extern bool   InpDebugLogger        = false;
-extern bool   InpShowtext           = false;
+extern bool   InpShowtext           = true;   // v2.00: price labels above lines (was false)
+extern int    InpLabelFontSize      = 9;
+extern color  InpLabelColor         = clrWhite;
 
 string ObjectPrefix = "smADR_";
 datetime g_last_d1_bar = 0;
+bool g_needs_redraw = false;  // MQ4: no CHART_CHANGE — redraw on every timer tick
 
 //+------------------------------------------------------------------+
 int init()
   {
    IndicatorShortName("SM_ADR_Marker(" + IntegerToString(InpATRPeriod) + ")");
    Recompute();
-   EventSetTimer(60);
+   EventSetTimer(5);  // 5-second cycle; handles disappear/reappear on TF/symbol switch
    return(0);
   }
 
@@ -52,7 +62,11 @@ int deinit()
 int start()
   {
    datetime cur_d1 = iTime(_Symbol, PERIOD_D1, 0);
-   if(cur_d1 != g_last_d1_bar)
+   // v2.00: also recompute when our objects are missing (recovery
+   // path for ATR-not-ready-on-load and TF-switch cases).
+   bool need_redraw = (cur_d1 != g_last_d1_bar) ||
+                      (ObjectFind(ObjectPrefix + "high") < 0);
+   if(need_redraw)
      {
       Recompute();
       g_last_d1_bar = cur_d1;
@@ -61,9 +75,13 @@ int start()
   }
 
 //+------------------------------------------------------------------+
+//  MQ4: no CHART_CHANGE — redraw on every timer tick.
+//  Functionally equivalent to MQ5 OnChartEvent(CHART_CHANGE) on a
+//  5-second cycle.
+//+------------------------------------------------------------------+
 void OnTimer()
   {
-   Recompute();
+   Recompute();  // MQ4: no CHART_CHANGE — redraw on every timer tick
   }
 
 //+------------------------------------------------------------------+
@@ -92,6 +110,9 @@ void Recompute()
    double adr_low  = today_open - adr / 2.0;
    double adr_mid  = today_open;
 
+   // Per Verified Updates: LineColor1=Orange (Thickness1=1) — primary marker.
+   //                       LineColor2=Red   (Thickness2=2) — secondary marker.
+   // Convention: Color1/Thickness1 → high+low boundaries; Color2/Thickness2 → mid.
    DrawHLine(ObjectPrefix + "high", adr_high,
              InpLineColor1, InpLineThickness1);
    DrawHLine(ObjectPrefix + "low",  adr_low,
@@ -100,7 +121,20 @@ void Recompute()
              InpLineColor2, InpLineThickness2);
 
    if(InpShowtext)
-      DrawLabel(adr, pip);
+     {
+      // v2.00: per-line price labels above each line + corner pip total.
+      double label_offset = adr * 0.05;  // [INFER] 5% of ADR as vertical padding
+      DrawPriceLabel("smADR_Hi_lbl",
+                     adr_high + label_offset,
+                     "ADR Hi " + DoubleToString(adr_high, _Digits));
+      DrawPriceLabel("smADR_Mid_lbl",
+                     adr_mid + label_offset,
+                     "ADR Mid " + DoubleToString(today_open, _Digits));
+      DrawPriceLabel("smADR_Lo_lbl",
+                     adr_low + label_offset,
+                     "ADR Lo " + DoubleToString(adr_low, _Digits));
+      DrawCornerLabel(adr, pip);
+     }
 
    if(InpDebugLogger)
       Print("SM_ADR_Marker: today_open=", DoubleToStr(today_open, digits),
@@ -124,7 +158,24 @@ void DrawHLine(string name, double price, color c, int thickness)
   }
 
 //+------------------------------------------------------------------+
-void DrawLabel(double adr, double pip)
+//  v2.00 — chart-anchored price label sitting ABOVE the line.
+//  price argument already includes the label_offset computed in Recompute().
+//+------------------------------------------------------------------+
+void DrawPriceLabel(string name, double price, string text)
+  {
+   // MQL4 ObjectCreate: name, type, sub_window, time, price (no chart_id).
+   if(ObjectFind(name) < 0)
+      ObjectCreate(name, OBJ_TEXT, 0, TimeCurrent(), price);
+
+   ObjectSetString (0, name, OBJPROP_TEXT,     text);
+   ObjectSetInteger(0, name, OBJPROP_COLOR,    InpLabelColor);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpLabelFontSize);
+  }
+
+//+------------------------------------------------------------------+
+//  Corner pip-total summary label (e.g. "ADR(14): 92.3 pips").
+//+------------------------------------------------------------------+
+void DrawCornerLabel(double adr, double pip)
   {
    string name = ObjectPrefix + "lbl";
    double pips = (pip > 0.0) ? adr / pip : 0.0;
@@ -143,6 +194,11 @@ void DrawLabel(double adr, double pip)
 //+------------------------------------------------------------------+
 void CleanupObjects()
   {
+   // Delete named label objects explicitly before prefix-sweep.
+   ObjectDelete("smADR_Hi_lbl");
+   ObjectDelete("smADR_Mid_lbl");
+   ObjectDelete("smADR_Lo_lbl");
+
    for(int i = ObjectsTotal() - 1; i >= 0; i--)
      {
       string n = ObjectName(i);
