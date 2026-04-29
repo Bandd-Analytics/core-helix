@@ -17,7 +17,7 @@
 - [ ] **Phase 9: Strategy Router** — Build the StrategyRouter that dispatches per-pair per-bar using regime gate, 4yr matrix, session gates, and RAG score, and validate aggregate portfolio Sharpe uplift
 - [ ] **Phase 10: Live Execution + Paper Trade Gate** — Wire LiveSignalEngine and MT5 EA into the ZMQ bridge, fix equity baseline, and run 7-day IC Markets demo as final go/no-go gate
 - [x] **Phase 11: SM Indicators full-spec documentation** — Reconstruct all 14 `!SM_*` / `!sm_*` MT4 indicators (3 helpers + 11 indicators) into a 15-file markdown reference set under `resource_pack/MMM/SM Indicators/docs/` (off critical path; independent of router/live work) (completed 2026-04-27)
-- [ ] **Phase 12: SM Indicators implementation** — Build runnable MQ4 + MQ5 + Python implementations from the 14 Phase 11 specs (off critical path; CONTEXT and 3 tier-mirrored plans landed 2026-04-27)
+- [x] **Phase 12: SM Indicators implementation** — Build runnable MQ4 + MQ5 + Python implementations from the 14 Phase 11 specs (off critical path; CONTEXT and 3 tier-mirrored plans landed 2026-04-27) (completed 2026-04-29)
 
 ---
 
@@ -263,7 +263,7 @@ Plans:
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 11
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 12 to break down)
