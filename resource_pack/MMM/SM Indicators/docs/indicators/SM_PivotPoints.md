@@ -313,3 +313,15 @@ Helix's daily Z-score mean-reversion strategy (v1.0, Sharpe 2.08) does not curre
 - [INFER] Sunday D1 bar skip logic — whether the indicator automatically detects and skips Sunday candles; no confirmation from binary size alone (15,684 bytes is consistent with either including or excluding this logic)
 - [INFER] Whether the indicator supports monthly pivots in addition to daily and weekly
 - [INFER] sm_gmtoffset dependency — the indicator may use a hard-coded GMT offset parameter instead of calling sm_gmtoffset; the 15,684-byte size doesn't necessitate calling sm_gmtoffset
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Build date | Notes |
+|--------|--------|------------|-------|
+| MQ5 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_PivotPoints.mq5`; OBJ_HLINE chart objects; Pitfall 5 guard (shift=1); M1-M4 per MMM Book pp. 42-43 |
+| MQ4 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_PivotPoints.mq4`; MQL4 idioms per D-20; iHigh/iLow/iClose return double directly |
+| Python | Built ✅ | 2026-04-29 | `V2/v3_intelligence/sm_indicators/pivot_points.py`; `compute_pivot_points()` + `PivotPointsParams`; shift(1) Pitfall 5 guard; M1-M4 mid-pivots per MMM Book pp. 42-43; 4/4 pytest GREEN |
+
+**Confidence:** High — standard floor pivot formulas zero-ambiguity; M1-M4 documented in MMM Book pp. 42-43; [INFER] on cosmetic parameters only.

@@ -22,6 +22,7 @@ from .ilsley_psych_levels import (
 
 # Tier 2 composites — Plan 12-03 Wave 1
 from .tdi import TDIParams, compute_tdi
+from .pivot_points import PivotPointsParams, compute_pivot_points
 
 __all__ = [
     "ADRMarkerParams",
@@ -37,4 +38,6 @@ __all__ = [
     # Tier 2
     "TDIParams",
     "compute_tdi",
+    "PivotPointsParams",
+    "compute_pivot_points",
 ]
