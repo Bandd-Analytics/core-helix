@@ -300,8 +300,215 @@ def run_router_simulation(
     rag_collection: str = "router_sim_trades",
     warm_rag: bool = True,
 ) -> dict:
-    """ROUT-04 entry point — Task 1b implements the main loop body."""
-    raise NotImplementedError("Task 1b adds the run_router_simulation main loop body")
+    """ROUT-04 entry point.
+
+    Loads detectors + 8 H1 4yr CSVs OUTSIDE PitClock (Pitfall #1).
+    Enters ONE PitClock(end_ts) wrap (Phase 8.4 Pitfall 5 — no nesting).
+    Per timestamp in unified sorted union, per pair in PAIR_CONFIGS order:
+      1. Skip if ts not in pair df.index OR bar_index < 100 (warmup).
+      2. Advance regime filter ONCE per bar via detectors[pair].update(log_return)
+         BEFORE router.route() (Pitfall #6).
+      3. Tick exits on existing live positions (target/stop/timeout via EXIT_PARAMS).
+      4. Build snapshot, call router.route(); on dispatch open at next_row['Open']
+         (BKTS-01 / Pitfall #7).
+      5. On exit, call on_trade_close(rec, logger=sim_logger, rag=sim_rag) per
+         warm_rag flag.
+
+    AFTER the loop, reads rejection_count from router.direction_conflict_count
+    (Plan 02 telemetry counter — WARN #5; not a heuristic).
+
+    Computes aggregate Sharpe via daily-binned √252 (Phase 7 lock); compares to
+    SHARPE_4YR best_single + 0.2; writes JSON report.
+
+    Returns the report dict.
+    """
+    report_path = report_path or (REPORTS_DIR / "router_4yr_simulation.json")
+    sim_db_path = sim_db_path or (REPORTS_DIR / "router_simulation_trades.db")
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    if sim_db_path.exists():
+        sim_db_path.unlink()  # fresh sim each run
+
+    # Sim-only logger + sim-only Chroma collection (RESEARCH §6 — never touch
+    # production marketmind.db / trade_memory).
+    sim_logger = TradeLogger(db_path=sim_db_path)
+    sim_rag = None
+    if warm_rag and CHROMA_AVAILABLE and RAGSignalFilter is not None:
+        sim_rag = RAGSignalFilter(collection=rag_collection)
+
+    # Pre-load CSVs + detectors OUTSIDE PitClock (Pitfall #1).
+    h1_data = _load_h1_data()
+    detectors = _load_detectors()
+    position_store = InMemoryPositionStore()
+    # Router needs a non-None rag_filter; reuse sim_rag (or a no-op stand-in).
+    router_rag = sim_rag if sim_rag is not None else _NoOpRag()
+    router = StrategyRouter(detectors, router_rag, position_store, PAIR_CONFIGS)
+
+    # Unified sorted union of timestamps across all 8 pairs.
+    all_ts: list[pd.Timestamp] = sorted(set().union(*[df.index for df in h1_data.values()]))
+    end_ts = pd.Timestamp(all_ts[-1])
+
+    # Track live positions per pair for exit handling.
+    live: dict[str, list[_LivePosition]] = {pair: [] for pair in h1_data}
+    closed_trades: list[dict] = []
+    dispatch_count = 0
+    # rejection_count is read from router.direction_conflict_count AFTER the sim loop.
+
+    with PitClock(end_ts) as clock:  # Phase 8.4 Pitfall 5 — single wrap
+        for ts in all_ts:
+            clock.advance(pd.Timestamp(ts))
+            for pair, df in h1_data.items():
+                if ts not in df.index:
+                    continue
+                bar_index = df.index.get_loc(ts)
+                if bar_index < 100:  # warmup — Phase 7 backtest convention
+                    continue
+                row = df.iloc[bar_index]
+
+                # --- 1. Advance regime filter ONCE per bar BEFORE route() (Pitfall #6)
+                log_return = row.get("log_return")
+                if pd.notna(log_return):
+                    detectors[pair].update(float(log_return))
+
+                # --- 2. Tick exits on existing positions
+                surviving: list[_LivePosition] = []
+                for pos in live[pair]:
+                    bars_held = bar_index - pos.bar_index_at_entry
+                    params = EXIT_PARAMS[pos.strategy]
+                    long_sign = 1.0 if pos.direction == Direction.LONG else -1.0
+                    target = pos.entry_px + (
+                        params["target_atr_mult"] * pos.atr_at_entry * long_sign
+                    )
+                    stop = pos.entry_px - (
+                        params["stop_atr_mult"] * pos.atr_at_entry * long_sign
+                    )
+                    exit_reason: Optional[str] = None
+                    exit_px: Optional[float] = None
+                    if pos.direction == Direction.LONG:
+                        if row["Low"] <= stop:
+                            exit_reason, exit_px = "stop", float(stop)
+                        elif row["High"] >= target:
+                            exit_reason, exit_px = "target", float(target)
+                    else:
+                        if row["High"] >= stop:
+                            exit_reason, exit_px = "stop", float(stop)
+                        elif row["Low"] <= target:
+                            exit_reason, exit_px = "target", float(target)
+                    if exit_reason is None and bars_held >= params["timeout_bars"]:
+                        # Exit-price assignment to `px` is whitelisted by
+                        # pit_validator._is_exit_price_assignment (target name 'px').
+                        px = row["Close"]
+                        exit_reason = "timeout"
+                        exit_px = float(px)
+                    if exit_reason is not None and exit_px is not None:
+                        rec = _exit_position(
+                            pos, ts, exit_px, exit_reason,
+                            sim_logger, sim_rag, warm_rag=warm_rag,
+                        )
+                        rec["bars_held"] = int(bars_held)
+                        closed_trades.append(rec)
+                        position_store.close(pair, pos.opened_at)
+                    else:
+                        surviving.append(pos)
+                live[pair] = surviving
+
+                # --- 3. Build snapshot, dispatch via router
+                if pd.isna(row.get("atr")) or pd.isna(row.get("daily_z")):
+                    continue  # warmup — indicators not yet stable
+                snapshot = _build_snapshot(pair, ts, row)
+                decision = router.route(pair, ts, snapshot)
+                if decision is None:
+                    # No-signal OR direction-conflict reject (D-15). Accurate
+                    # per-bar rejection bookkeeping is read AFTER the loop from
+                    # router.direction_conflict_count (Plan 02 telemetry counter).
+                    continue
+
+                # --- 4. Open position at NEXT bar's Open (BKTS-01 / Pitfall #7)
+                next_row_idx = bar_index + 1
+                if next_row_idx >= len(df):
+                    continue
+                next_row = df.iloc[next_row_idx]
+                entry_px = float(next_row["Open"])
+                pos = _LivePosition(
+                    pair=pair,
+                    direction=decision.direction,
+                    strategy=decision.strategy,
+                    opened_at=ts,
+                    entry_px=entry_px,
+                    size_mult=decision.size_mult,
+                    confidence=decision.confidence,
+                    atr_at_entry=float(row["atr"]),
+                    bar_index_at_entry=bar_index,
+                    daily_z_at_entry=float(row["daily_z"]),
+                    h1_z_at_entry=float(row["h1_z"]),
+                    vol_pct_at_entry=float(row.get("vol_percentile", 0.5) or 0.5),
+                )
+                live[pair].append(pos)
+                position_store.open(
+                    OpenPosition(
+                        pair=pair,
+                        direction=decision.direction,
+                        strategy=decision.strategy,
+                        opened_at=ts,
+                    )
+                )
+                dispatch_count += 1
+    # PitClock context exits here; sim ends.
+
+    # WARN #5 / Plan 02 Task 2: read accurate ROUT-03 rejection count from router.
+    # No heuristic — direct telemetry from StrategyRouter._direction_conflict.
+    rejection_count = router.direction_conflict_count
+
+    # Compute aggregate Sharpe vs single-pair-best baseline (D-16).
+    aggregate_sharpe = _aggregate_sharpe(closed_trades)
+    best_single_sharpe = _best_single_sharpe()
+    baseline_plus_0_2 = best_single_sharpe + 0.2
+    gate_passed = aggregate_sharpe >= baseline_plus_0_2
+
+    # Per-strategy and per-pair dispatch counts for telemetry.
+    dispatched_per_strategy: dict[str, int] = {}
+    dispatched_per_pair: dict[str, int] = {}
+    for trade in closed_trades:
+        strat = trade.get("strategy_type", "UNKNOWN")
+        sym = trade.get("symbol", "UNKNOWN")
+        dispatched_per_strategy[strat] = dispatched_per_strategy.get(strat, 0) + 1
+        dispatched_per_pair[sym] = dispatched_per_pair.get(sym, 0) + 1
+
+    report = {
+        "aggregate_sharpe": aggregate_sharpe,
+        "best_single_sharpe": best_single_sharpe,
+        "baseline_plus_0_2": baseline_plus_0_2,
+        "gate_passed": bool(gate_passed),
+        "dispatch_count": dispatch_count,
+        "rejection_count": rejection_count,
+        "closed_trade_count": len(closed_trades),
+        "sim_window_start": str(all_ts[0]),
+        "sim_window_end": str(all_ts[-1]),
+        "n_pairs": len(h1_data),
+        "warm_rag": warm_rag,
+        "rag_collection": rag_collection,
+        "sim_db_path": str(sim_db_path),
+        "dispatched_per_strategy": dispatched_per_strategy,
+        "dispatched_per_pair": dispatched_per_pair,
+    }
+    report_path.write_text(json.dumps(report, indent=2, default=str))
+    return report
+
+
+class _NoOpRag:
+    """No-op RAG stand-in used when CHROMA is unavailable or warm_rag=False.
+
+    Mirrors RAGSignalFilter.score_signal() return shape (action + confidence)
+    so router.route() doesn't break. Ensures the gate-4 path is exercised but
+    always passes through (action='ENTER').
+
+    Safe sentinel — Plan 04 surface only; production never sees this.
+    """
+
+    def score_signal(self, **kwargs) -> dict:  # noqa: D401
+        return {"action": "ENTER", "confidence": 0.5, "size_modifier": 1.0}
+
+    def index_trade(self, trade: dict) -> None:  # noqa: D401
+        pass
 
 
 __all__ = [
