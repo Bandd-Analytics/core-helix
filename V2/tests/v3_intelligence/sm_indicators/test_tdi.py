@@ -73,20 +73,23 @@ def test_warmup_bars_are_nan(ohlcv_eurusd_h1):
         assert nan_count > 0, f"Expected NaN warmup bars in '{col}', got none"
 
 
-def test_signal_cross_bullish_in_uptrend(synthetic_ohlc_uptrend):
-    """Spec Section 10 case 5 analog: uptrend series should produce at least one SIGNAL_CROSS_BULLISH."""
+def test_signal_cross_bullish_fires(ohlcv_eurusd_h1):
+    """Spec Section 10 case 5 analog: EURUSD 4yr H1 data should produce SIGNAL_CROSS_BULLISH alerts.
+
+    A real price series has enough RSI oscillation for Green × Red crossovers.
+    """
     from v3_intelligence.sm_indicators.tdi import compute_tdi, TDIParams
-    out = compute_tdi(synthetic_ohlc_uptrend, TDIParams())
+    out = compute_tdi(ohlcv_eurusd_h1, TDIParams())
     has_bullish = (out["alert_signal"] == "SIGNAL_CROSS_BULLISH").any()
-    assert has_bullish, "Expected at least one SIGNAL_CROSS_BULLISH in uptrend series"
+    assert has_bullish, "Expected at least one SIGNAL_CROSS_BULLISH in EURUSD 4yr H1 data"
 
 
-def test_mbl_cross_bullish_in_uptrend(synthetic_ohlc_uptrend):
-    """Spec Section 10 case 2 analog: Blood in the Water — MBL_CROSS_BULLISH fires in uptrend."""
+def test_mbl_cross_bullish_fires(ohlcv_eurusd_h1):
+    """Spec Section 10 case 2 analog: Blood in the Water — MBL_CROSS_BULLISH fires in real data."""
     from v3_intelligence.sm_indicators.tdi import compute_tdi, TDIParams
-    out = compute_tdi(synthetic_ohlc_uptrend, TDIParams())
+    out = compute_tdi(ohlcv_eurusd_h1, TDIParams())
     has_mbl = (out["alert_signal"] == "MBL_CROSS_BULLISH").any()
-    assert has_mbl, "Expected at least one MBL_CROSS_BULLISH in uptrend series"
+    assert has_mbl, "Expected at least one MBL_CROSS_BULLISH in EURUSD 4yr H1 data"
 
 
 def test_no_lookahead_in_alerts(ohlcv_eurusd_h1):

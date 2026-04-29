@@ -374,3 +374,24 @@ The TDI Hook pattern (mean-reversion from extreme) maps directly to the daily Z-
 See `.planning/phases/11-sm-indicators-full-spec-documentation/evidence/VERIFIED-DEFAULTS.md` §2 for full audit.
 
 **Confidence:** stays **High** but the spec's parameter table needs a full rewrite for Phase 12. Test cases that referenced RSI=13 numerically must be regenerated with RSI=21.
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Notes |
+|--------|--------|-------|
+| MQ4 | Built ✅ | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_TDI.mq4` — 5 buffers, MQ4 iRSI direct idiom |
+| MQ5 | Built ✅ | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_TDI.mq5` — iRSI handle + CopyBuffer (RESEARCH Pattern 2), 5 buffers + 2 VB HLINE levels |
+| Python | Built ✅ | `V2/v3_intelligence/sm_indicators/tdi.py` — TDIParams + compute_tdi() returning 9 backtester-ready columns |
+
+**Verified Updates honored:**
+- RSI_Period = 21 (corrected from 13)
+- Shark_Fin_Upper = 63.0 (corrected from 68)
+- Shark_Fin_Lower = 37.0 (corrected from 32)
+- VB_High_Value = 45.0, VB_Low_Value = 55.0 (NEW inputs — HLINE display in subwindow)
+- fixed_min = 19.2182, fixed_max = 77.5613 (Levels tab — MQ5 `#property indicator_minimum/maximum`)
+
+**Tests:** 8 GREEN in `V2/tests/v3_intelligence/sm_indicators/test_tdi.py`
+**Parity script:** `scripts/parity_check_tdi.py` (advisory D-15)
+**Build date:** 2026-04-29

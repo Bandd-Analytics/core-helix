@@ -20,6 +20,9 @@ from .ilsley_psych_levels import (
     compute_ilsley_psych_levels,
 )
 
+# Tier 2 composites — Plan 12-03 Wave 1
+from .tdi import TDIParams, compute_tdi
+
 __all__ = [
     "ADRMarkerParams",
     "compute_adr_marker",
@@ -31,4 +34,7 @@ __all__ = [
     "compute_daily_hilo",
     "IlsleyPsychLevelsParams",
     "compute_ilsley_psych_levels",
+    # Tier 2
+    "TDIParams",
+    "compute_tdi",
 ]
