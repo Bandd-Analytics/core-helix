@@ -4,29 +4,31 @@
 //|  Spec: resource_pack/MMM/SM Indicators/docs/indicators/           |
 //|        SM_Daily_HiLo.md                                            |
 //|                                                                   |
-//|  v2.00 — trailing N-day snake pattern (operator-tuned 2026-04-28).|
-//|  For each of the last InpDaysBack D1 bars, draws two short        |
-//|  dotted OBJ_TREND segments spanning that day's bar width:         |
-//|    HIGH segment at iHigh(D1, i) — red                             |
-//|    LOW  segment at iLow (D1, i) — lime green                      |
-//|  Together they form a stair-step / zigzag visualization tracking  |
-//|  the recent daily H/L topology like a snake.                      |
+//|  v2.01 — trailing N-day snake pattern (operator-tuned 2026-04-29).|
+//|  For each completed D1 bar i (i=1..InpDaysBack) the H/L is        |
+//|  PROJECTED INTO THE FOLLOWING DAY'S bar — yesterday's H/L         |
+//|  becomes a reference line drawn through today's price action,    |
+//|  the day-before-yesterday's H/L overlays yesterday's bar, etc.   |
+//|  This is the classic SM "previous-day pivot" pattern: the most   |
+//|  recent completed bar provides today's psychological S/R.        |
 //|                                                                   |
-//|  Most recent day (i=1) gets text labels above each line showing   |
-//|  "PHOD <price>" / "PLOD <price>".                                 |
+//|  Both high and low lines: dotted Aqua (operator-tuned).           |
 //|                                                                   |
-//|  Pitfall 5 guard: i=0 is the still-forming D1 bar — start at i=1. |
+//|  Most recent (i=1, yesterday's H/L projected into today) gets    |
+//|  "PHOD <price>" / "PLOD <price>" labels above each line.          |
+//|                                                                   |
+//|  Pitfall 5 guard: i=0 is the still-forming D1 bar — start at i=1.|
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_Daily_HiLo.ex4"
-#property version   "2.00"
+#property version   "2.01"
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
 
-//--- v2.00 inputs
+//--- v2.01 inputs
 input int             InpDaysBack    = 14;             // Number of trailing D1 bars
-input color           InpHighColor   = clrRed;         // Daily high segment color
-input color           InpLowColor    = clrLimeGreen;   // Daily low segment color
+input color           InpHighColor   = clrAqua;        // v2.01 daily high segment color
+input color           InpLowColor    = clrAqua;        // v2.01 daily low segment color
 input ENUM_LINE_STYLE InpLineStyle   = STYLE_DOT;      // Dotted lines per operator request
 input int             InpLineWidth   = 2;
 input bool            InpShowLabel   = true;           // PHOD/PLOD label on most recent day
@@ -82,15 +84,23 @@ void Recompute()
    CleanupObjects();   // wipe previous frame — simplest correct approach
                        // for variable-day trail since bars age out
 
+   //--- v2.01: project each completed bar i's H/L into bar (i-1)'s time
+   //--- range. For i=1 this means yesterday's H/L appears as a line
+   //--- through today's bar. For i=N this means N-days-ago's H/L
+   //--- appears as a line through (N-1)-days-ago's bar.
    for(int i = 1; i <= InpDaysBack; i++)
      {
       double hi = iHigh(_Symbol, PERIOD_D1, i);
       double lo = iLow (_Symbol, PERIOD_D1, i);
       if(hi <= 0.0 || lo <= 0.0) continue;
 
-      datetime t_open = iTime(_Symbol, PERIOD_D1, i);
-      datetime t_end  = (i > 0) ? iTime(_Symbol, PERIOD_D1, i - 1) : (t_open + 86400);
-      if(t_end <= t_open) t_end = t_open + 86400;
+      datetime t_open = iTime(_Symbol, PERIOD_D1, i - 1);  // open of FOLLOWING day
+      datetime t_end;
+      if(i >= 2)
+         t_end = iTime(_Symbol, PERIOD_D1, i - 2);          // close of FOLLOWING day
+      else
+         t_end = t_open + 86400;                            // i=1 → today still in progress
+      if(t_open <= 0 || t_end <= t_open) continue;
 
       string n_hi = StringFormat("%shi_%d", InpObjectPrefix, (int)t_open);
       string n_lo = StringFormat("%slo_%d", InpObjectPrefix, (int)t_open);
@@ -102,9 +112,11 @@ void Recompute()
         {
          string l_hi = InpObjectPrefix + "phod_lbl";
          string l_lo = InpObjectPrefix + "plod_lbl";
-         DrawLabelAbove(l_hi, t_end, hi,
+         //--- Anchor the label at the START of the projected line
+         //--- (today's open) so it sits at the leftmost visible edge.
+         DrawLabelAbove(l_hi, t_open, hi,
                         "PHOD " + DoubleToString(hi, _Digits), InpHighColor);
-         DrawLabelAbove(l_lo, t_end, lo,
+         DrawLabelAbove(l_lo, t_open, lo,
                         "PLOD " + DoubleToString(lo, _Digits), InpLowColor);
         }
      }
