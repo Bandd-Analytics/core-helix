@@ -6,6 +6,9 @@ __pycache__/
 venv/
 .venv/
 
+# Claude Code per-machine API key helper (reads from .env)
+.claude/anthropic-key-helper.sh
+
 # Data & databases
 *.db
 *.sqlite3
