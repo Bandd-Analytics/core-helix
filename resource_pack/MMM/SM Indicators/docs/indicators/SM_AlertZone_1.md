@@ -239,3 +239,16 @@ Alert zones are SPATIAL filters — price-level gates. In `backtest_hybrid.py`, 
 - [INFER] RepeatAlertSeconds default 300 (5 minutes) — a 5-minute cooldown is common in MT4 alert indicators
 - [INFER] ObjectPrefix "smAZ1_" — conventional naming; actual prefix unknown
 - [INFER] Whether the rectangle extends to the chart's right edge via "ray" vs fixed time anchors — "ray" extension is more practical for a zone that should remain visible as time advances
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Build date | Notes |
+|--------|--------|------------|-------|
+| MQ5 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_AlertZone_1.mq5`; OBJ_RECTANGLE with fill; LOD-tracking auto zone; 1s timer; alert cooldown 300s |
+| MQ4 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_AlertZone_1.mq4`; MQL4 idioms per D-20; iLow/iHigh return double directly |
+| Python | Built ✅ | 2026-04-29 | `V2/v3_intelligence/sm_indicators/alert_zone_1.py`; `compute_alert_zone()` shared core + `AlertZone1Params` (zone_type="LOWER"); 3/3 pytest GREEN |
+
+**Confidence:** Medium — zone-alerter pattern well-understood; MMM Strike Zone semantics from MMM Book p. 55; all non-formula parameters [INFER].
+Shares Python `compute_alert_zone()` with AlertZone_2 per RESEARCH Open Question #5 (148-byte binary delta = same algorithm, different defaults).

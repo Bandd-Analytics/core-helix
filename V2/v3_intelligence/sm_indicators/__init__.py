@@ -23,6 +23,8 @@ from .ilsley_psych_levels import (
 # Tier 2 composites — Plan 12-03 Wave 1
 from .tdi import TDIParams, compute_tdi
 from .pivot_points import PivotPointsParams, compute_pivot_points
+from .alert_zone_1 import AlertZone1Params, compute_alert_zone
+from .alert_zone_2 import AlertZone2Params
 
 __all__ = [
     "ADRMarkerParams",
@@ -40,4 +42,7 @@ __all__ = [
     "compute_tdi",
     "PivotPointsParams",
     "compute_pivot_points",
+    "AlertZone1Params",
+    "compute_alert_zone",
+    "AlertZone2Params",
 ]

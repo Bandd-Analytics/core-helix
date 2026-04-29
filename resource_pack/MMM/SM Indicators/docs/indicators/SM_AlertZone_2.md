@@ -243,3 +243,16 @@ if az2_low <= current_price <= az2_high:
 - [INFER] Whether the two indicators are intended to always be loaded as a pair (one per zone) or can be used independently with only one zone active
 - [INFER] ObjectPrefix "smAZ2_" — must differ from AlertZone_1's prefix to avoid object collision; "smAZ2_" is the logical choice but unverifiable
 - [INFER] Whether the 148-byte difference involves a different `ObjectPrefix` string length (e.g., "smAlertZone2_" vs "smAZ1_") rather than a sound filename difference
+
+---
+
+## Implementation status (Phase 12)
+
+| Target | Status | Build date | Notes |
+|--------|--------|------------|-------|
+| MQ5 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT5/indicators/SM_AlertZone_2.mq5`; OBJ_RECTANGLE with fill; HOD-tracking auto zone; prefix `smAZ2_` |
+| MQ4 | Built ✅ | 2026-04-29 | `resource_pack/MMM/SM Indicators/MT4/_helix_built/indicators/SM_AlertZone_2.mq4`; MQL4 idioms per D-20 |
+| Python | Built ✅ | 2026-04-29 | `V2/v3_intelligence/sm_indicators/alert_zone_2.py`; `AlertZone2Params` (zone_type="UPPER") re-exports `compute_alert_zone` from `alert_zone_1`; 3/3 pytest GREEN |
+
+**Confidence:** Medium — same algorithm as AlertZone_1 per RESEARCH Open Question #5; UPPER zone preset differs only in zone_type default and auto-zone anchor (HOD vs LOD).
+Shares Python `compute_alert_zone()` with AlertZone_1 per RESEARCH Open Question #5 (148-byte binary delta = same algorithm, different defaults).
