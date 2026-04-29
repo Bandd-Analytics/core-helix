@@ -144,6 +144,15 @@ class OnlineRegimeFilter:
         """Current normalized forward variable (state probabilities), shape (n_states,)."""
         return self._alpha.copy()
 
+    def current_state_prob(self) -> tuple[RegimeState, float]:
+        """Return current (argmax_state, posterior) without advancing the filter.
+
+        Read-only mirror of update()'s return shape. Phase 9 router gate 1 reads
+        this on every bar (CONTEXT D-04 / RESEARCH §1 critical gap closure).
+        """
+        best_state = int(np.argmax(self._alpha))
+        return RegimeState(best_state), float(self._alpha[best_state])
+
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------

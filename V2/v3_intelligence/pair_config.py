@@ -76,6 +76,26 @@ class PairConfig:
     notes: str = ""
 
 
+# ── 4yr Sharpe routing matrix — canonical typed source (Phase 9 D-08 tie-break) ──
+# Lifted from print_pair_summary() at the bottom of this module
+# (Phase 9-02 / RESEARCH §3 recommendation). Numbers committed by Phase 7
+# BKTS-02/03 + Phase 8.4 P03 (GBPNZD scalp 4yr correction 0.66 supersedes the
+# stale -0.60 literal that was in print_pair_summary).
+#
+# Keys are lowercase to match RESEARCH §3 / D-08 tie-break vocabulary AND
+# the temporal_filters.is_tradeable_session() session_key convention.
+SHARPE_4YR: dict[str, dict[str, float]] = {
+    "USDJPY": {"swing":  3.09, "h1_scalp": -2.34, "h1_momentum": -1.61, "m15_scalp":  0.93},
+    "GBPJPY": {"swing":  1.93, "h1_scalp":  0.85, "h1_momentum":  0.21, "m15_scalp": -0.02},
+    "GBPAUD": {"swing":  1.86, "h1_scalp": -0.61, "h1_momentum": -0.11, "m15_scalp":  1.08},
+    "GBPUSD": {"swing":  1.05, "h1_scalp": -0.15, "h1_momentum":  1.00, "m15_scalp":  2.60},
+    "EURGBP": {"swing":  0.45, "h1_scalp":  1.32, "h1_momentum":  1.57, "m15_scalp":  1.86},
+    "GBPNZD": {"swing": -0.34, "h1_scalp":  0.66, "h1_momentum": -1.23, "m15_scalp":  3.65},
+    "EURUSD": {"swing": -0.20, "h1_scalp": -0.17, "h1_momentum": -1.03, "m15_scalp":  2.62},
+    "AUDNZD": {"swing": -2.16, "h1_scalp":  1.63, "h1_momentum":  0.55, "m15_scalp":  2.19},
+}
+
+
 # ── Per-pair configurations ────────────────────────────────────────────────────
 # Each strategy enabled/disabled based on evaluation matrix results.
 # Strategies are independent — multiple can be active on the same pair.
@@ -210,15 +230,12 @@ def print_pair_summary():
     print("="*120)
     print(f"{'Symbol':8} {'Tier':5} {'Swing':6} {'H1Scalp':8} {'Momentum':9} {'M15':5} {'M15Sh':6} Notes")
     print("-"*120)
+    # Read from canonical SHARPE_4YR module constant (Phase 9 D-08 tie-break).
+    # This corrects the GBPNZD scalp drift (-0.60 -> 0.66) automatically since
+    # the constant is the single source of truth.
     sharpes = {
-        'USDJPY': (3.09, -2.34, -1.61, 0.93),
-        'GBPJPY': (1.93,  0.85,  0.21,-0.02),
-        'GBPAUD': (1.86, -0.61, -0.11, 1.08),
-        'GBPUSD': (1.05, -0.15,  1.00, 2.60),
-        'EURGBP': (0.45,  1.32,  1.57, 1.86),
-        'GBPNZD': (-0.34,-0.60, -1.23, 3.65),
-        'EURUSD': (-0.20,-0.17, -1.03, 2.62),
-        'AUDNZD': (-2.16, 1.63,  0.55, 2.19),
+        sym: (s["swing"], s["h1_scalp"], s["h1_momentum"], s["m15_scalp"])
+        for sym, s in SHARPE_4YR.items()
     }
     for sym, cfg in PAIR_CONFIGS.items():
         sh = sharpes.get(sym, (0,0,0,0))
