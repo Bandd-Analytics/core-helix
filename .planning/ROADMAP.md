@@ -207,7 +207,7 @@ Plans:
 Plans:
 - [x] 09-01-PLAN.md — Wave 0: RED test scaffold (8 router unit + 2 detector inventory + 3 router-simulation tests) + router.py stub with typed contracts (Strategy/Direction/RouteDecision/PositionStore) + conftest fixtures [autonomous]
 - [x] 09-02-PLAN.md — Wave 1: StrategyRouter 4-gate chain (regime → session → matrix → RAG) + swing-first iteration (ROUT-02) + direction-conflict reject (ROUT-03) + OnlineRegimeFilter.current_state_prob() + pair_config.SHARPE_4YR constant lift (ROUT-01/02/03) [autonomous]
-- [ ] 09-03-PLAN.md — Wave 2: Detector inventory expansion to 8 pairs (GBPNZD/EURUSD/AUDNZD) — fit_regime_detectors.py sources ACTIVE_PAIRS from PAIR_CONFIGS.keys() (Pitfall #3 closure) (ROUT-04 prereq) [autonomous]
+- [x] 09-03-PLAN.md — Wave 2: Detector inventory expansion to 8 pairs (GBPNZD/EURUSD/AUDNZD) — fit_regime_detectors.py sources ACTIVE_PAIRS from PAIR_CONFIGS.keys() (Pitfall #3 closure) (ROUT-04 prereq) [autonomous]
 - [ ] 09-04-PLAN.md — Wave 3: ROUT-04 4yr simulation harness (V2/backtest/router_simulation.py + V2/scripts/run_router_simulation.py) + V2/reports/router_4yr_simulation.json gate (aggregate Sharpe ≥ best_single + 0.2) (ROUT-04) [autonomous]
 
 ---
@@ -241,7 +241,7 @@ Plans:
 | 8. HMM-GARCH Regime + PiT Port | 4/4 | Complete | 2011-04-25 |
 | 8.4. Infrastructure Prereqs (INSERTED) | 4/4 | Complete   | 2011-04-26 |
 | 8.5. Temporal & Session Analysis | 1/5 | In Progress | — |
-| 9. Strategy Router | 0/4 | Not started | — |
+| 9. Strategy Router | 3/4 | In Progress | — |
 | 10. Live Execution + Paper Trade Gate | 0/? | Not started | — |
 
 ### Phase 11: SM Indicators full-spec documentation

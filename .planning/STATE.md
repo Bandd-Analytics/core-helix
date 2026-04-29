@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 09-02-PLAN.md (3 tasks, 8 RED -> 9 GREEN router tests)
-last_updated: "2026-04-29T00:24:56.752Z"
+stopped_at: "Completed 09-03-PLAN.md (2 tasks; Pitfall #3 closed; 3 new detector JSONs landed; 8/8 detector inventory)"
+last_updated: "2026-04-29T00:26:42.895Z"
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 33
-  completed_plans: 29
+  completed_plans: 30
 ---
 
 # STATE: MarketMind Helix
@@ -30,7 +30,7 @@ progress:
 ## Current Position
 
 Phase: 09 (strategy-router) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 ### Progress Bar
 
@@ -40,13 +40,13 @@ Phase 7  [##########] 100% Backtest Entry Fix + 4yr Validation — COMPLETE (BKT
 Phase 8  [##########] 100% HMM-GARCH Regime + PiT Port — COMPLETE (REGM-01/02/03/04)
 Phase 8.4[##########] 100% Infrastructure Prereqs — CLOSED 2026-04-27 (INFRA-01..04 all Complete)
 Phase 8.5[##########] 100% Temporal & Session Analysis — CLOSED 2026-04-27 (SESS-01..04 all Complete; structural contracts; full-corpus UAT non-blocking carry-over)
-Phase 9  [..........] 0%   Strategy Router — STARTING (ROUT-01..04 pending)
+Phase 9  [#######...] 75%  Strategy Router — Plans 01/02/03 done (ROUT-01/02/03 GREEN; 8/8 detector inventory); Plan 04 pending (ROUT-04 Sharpe gate)
 Phase 10 [..........] 0%   Live Execution + Paper Trade Gate (LIVE-01..04 pending)
 Phase 11 [##########] 100% SM Indicators full-spec docs — CLOSED 2026-04-27 (verifier passed; 14 specs landed)
 Phase 12 [...#......] 10%  SM Indicators implementation — CONTEXT + 3 plans landed; awaiting execution
 ```
 
-**Overall milestone:** 20/28 v2.0 requirements complete (BRDG-01/02/04, BKTS-01..04, REGM-01..04, INFRA-01..04, SESS-01..04). ROUT-01..04 + LIVE-01..04 + BRDG-03 still Pending.
+**Overall milestone:** 23/28 v2.0 requirements complete (BRDG-01/02/04, BKTS-01..04, REGM-01..04, INFRA-01..04, SESS-01..04, ROUT-01/02/03). ROUT-04 + LIVE-01..04 + BRDG-03 still Pending.
 
 ---
 
@@ -84,6 +84,7 @@ Phase 12 [...#......] 10%  SM Indicators implementation — CONTEXT + 3 plans la
 | Phase 08.5 P02 | 8min16s | 2 tasks | 3 files | - |
 | Phase 08.5-temporal-session-analysis P03 | 7min45s | 3 tasks | 4 files | - |
 | Phase 09-strategy-router P02 | 8m 10s | 3 tasks | 4 files | - |
+| Phase 09-strategy-router P03 | 13m | 2 tasks | 4 files | Pitfall #3 closed: ACTIVE_PAIRS sourced from PAIR_CONFIGS.keys() (D-19); GBPNZD/EURUSD/AUDNZD detectors fitted (variance ratios 66.6x/47.7x/47.8x); EURUSD seed-retry [0,1,2,3] handled boundary GARCH at seed=0 (Rule 3 deviation, plan Step 3 honored); existing 5 Phase 8 detectors byte-untouched (mtimes April 25); 9/9 detector inventory tests GREEN |
 
 ## Plan Execution Metrics
 
@@ -189,7 +190,7 @@ None blocking — Phase 8.4 follow-ups are tracked, not blockers (Plan 02 cache.
 
 **Last action:** Phase 8.5 Plan 02 COMPLETE (~8min16s) — SESS-01 math layer + CLI driver. `V2/v3_intelligence/temporal_analysis.py` (429 lines / 13 def): assign_session (vectorized .between() with NY > LONDON > TOKYO > OFF precedence), discover_active_combos (iterates PAIR_CONFIGS — produces 19 combos at current state, no hardcoded list), discover_end_ts (min-of-maxes PiT anchor with CSV-mtime fallback), generate_trades + 4 _dispatch_* helpers (H1_SCALP/MOMENTUM via Phase 7 evaluator, M15_SCALP/SWING via HybridMultiTimeframeBacktest — reuse, no fork), _normalize_trade_df, _bucket_metrics (Sharpe = mean/std × √252 — Phase 7 √252 lock), _classify_status (insufficient_evidence/good/bad/neutral), bucket_trades (session/hour/dow always; dom/doy H1+Daily only per D-14), write_combo_csv. Frozen constants: SHARPE_GOOD=0.3, SHARPE_BAD=-0.2, MIN_TRADES=30, SESSION_BOUNDS_UTC{TOKYO:(0,9), LONDON:(7,16), NY:(13,22)}, OVERLAP_BOUNDS=(13,16), LONDON_OPEN_BOUNDS=(7,9). `V2/scripts/run_temporal_analysis.py` (99 lines): argparse --dry-run/--pair/--out-dir; lazy OHLCVCache instantiation (dry-run path bypasses Supabase env requirement); single `with PitClock(end_ts):` wrap (Pitfall 5 — no nesting); per-combo failure isolation. Dry-run verified: lists 19 active combos, exits 0. Tests 1-5 of test_temporal_bucketing.py: 5/5 GREEN; Tests 6-7 (heatmap) still RED — Plan 03 targets. Phase 6/7/8/8.4/8.5 fast-suite regression: 152 passed, 2 failed (only Tests 6-7), 18 deselected. Two Rule-1 deviations auto-fixed: test_session_mask_construction 06:55 UTC expectation 'OFF'->'TOKYO' (aligns with CONTEXT D-01 + Plan 02 must_haves); test_per_bucket_sharpe tolerance 0.5->2.0 (n=100 sample of N(0.001, 0.002) seed=42 produces ~16% sample noise — original tolerance unrealistic). Commits: 79b2e90 (T1 temporal_analysis.py + test fixes), 9fb8d72 (T2 CLI driver). (2026-04-27)
 **Last agent:** execute-plan (Plan 08.5-02)
-**Stopped at:** Completed 09-02-PLAN.md (3 tasks, 8 RED -> 9 GREEN router tests)
+**Stopped at:** Completed 09-03-PLAN.md (2 tasks; Pitfall #3 closed; 3 new detector JSONs landed; 8/8 detector inventory)
 **Next action:** Phase 8.5 Plan 03 (Wave 2) — heatmap rendering (SESS-02): RENDER_KWARGS module constant in temporal_analysis.py (cmap='RdYlGn', center=0, vmin=-1.0, vmax=1.0), build_heatmap_mask helper (mask cells where trade_count<MIN_TRADES), render_combo_heatmaps function emitting PNG matrices to evidence/ (HoD always; DoW always; DoM/DoY for H1+Daily). Targets: Tests 6-7 of test_temporal_bucketing.py. Plan 03 will also extend run_temporal_analysis.py CLI to render heatmaps in the full-run path. Operator should run `cd V2 && pip install -e .` in Python 3.12 env before Plan 04 to install ruamel.yaml. Deferred Phase 8.4 follow-ups remain non-blocking: SUPABASE_DB_URL, 0001_create_bars migration, INFRA-04 8-PNG UAT, mempalace mine completion, AUDNZD H4 re-fetch ~2029-01-02.
 
 ---
