@@ -43,17 +43,29 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="Disable on_trade_close RAG indexing (debugging — gate 4 stays cold-start)",
     )
+    parser.add_argument(
+        "--max-ts",
+        default=None,
+        help=(
+            "Optional ISO-8601 timestamp to truncate sim window to (for wall-time-bounded "
+            "evaluation). When omitted, runs the full 4yr corpus."
+        ),
+    )
     args = parser.parse_args(argv)
 
     # Lazy import — slow heavy imports only after argparse succeeds (matches
     # V2/scripts/run_temporal_analysis.py precedent).
     from backtest.router_simulation import run_router_simulation
+    import pandas as pd
+
+    max_ts = pd.Timestamp(args.max_ts) if args.max_ts is not None else None
 
     report = run_router_simulation(
         report_path=args.report_path,
         sim_db_path=args.sim_db,
         rag_collection=args.rag_collection,
         warm_rag=not args.no_rag_learning,
+        max_ts=max_ts,
     )
 
     print("\n" + "=" * 70)
