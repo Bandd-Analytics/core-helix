@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "pair": "AUDNZD",
+  "n_states": 3,
+  "garch_params": [
+    {
+      "mu": 1.084363156309293e-05,
+      "omega": 1.2539673370456701e-07,
+      "alpha": 0.2,
+      "beta": 0.49999999999999994
+    },
+    {
+      "mu": 0.007642097637438376,
+      "omega": 5e-08,
+      "alpha": 0.05,
+      "beta": 0.9
+    },
+    {
+      "mu": 0.0,
+      "omega": 1e-06,
+      "alpha": 0.05,
+      "beta": 0.9
+    }
+  ],
+  "transmat": [
+    [
+      0.9996795321883963,
+      0.00032046781160364297,
+      8.395572389735462e-71
+    ],
+    [
+      0.9999996581213184,
+      3.4187868152183404e-07,
+      6.058242413544998e-74
+    ],
+    [
+      0.395169496221593,
+      0.6048305037784069,
+      2.967777153866281e-74
+    ]
+  ],
+  "startprob": [
+    0.9894584032019149,
+    0.010541596798085077,
+    1.057103443119257e-71
+  ],
+  "variance_ordering": {
+    "state_labels": [
+      "TRENDING",
+      "MEAN_REVERTING",
+      "CRISIS"
+    ],
+    "unconditional_variances": [
+      4.1798911234855655e-07,
+      1.0000000000000012e-06,
+      2.0000000000000025e-05
+    ]
+  },
+  "fit_metadata": {
+    "fitted_at_utc": "2026-04-29T00:13:07+00:00",
+    "data_window": "4yr",
+    "data_path": "/home/user/Desktop/BA.ORG/Bandd-Analytics/helix/V2/data/AUDNZD_H1_4yr.csv",
+    "n_bars": 8159,
+    "hmmlearn_converged": true,
+    "v1_parity_tested": false
+  }
+}

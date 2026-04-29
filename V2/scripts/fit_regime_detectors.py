@@ -51,7 +51,14 @@ REGIME_DIR = DATA_DIR / "regime"
 
 
 def _fit_one(pair: str, data_window: str, force: bool) -> bool:
-    """Fit a single pair. Returns True on success/skip, False on failure."""
+    """Fit a single pair. Returns True on success/skip, False on failure.
+
+    Tries random_state seeds [0, 1, 2, 3] in order; first successful fit wins.
+    Phase 8's existing 5 detectors all converge at seed 0 (parity preserved).
+    Phase 9 D-19 expansion: low-volatility pairs (e.g. EURUSD, std~1e-3) may
+    need a different seed to dodge GARCH boundary cases (alpha+beta=1.0000).
+    Per Plan 09-03 Step 3 — "after 3 retries flag for operator review".
+    """
     out = REGIME_DIR / f"{pair}_detector.json"
     if out.exists() and not force:
         print(f"  SKIP {pair} — {out.name} exists (idempotent)")
@@ -65,10 +72,20 @@ def _fit_one(pair: str, data_window: str, force: bool) -> bool:
     df = pd.read_csv(csv, index_col=0, parse_dates=True)
     returns = bars_to_log_returns(df)
 
-    detector = HMMGARCHRegimeDetector(random_state=0)
-    if not detector.fit(returns):
+    detector = None
+    seed_used = None
+    for rs in (0, 1, 2, 3):
+        candidate = HMMGARCHRegimeDetector(random_state=rs)
+        if candidate.fit(returns):
+            detector = candidate
+            seed_used = rs
+            break
+        print(f"  RETRY {pair} — seed {rs} did not converge", file=sys.stderr)
+
+    if detector is None:
         print(
-            f"  FAIL {pair} — fit() returned False (stationarity or convergence)",
+            f"  FAIL {pair} — fit() returned False on seeds [0,1,2,3] "
+            f"(stationarity or convergence)",
             file=sys.stderr,
         )
         return False
@@ -85,7 +102,8 @@ def _fit_one(pair: str, data_window: str, force: bool) -> bool:
         v1_parity_tested=False,
     )
     variances = [f"{p.unconditional_variance:.2e}" for p in detector.garch_params]
-    print(f"  OK   {pair} — variances={variances} → {out.name}")
+    seed_note = f" seed={seed_used}" if seed_used != 0 else ""
+    print(f"  OK   {pair} — variances={variances}{seed_note} → {out.name}")
     return True
 
 
