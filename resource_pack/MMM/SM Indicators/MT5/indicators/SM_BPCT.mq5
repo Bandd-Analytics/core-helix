@@ -14,11 +14,19 @@
 //|     - Per open position on current symbol: distance from each of  |
 //|       the four key levels in pips, signed                          |
 //|                                                                   |
+//|  v2.01 (operator-tuned 2026-04-28 round 2):                        |
+//|     - Bar countdown row (TF-adaptive: <15min=Ns, 15m–1h=M:SS,     |
+//|       >1h=H:MM)                                                    |
+//|     - Removed InpTradeBuyColor / InpTradeSellColor                |
+//|     - Base Y offset 20→60 to coexist with SM_ADR_Marker corner    |
+//|       label (Y=40)                                                 |
+//|                                                                   |
 //|  Mini-HUD: corner-positioned OBJ_LABEL stack displaying real-time |
-//|  price + spread + HOD/LOD + weekly + PHOD/PLOD + per-trade rows.  |
+//|  price + spread + bar timer + HOD/LOD + weekly + PHOD/PLOD +      |
+//|  per-trade rows.                                                  |
 //+------------------------------------------------------------------+
 #property copyright "Bandd Analytics — Phase 12 reconstruction of !SM_BPCT.ex4 (mini-HUD per Verified Updates)"
-#property version   "2.00"
+#property version   "2.01"
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
@@ -48,6 +56,7 @@ input double           InpPipsToHODLODForAlert = 5.0;      // VERIFIED
 input bool             InpShowWeekLevels       = true;       // Weekly first-4hr H/L
 input bool             InpShowPHODPLOD         = true;       // Yesterday's D1 H/L
 input bool             InpShowOpenTrades       = true;       // Per-position rows
+input bool             InpShowBarTimer         = true;       // v2.01 bar countdown
 input int              InpWeekStartDOW         = 1;          // 0=Sun 1=Mon
 input int              InpWeekFirstHours       = 4;
 input int              InpMaxTradesShown       = 6;
@@ -55,8 +64,7 @@ input color            InpWeekHiColor          = clrDeepSkyBlue;
 input color            InpWeekLoColor          = clrOrange;
 input color            InpPHODColor            = clrRed;
 input color            InpPLODColor            = clrLimeGreen;
-input color            InpTradeBuyColor        = clrLime;
-input color            InpTradeSellColor       = clrCrimson;
+input color            InpBarTimerColor        = clrGold;
 
 const string InpObjectPrefix = "smBPCT_";
 
@@ -116,8 +124,10 @@ void EnsureLabel(string suffix, int row_index)
 
    ObjectSetInteger(0, name, OBJPROP_CORNER,    InpCornerOfChart);
    ObjectSetInteger(0, name, OBJPROP_XDISTANCE, 8 + InpAdjustSideToSide);
+   //--- v2.01 base Y bumped from 20 → 60 so HUD sits below the SM_ADR_Marker
+   //--- corner label (which lives at Y=40) when both run on the same chart.
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE,
-                    20 + InpShiftUpDn + row_index * 16);
+                    60 + InpShiftUpDn + row_index * 16);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE,
                     InpShowSmallerSize ? 9 : 11);
    ObjectSetString (0, name, OBJPROP_FONT, "Arial");
@@ -133,10 +143,42 @@ void EnsureLabel(string suffix, int row_index)
 void CreateLabels()
   {
    // Pre-create the fixed-row labels. Trade rows are created in Recompute().
-   string fixed_rows[] = {"price", "spread", "hod", "lod",
-                          "wkhi", "wklo", "phod", "plod", "alert"};
+   // v2.01: bar_timer inserted after spread.
+   string fixed_rows[] = {"price", "spread", "bar_timer",
+                          "hod", "lod", "wkhi", "wklo", "phod", "plod", "alert"};
    for(int i = 0; i < ArraySize(fixed_rows); i++)
       EnsureLabel(fixed_rows[i], i);
+  }
+
+//+------------------------------------------------------------------+
+//  v2.01 — bar-close countdown text. Format adapts to the current
+//  timeframe per operator request:
+//    period <  15min : "Bar: 47s"
+//    15min ≤ p ≤ 1h  : "Bar: 12:34"
+//    period >  1h    : "Bar: 3:42" (hours:minutes)
+//+------------------------------------------------------------------+
+string FormatBarCountdown()
+  {
+   datetime cur_bar  = iTime(_Symbol, _Period, 0);
+   int      period_s = PeriodSeconds(_Period);
+   if(cur_bar == 0 || period_s <= 0) return("Bar: --");
+
+   datetime next_bar = cur_bar + period_s;
+   long     remain   = (long)(next_bar - TimeCurrent());
+   if(remain < 0) remain = 0;
+
+   if(period_s < 900)               // < M15
+      return(StringFormat("Bar: %ds", (int)remain));
+   if(period_s <= 3600)             // M15..H1
+     {
+      int mm = (int)(remain / 60);
+      int ss = (int)(remain % 60);
+      return(StringFormat("Bar: %d:%02d", mm, ss));
+     }
+   // > H1
+   int hh = (int)(remain / 3600);
+   int mm = (int)((remain % 3600) / 60);
+   return(StringFormat("Bar: %d:%02d", hh, mm));
   }
 
 //+------------------------------------------------------------------+
@@ -179,6 +221,11 @@ void Recompute()
       SetLabel("spread",
                StringFormat("Spread: %.1f pips", spread_pips),
                InpSpreadColor);
+
+   if(InpShowBarTimer)
+      SetLabel("bar_timer", FormatBarCountdown(), InpBarTimerColor);
+   else
+      SetLabel("bar_timer", "", InpLabelColor);
 
    if(InpShowTradePips)
      {
@@ -226,14 +273,13 @@ void Recompute()
       SetLabel("plod", "", InpLabelColor);
      }
 
-   //--- v2.00 per-trade rows (after the 9 fixed rows)
-   int next_row = 9;  // 9 fixed rows: price spread hod lod wkhi wklo phod plod alert
-                      // (alert is rendered last after trades — see end of function)
+   //--- v2.00 per-trade rows (after the 10 fixed rows)
+   //--- v2.01: 10 fixed rows now (bar_timer added between spread and hod).
+   int next_row = 10;
    int trades_drawn = 0;
    if(InpShowOpenTrades)
      {
-      // Trade rows are inserted BEFORE alert. Shift alert down dynamically.
-      next_row = 8;  // start trades at row index 8 (which was "alert")
+      next_row = 9;  // start trades at row index 9 (which was "alert")
       int total = PositionsTotal();
       for(int idx = 0; idx < total && trades_drawn < InpMaxTradesShown; idx++)
         {
@@ -244,7 +290,6 @@ void Recompute()
          double entry = PositionGetDouble(POSITION_PRICE_OPEN);
          long   ptype = PositionGetInteger(POSITION_TYPE);
          bool   is_buy = (ptype == POSITION_TYPE_BUY);
-         color  c      = is_buy ? InpTradeBuyColor : InpTradeSellColor;
 
          //--- distances signed from ENTRY price (positive = level above entry)
          double d_wkhi = wk_ok ? (wk_hi - entry) / g_pip : 0.0;
@@ -254,11 +299,12 @@ void Recompute()
 
          string row_suffix = StringFormat("trade_%d", trades_drawn);
          EnsureLabel(row_suffix, next_row);
+         //--- v2.01: trade color inputs removed; use InpLabelColor uniformly
          SetLabel(row_suffix,
                   StringFormat("%s %.5f: WkH%+.0f WkL%+.0f PHOD%+.0f PLOD%+.0f",
                                is_buy ? "L" : "S", entry,
                                d_wkhi, d_wklo, d_phod, d_plod),
-                  c);
+                  InpLabelColor);
          trades_drawn++;
          next_row++;
         }
