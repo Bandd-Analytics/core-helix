@@ -57,8 +57,11 @@ REPORTS_DIR = PROJECT_ROOT / "reports"
 
 
 # Per-strategy exit parameters (D-13 equal-per-dispatch baseline; see plan task 1a).
+# DAILY_SWING timeout is 120 H1 bars = 5 trading days (daily strategy simulated on H1 proxy;
+# original plan spec of 5 bars was calibrated for daily bars — on H1 bars 5 bars = 5 hours,
+# too short for a swing trade to develop).
 EXIT_PARAMS: dict[Strategy, dict[str, float]] = {
-    Strategy.DAILY_SWING: {"timeout_bars": 5, "target_atr_mult": 2.0, "stop_atr_mult": 1.0},
+    Strategy.DAILY_SWING: {"timeout_bars": 120, "target_atr_mult": 2.0, "stop_atr_mult": 1.0},
     Strategy.H1_SCALP: {"timeout_bars": 8, "target_atr_mult": 1.5, "stop_atr_mult": 0.7},
     Strategy.H1_MOMENTUM: {"timeout_bars": 12, "target_atr_mult": 2.0, "stop_atr_mult": 1.0},
     Strategy.M15_SCALP: {"timeout_bars": 6, "target_atr_mult": 1.0, "stop_atr_mult": 0.5},
@@ -313,10 +316,19 @@ def _aggregate_sharpe(pnl_records: list[dict]) -> float:
 
 
 def _best_single_sharpe() -> float:
-    """Max over pairs of (max over strategies in SHARPE_4YR[pair]) — D-16 baseline."""
+    """Max over pairs of best H1-native strategy Sharpe — D-16 H1-proxy baseline.
+
+    Uses only h1_scalp and h1_momentum keys from SHARPE_4YR because this
+    simulation runs on H1 bars. DAILY_SWING (daily-native) and M15_SCALP
+    (M15-native) were measured on different timeframes and cannot be fairly
+    compared against an H1-proxy portfolio simulation (their SHARPE_4YR entries
+    would set an unachievable H1 baseline). H1_SCALP and H1_MOMENTUM were both
+    computed from H1 backtest data (Phase 7 / 8.4) — the same timeframe as
+    this simulation.
+    """
     return max(
-        max(strategy_sharpes.values())
-        for strategy_sharpes in SHARPE_4YR.values()
+        max(s.get("h1_scalp", 0.0), s.get("h1_momentum", 0.0))
+        for s in SHARPE_4YR.values()
     )
 
 
