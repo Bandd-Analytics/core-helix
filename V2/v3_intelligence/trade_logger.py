@@ -83,6 +83,20 @@ class TradeLogger:
                     raise  # genuine schema error — surface it
                 # column already exists (idempotent)
 
+            # Live-ingest: broker_position_id ties a journal row to one MT5
+            # position (open-deal + close-deal pair). Partial UNIQUE INDEX lets
+            # the hourly puller use a check-then-insert idempotency pattern.
+            # Same idempotent ALTER as params_json above.
+            try:
+                conn.execute("ALTER TABLE trades ADD COLUMN broker_position_id TEXT")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e).lower():
+                    raise
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_trades_broker_position_id "
+                "ON trades(broker_position_id) WHERE broker_position_id IS NOT NULL"
+            )
+
     def log_trade(self, trade: dict):
         """Record a completed trade with full market context."""
         pnl = trade.get("pnl_pct")
@@ -107,6 +121,7 @@ class TradeLogger:
             "won":            int(pnl > 0) if pnl is not None else None,
             "notes":          trade.get("notes"),
             "params_json":    trade.get("params_json"),
+            "broker_position_id": trade.get("broker_position_id"),
         }
         with self._connect() as conn:
             conn.execute("""
@@ -114,14 +129,40 @@ class TradeLogger:
                     logged_at, symbol, strategy_type, entry_date, exit_date,
                     entry_price, exit_price, pnl_pct, bars_held, session,
                     exit_reason, size, daily_z, h1_z, h1_atr, vol_percentile,
-                    hour_utc, won, notes, params_json
+                    hour_utc, won, notes, params_json, broker_position_id
                 ) VALUES (
                     :logged_at, :symbol, :strategy_type, :entry_date, :exit_date,
                     :entry_price, :exit_price, :pnl_pct, :bars_held, :session,
                     :exit_reason, :size, :daily_z, :h1_z, :h1_atr, :vol_percentile,
-                    :hour_utc, :won, :notes, :params_json
+                    :hour_utc, :won, :notes, :params_json, :broker_position_id
                 )
             """, row)
+
+    def log_trade_if_new(self, trade: dict) -> bool:
+        """Insert a trade only if its broker_position_id is not already present.
+
+        Returns True on insert, False on duplicate. Trades without a
+        broker_position_id fall through to log_trade (always insert, return True).
+
+        Used by the hourly live puller to make repeated runs over the same
+        deal history idempotent. Relies on the partial UNIQUE INDEX on
+        broker_position_id created in _init_db.
+        """
+        position_id = trade.get("broker_position_id")
+        if position_id is None:
+            self.log_trade(trade)
+            return True
+        with self._connect() as conn:
+            existing = conn.execute(
+                "SELECT 1 FROM trades WHERE broker_position_id = ?",
+                (str(position_id),),
+            ).fetchone()
+        if existing:
+            return False
+        trade = dict(trade)
+        trade["broker_position_id"] = str(position_id)
+        self.log_trade(trade)
+        return True
 
     def log_decision(
         self,
