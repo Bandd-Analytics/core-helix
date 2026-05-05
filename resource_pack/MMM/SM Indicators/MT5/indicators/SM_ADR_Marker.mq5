@@ -45,6 +45,9 @@ input int             InpBarForLabels       = -10;          // Label X-anchor (b
 input bool            InpDebugLogger        = false;        // Verbose logs
 input bool            InpShowtext           = true;         // v2.00: price labels above lines (was false)
 input int             InpLabelFontSize      = 9;
+input ENUM_BASE_CORNER InpCornerLabelCorner = CORNER_LEFT_UPPER; // Corner for "ADR(N): X pips" summary label
+input int             InpCornerLabelX       = 8;            // X offset for corner label
+input int             InpCornerLabelY       = 18;           // Y offset for corner label
 
 const string InpObjectPrefix = "smADR_";
 
@@ -240,14 +243,19 @@ void DrawCornerLabel(double adr)
    if(ObjectFind(0, name) < 0)
       ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
 
+   // Anchor must mirror corner — otherwise label text overshoots the chosen offset.
+   ENUM_ANCHOR_POINT anchor = (InpCornerLabelCorner == CORNER_RIGHT_UPPER) ? ANCHOR_RIGHT_UPPER
+                            : (InpCornerLabelCorner == CORNER_RIGHT_LOWER) ? ANCHOR_RIGHT_LOWER
+                            : (InpCornerLabelCorner == CORNER_LEFT_LOWER)  ? ANCHOR_LEFT_LOWER
+                                                                           : ANCHOR_LEFT_UPPER;
    ObjectSetString (0, name, OBJPROP_TEXT,      text);
-   ObjectSetInteger(0, name, OBJPROP_CORNER,    CORNER_RIGHT_UPPER);
-   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, 8);
-   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, 40);
+   ObjectSetInteger(0, name, OBJPROP_CORNER,    InpCornerLabelCorner);
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, InpCornerLabelX);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, InpCornerLabelY);
    ObjectSetInteger(0, name, OBJPROP_COLOR,     InpLineColor1);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE,  10);
    ObjectSetString (0, name, OBJPROP_FONT,      "Arial");
-   ObjectSetInteger(0, name, OBJPROP_ANCHOR,    ANCHOR_RIGHT_UPPER);
+   ObjectSetInteger(0, name, OBJPROP_ANCHOR,    anchor);
    ObjectSetInteger(0, name, OBJPROP_HIDDEN,    true);
   }
 

@@ -52,6 +52,8 @@ input int    InpBackgroundSize         = 120;           // [INFER]
 input bool   InpXLBackgroundForNews    = true;          // [INFER]
 input bool   InpOverviewMode           = false;         // [INFER]
 input bool   InpTradeTrackMode         = false;         // [INFER]
+input ENUM_BASE_CORNER InpCorner        = CORNER_RIGHT_UPPER; // Chart corner for HUD anchor
+input int    InpX                      = 80;            // X offset from corner (right corner: must clear price scale, ~60-80px)
 input int    InpY                      = 18;            // [INFER] Y position of HUD top
 input int    InpYDistance              = 0;             // [INFER] Y spacing between rows
 input int    InpAv1                    = 0;             // [INFER] unused/reserved
@@ -86,8 +88,15 @@ void SetLabel(const string name, const string text, const int x, const int y,
   {
    if(ObjectFind(0, name) < 0)
      {
+      // Anchor must match corner — otherwise right-corner labels of varying
+      // text width left-align off the chosen offset and look ragged.
+      ENUM_ANCHOR_POINT anchor = (InpCorner == CORNER_RIGHT_UPPER) ? ANCHOR_RIGHT_UPPER
+                               : (InpCorner == CORNER_RIGHT_LOWER) ? ANCHOR_RIGHT_LOWER
+                               : (InpCorner == CORNER_LEFT_LOWER)  ? ANCHOR_LEFT_LOWER
+                                                                   : ANCHOR_LEFT_UPPER;
       ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
-      ObjectSetInteger(0, name, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+      ObjectSetInteger(0, name, OBJPROP_CORNER, InpCorner);
+      ObjectSetInteger(0, name, OBJPROP_ANCHOR, anchor);
       ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
       ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
       ObjectSetString(0, name,  OBJPROP_FONT, "Arial");  // Pitfall 9 — Wine font cache default
@@ -190,8 +199,8 @@ void Recompute()
          ema_vals[k] = 0.0;  // [INFER] fallback if handle not initialized
      }
 
-//--- Build HUD display (18 rows at x=5, y starting at InpY, line height ~14px [INFER])
-   int x = 5;
+//--- Build HUD display (18 rows, x from InpX, y starting at InpY, line height ~14px [INFER])
+   int x = InpX;
    int y = InpY;
    int line_h = 14 + InpYDistance;  // [INFER] line height
 
